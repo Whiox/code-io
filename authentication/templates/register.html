@@ -1,0 +1,27 @@
+
+{% extends 'base.html' %}
+
+{% block title %} Регистрация {% endblock %}
+
+{% block content %}
+
+<form method="POST" action="/register/">
+    {% csrf_token %}
+    <div>
+        {{ RegisterForm.username }}
+    </div>
+    <div>
+        {{ RegisterForm.email }}
+    </div>
+    <div>
+        {{ RegisterForm.password }}
+    </div>
+    <div>
+        {{ RegisterForm.repeat_password }}
+    </div>
+    <div>
+        <input type="submit" class="submit-button" value="Создать аккаунт">
+    </div>
+</form>
+
+{% endblock %}

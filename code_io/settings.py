@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
-    'auth'
+    'authentication'
 ]
 
 MIDDLEWARE = [
@@ -60,7 +60,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            'static/html'
+            'static/html',
+            'authentication/templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {

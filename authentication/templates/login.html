@@ -1,0 +1,21 @@
+
+{% extends 'base.html' %}
+
+{% block title %} Вход в аккаунт {% endblock %}
+
+{% block content %}
+
+<form method="POST" action="/login/">
+    {% csrf_token %}
+    <div>
+        {{ LoginForm.auth }}
+    </div>
+    <div>
+        {{ LoginForm.password }}
+    </div>
+    <div>
+        <input type="submit" class="submit-button" value="Войти">
+    </div>
+</form>
+
+{% endblock %}

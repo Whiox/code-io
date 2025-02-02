@@ -1,0 +1,22 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Code-io{% endblock %}</title>
+
+</head>
+    <body class="body">
+        <div class="container">
+
+            {% include 'menu.html' %}
+
+            {% block content %}
+                Здесь написан код, который будет переопределён во всех наследных шаблонах
+            {% endblock %}
+
+        </div>
+    </body>
+</html>
