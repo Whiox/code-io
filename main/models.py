@@ -1,15 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import (
-    AbstractBaseUser ,
-    BaseUser Manager
+    AbstractBaseUser,
+    BaseUserManager
 )
+
 from django.contrib.auth.hashers import (
     make_password,
     check_password
 )
 
 # Пользователи
-class UserManager(BaseUser Manager):
+class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
