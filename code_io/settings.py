@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 STATICFILES_DIRS = [
-    BASE_DIR / "static/css",
+    BASE_DIR / "static/css", 'static/html',
 ]
 
 # Application definition
