@@ -190,3 +190,93 @@ footer {
 }
 
 /*FOOTER_END*/
+/* Стили для формы входа */
+.login-form {
+    background-color: #f9f9f9; /* Светлый фон для формы входа */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: auto;
+}
+
+.login-form .form-group {
+    margin-bottom: 15px;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"],
+.login-form input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc; /* Светлая граница */
+    border-radius: 5px; /* Скругленные углы */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Плавный переход */
+}
+
+.login-form input[type="text"]:focus,
+.login-form input[type="password"]:focus,
+.login-form input[type="email"]:focus {
+    border-color: #007bff; /* Цвет границы при фокусировке */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Легкая тень при фокусировке */
+    outline: none; /* Убираем стандартный контур */
+}
+
+.login-form .submit-button {
+    background-color: #007bff; /* Синий фон для кнопки */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s; /* Плавный переход цвета */
+}
+
+.login-form .submit-button:hover {
+    background-color: #0056b3; /* Темнее при наведении */
+}
+
+/* Стили для формы регистрации */
+.register-form {
+    background-color: #f9f9f9; /* Светлый фон для формы регистрации */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: auto;
+}
+
+.register-form .form-group {
+    margin-bottom: 15px;
+}
+
+.register-form input[type="text"],
+.register-form input[type="password"],
+.register-form input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc; /* Светлая граница */
+    border-radius: 5px; /* Скругленные углы */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Плавный переход */
+}
+
+.register-form input[type="text"]:focus,
+.register-form input[type="password"]:focus,
+.register-form input[type="email"]:focus {
+    border-color: #28a745; /* Цвет границы при фокусировке */
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); /* Легкая тень при фокусировке */
+    outline: none; /* Убираем стандартный контур */
+}
+
+.register-form .submit-button {
+    background-color: #28a745; /* Зеленый фон для кнопки */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s; /* Плавный переход цвета */
+}
+
+.register-form .submit-button:hover {
+    background-color: #218
