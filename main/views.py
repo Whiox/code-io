@@ -11,3 +11,7 @@ def my_courses(request):
 def all_courses(request):
     # Здесь вы можете добавить логику для получения всех курсов
     return render(request, 'all_courses.html')
+
+def add_courses(request):
+    # Здесь вы можете добавить логику для добавления курсов
+    return render(request, 'add_courses.html')
