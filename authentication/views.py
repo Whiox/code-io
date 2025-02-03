@@ -33,7 +33,7 @@ class RegisterView(View):
         """
         form = RegisterForm(request.POST)
         if form.is_valid():
-            name = form.cleaned_data['name']
+            username = form.cleaned_data['username']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             repeat_password = form.cleaned_data['repeat_password']
@@ -49,7 +49,7 @@ class RegisterView(View):
                 messages.error(request, "Пользователь с такой почтой уже зарегистрирован.")
 
             if errors:
-                user = User.objects.create_user(email=email, password=password, name=name)
+                user = User.objects.create_user(email=email, password=password, username=username)
 
                 login(request, user)
 
