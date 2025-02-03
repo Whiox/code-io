@@ -1,0 +1,26 @@
+    <header class="header">
+        <div class="logo"><a href="{% url 'home' %}">CODE.IO</a></div>
+        <nav class="navbar">
+            <ul class="menu">
+                <li class="menu-item"><a href="{% url 'all_courses' %}" class="menu-link">Все курсы</a></li>
+                <li class="menu-item"><a href="{% url 'my_courses' %}" class="menu-link">Мои курсы</a></li>
+                <li class="menu-item"><a href="#" class="menu-link">Создать курс</a></li>
+            </ul>
+        </nav>
+        <div class="user-area">
+            <span class="user-name">Имя пользователя</span>
+            <div class="profile-pic">
+                <img src="profile-pic.jpg" alt="Фото профиля" class="profile-image">
+            </div>
+            <div class="dropdown">
+                <button class="dropbtn">▼</button>
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item">Мой профиль</a>
+                    <a href="#" class="dropdown-item">Редактировать профиль</a>
+                    <a href="#" class="dropdown-item">Выход</a>
+                    <a href="#" class="dropdown-item">Смена пароля</a>
+                </div>
+            </div>
+        </div>
+    </header>
+

@@ -1,22 +1,36 @@
-
 {% load static %}
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Code-io{% endblock %}</title>
-
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Подключение CSS -->
 </head>
-    <body class="body">
-        <div class="container">
+<body>
 
-            {% include 'menu.html' %}
+{% include 'header.html' %}
 
             {% block content %}
                 Здесь написан код, который будет переопределён во всех наследных шаблонах
             {% endblock %}
-
-        </div>
-    </body>
+{% include 'footer.html' %}
+</body>
 </html>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dropdown = document.querySelector('.dropdown');
+        const dropdownMenu = dropdown.querySelector('.dropdown-menu');
+    
+        dropdown.addEventListener('mouseenter', function () {
+            dropdown.classList.add('show');
+            dropdownMenu.style.height = dropdownMenu.scrollHeight + 'px'; // Устанавливаем высоту на полную
+        });
+    
+        dropdown.addEventListener('mouseleave', function () {
+            dropdown.classList.remove('show');
+            dropdownMenu.style.height = '0'; // Сбрасываем высоту
+        });
+    });
+    
+</script>

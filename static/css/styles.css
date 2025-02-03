@@ -1,0 +1,192 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+* {
+    box-sizing: border-box; /* Учитываем отступы и границы в ширине */
+}
+/* Стили для фиксированной шапки */
+.header {
+    position: fixed; /* Фиксируем шапку */
+    top: 0; /* Располагаем её вверху */
+    left: 0; /* Привязываем к левому краю */
+    width: 100%; /* Ширина на всю ширину экрана */
+    background-color: white; /* Цвет фона */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Тень для эффекта */
+    z-index: 1000; /* Убедитесь, что шапка находится поверх других элементов */
+}
+main {
+    margin-top: 70px; /* Отступ равный высоте шапки */
+}
+
+/*FOOTER*/
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    padding: 10px 20px;
+    color: white;
+}
+
+.logo {
+    font-size: 28px; /* Увеличен размер шрифта для выделения */
+    font-weight: bold;
+}
+
+.navbar {
+    flex-grow: 1;
+}
+
+.menu {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.menu-item {
+    position: relative;
+}
+
+.menu-link {
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+    transition: background-color 0.3s ease; /* Плавный переход для фона */
+}
+
+.menu-link:hover {
+    background-color: #555;
+}
+
+.user-area {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Сдвигает область пользователя вправо */
+}
+
+.user-name {
+    margin-right: 10px; /* Отступ между именем пользователя и фото профиля */
+    color: white; /* Цвет текста имени пользователя */
+}
+
+.profile-pic {
+    margin-left: 20px;
+}
+
+.profile-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: transform 0.3s ease; /* Плавный переход для изображения профиля */
+}
+
+.profile-image:hover {
+    transform: scale(1.1); /* Увеличение изображения при наведении */
+}
+
+/* Стили для выпадающего списка */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background-color: transparent;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.3s ease; /* Плавный переход для цвета кнопки */
+}
+
+.dropdown-menu {
+    display: none; /* Скрыть меню по умолчанию */
+    position: absolute;
+    right: 0;
+    background-color: #444;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    opacity: 0; /* Начальная непрозрачность */
+    height: 0; /* Начальная высота */
+    overflow: hidden; /* Скрыть содержимое при высоте 0 */
+    transition: opacity 0.3s ease, height 0.3s ease; /* Плавный переход для непрозрачности и высоты */
+}
+
+.dropdown.show .dropdown-menu {
+    display: block; /* Отображение при добавлении класса */
+    opacity: 1; /* Полная непрозрачность */
+    height: auto; /* Установите высоту на auto для отображения содержимого */
+}
+
+.dropdown-menu.show {
+    height: 100px; /* Задайте желаемую высоту для раскрытия */
+}
+
+.dropdown-item {
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    transition: background-color 0.3s ease; /* Плавный переход для фона элемента */
+}
+
+.dropdown-item:hover {
+    background-color: #555;
+}
+/*FOOTER_END*/
+/*FOOTER*/
+footer {
+    background-color: #333;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-content {
+    margin-bottom: 10px;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    display: inline;
+    margin: 0 15px;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.social-media {
+    margin-top: 10px;
+}
+
+.social-media a {
+    color: white;
+    margin: 0 10px;
+    text-decoration: none;
+}
+
+.social-media a:hover {
+    text-decoration: underline;
+}
+
+/*FOOTER_END*/
