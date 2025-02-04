@@ -61,3 +61,41 @@ class LoginForm(forms.Form):
             'placeholder': 'Пароль'
             })
         )
+
+
+class ResetPasswordForm(forms.Form):
+    """
+    Форма для входа в аккаунт
+
+    :param email: Электронная почта
+    """
+    email = forms.EmailField(
+        label='',
+        widget=forms.TextInput(attrs={
+            'class': 'auth-form-control',
+            'placeholder': 'Электронная почта'
+        })
+    )
+
+
+class ChangePasswordForm(forms.Form):
+    """
+    Форма для сброса пароля
+
+    :param old_password: Старый пароль
+    :param new_password: Новый пароль
+    """
+    old_password = forms.CharField(
+        label='', max_length=255,
+        widget=forms.TextInput(attrs={
+            'class': 'auth-form-control',
+            'placeholder': 'Введите пароль'
+        })
+    )
+    new_password = forms.CharField(
+        label='', max_length=255,
+        widget=forms.TextInput(attrs={
+            'class': 'auth-form-control',
+            'placeholder': 'Повторите пароль'
+            })
+        )

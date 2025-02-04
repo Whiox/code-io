@@ -1,0 +1,27 @@
+
+{% extends 'auth-base.html' %}
+
+{% block title %} Сброс пароля {% endblock %}
+
+{% block content %}
+
+<div class="messages-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<form method="POST" action="/reset/" class="change-form">
+    {% csrf_token %}
+    <div class="form-group">
+        {{ ResetPasswordForm.email }}
+    </div>
+    <div class="form-group">
+        <input type="submit" class="submit-button" value="Отправить email">
+    </div>
+</form>
+{% endblock %}
