@@ -1,11 +1,15 @@
 
-{% extends 'auth-base.html' %}
+{% extends 'base.html' %}
 
 {% block title %} Сброс пароля {% endblock %}
 
 {% block content %}
 
-<div class="messages-container">
+<form method="POST" action="/reset/" class="auth-form">
+    {% csrf_token %}
+
+    <label class="auth-label">Сброс пароля</label>
+
     {% if messages %}
         {% for message in messages %}
             <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
@@ -13,15 +17,11 @@
             </div>
         {% endfor %}
     {% endif %}
-</div>
 
-<form method="POST" action="/reset/" class="change-form">
-    {% csrf_token %}
-    <div class="form-group">
+    <div>
         {{ ResetPasswordForm.email }}
     </div>
-    <div class="form-group">
-        <input type="submit" class="submit-button" value="Отправить email">
-    </div>
+
+    <input type="submit" class="submit-button" value="Отправить email">
 </form>
 {% endblock %}

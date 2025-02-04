@@ -89,13 +89,13 @@ class ChangePasswordForm(forms.Form):
         label='', max_length=255,
         widget=forms.TextInput(attrs={
             'class': 'auth-form-control',
-            'placeholder': 'Введите пароль'
+            'placeholder': 'Старый пароль'
         })
     )
     new_password = forms.CharField(
         label='', max_length=255,
         widget=forms.TextInput(attrs={
             'class': 'auth-form-control',
-            'placeholder': 'Повторите пароль'
+            'placeholder': 'Новый пароль'
             })
         )

@@ -5,16 +5,24 @@
 
 {% block content %}
 
-<form method="POST" action="/change/" class="change-form">
+<form method="POST" action="/change/" class="auth-form">
     {% csrf_token %}
-    <div class="form-group">
+
+    <label class="auth-label">Смена пароля</label>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div>
         {{ ChangePasswordForm.old_password }}
-    </div>
-    <div class="form-group">
         {{ ChangePasswordForm.new_password }}
     </div>
-    <div class="form-group">
-        <input type="submit" class="submit-button" value="Сменить пароль">
-    </div>
+
+    <input type="submit" class="submit-button" value="Сменить пароль">
 </form>
 {% endblock %}

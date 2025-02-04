@@ -1,27 +1,31 @@
 
-{% extends 'auth-base.html' %}
+{% extends 'base.html' %}
 
 {% block title %} Регистрация {% endblock %}
 
 {% block content %}
 
-<form method="POST" action="/register/" class="register-form">
+<form method="POST" action="/register/" class="auth-form">
     {% csrf_token %}
-    <div class="form-group">
+
+    <label class="auth-label">Регистрация</label>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div>
         {{ RegisterForm.username }}
-    </div>
-    <div class="form-group">
         {{ RegisterForm.email }}
-    </div>
-    <div class="form-group">
         {{ RegisterForm.password }}
-    </div>
-    <div class="form-group">
         {{ RegisterForm.repeat_password }}
     </div>
-    <div class="form-group">
-        <input type="submit" class="submit-button" value="Создать аккаунт">
-    </div>
+
+    <input type="submit" class="submit-button" value="Создать аккаунт">
 </form>
 
 {% endblock %}
