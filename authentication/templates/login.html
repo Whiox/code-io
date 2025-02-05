@@ -25,8 +25,8 @@
 
     <div class="auth-form-inline">
         <input type="submit" class="submit-button" value="Войти">
-        <a href="http://localhost:8000/reset" class="submit-button">Забыли пароль?</a>
-        <a href="http://localhost:8000/register" class="submit-button">Нет аккаунта?</a>
+        <a href="{% url 'reset_password' %}" class="submit-button">Забыли пароль?</a>
+        <a href="{% url 'register' %}" class="submit-button">Нет аккаунта?</a>
     </div>
 </form>
 {% endblock %}

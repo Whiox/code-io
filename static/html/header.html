@@ -1,14 +1,19 @@
-    <header class="header">
-        <div class="logo"><a href="{% url 'home' %}">CODE.IO</a></div>
-        <nav class="navbar">
-            <ul class="menu">
-                <li class="menu-item"><a href="{% url 'all_courses' %}" class="menu-link">Все курсы</a></li>
+
+<header class="header">
+    <div class="logo"><a href="{% url 'home' %}">CODE.IO</a></div>
+    <nav class="navbar">
+        <ul class="menu">
+            <li class="menu-item"><a href="{% url 'all_courses' %}" class="menu-link">Все курсы</a></li>
+            {% if request.user.is_authenticated %}
                 <li class="menu-item"><a href="{% url 'my_courses' %}" class="menu-link">Мои курсы</a></li>
+                <li class="menu-item"><a href="{% url 'add_courses' %}" class="menu-link">Создать курс</a></li>
+            {% else %}
                 <li class="menu-item"><a href="{% url 'register' %}" class="menu-link">Регистрация</a></li>
                 <li class="menu-item"><a href="{% url 'login' %}" class="menu-link">Вход</a></li>
-                <li class="menu-item"><a href="{% url 'add_courses' %}" class="menu-link">Создать курс</a></li>
-            </ul>
-        </nav>
+            {% endif %}
+        </ul>
+    </nav>
+    {% if request.user.is_authenticated %}
         <div class="user-area">
             <span class="user-name">{{ request.user }}</span>
             <div class="profile-pic">
@@ -19,10 +24,10 @@
                 <div class="dropdown-menu">
                     <a href="#" class="dropdown-item">Мой профиль</a>
                     <a href="#" class="dropdown-item">Редактировать профиль</a>
-                    <a href="#" class="dropdown-item">Выход</a>
-                    <a href="#" class="dropdown-item">Смена пароля</a>
+                    <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>
+                    <a href="{% url 'change_password' %}" class="dropdown-item">Смена пароля</a>
                 </div>
             </div>
         </div>
-    </header>
-
+    {% endif %}
+</header>
