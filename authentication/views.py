@@ -57,6 +57,14 @@ class RegisterView(View):
             if errors is None:
                 user = User.objects.create_user(email=email, password=password, username=username)
 
+                send_mail(
+                    subject="Добро пожаловать!",
+                    message=f"Вы зарегистрировались на сайте",
+                    from_email="code-io.no-reply@yandex.ru",
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+
                 login(request, user)
 
                 messages.success(request, "Вы успешно вошли!")
@@ -220,7 +228,13 @@ class ResetPasswordConfirmView(View):
                 fail_silently=False,
             )
 
+            reset_request.delete()
+
             messages.success(request, "Новый пароль отправлен вам на почту.")
+
+        else:
+            messages.error(request, "Вы должны осуществлять все действия с одного устройства")
+
         return redirect('login')
 
 
@@ -242,4 +256,25 @@ class ChangePasswordView(View):
 
     @staticmethod
     def post(request):
+        form = ChangePasswordForm(request.POST)
+        if form.is_valid():
+            old_password = form.cleaned_data['old_password']
+            new_password = form.cleaned_data['new_password']
+
+            if request.user.check_password(old_password):
+                request.user.set_password(new_password)
+
+                send_mail(
+                    subject="Ваш пароль был изменён",
+                    message=f"Ваш новый пароль: {new_password}",
+                    from_email="code-io.no-reply@yandex.ru",
+                    recipient_list=[request.user.email],
+                    fail_silently=False,
+                )
+
+                messages.success(request, "Пароль успешно изменён")
+
+            else:
+                messages.error(request, "Старый пароль не совпадает")
+
         return render(request, 'change.html', {'ChangePasswordForm': ChangePasswordForm})
