@@ -6,7 +6,8 @@ from django.contrib import messages
 from authentication.forms import RegisterForm, LoginForm, ResetPasswordForm, ChangePasswordForm
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
-from authentication.methods import generate_password
+from authentication.methods import generate_password, user_info_view, is_author
+from authentication.models import ResetRequest
 from django.core.mail import send_mail
 from main.models import User
 
@@ -53,7 +54,7 @@ class RegisterView(View):
                 errors = True
                 messages.error(request, "Пользователь с такой почтой уже зарегистрирован.")
 
-            if errors:
+            if errors is None:
                 user = User.objects.create_user(email=email, password=password, username=username)
 
                 login(request, user)
@@ -101,7 +102,7 @@ class LoginView(View):
                     errors = True
                     messages.error(request, "Ваш аккаунт отключён. Обратитесь к администратору.")
 
-                if errors:
+                if errors is None:
                     login(request, user)
 
                     messages.success(request, "Вы успешно вошли!")
@@ -160,13 +161,19 @@ class ResetPasswordView(View):
             user = User.objects.filter(email=email).first()
 
             if user:
+                info = user_info_view(request)
+
+                ResetRequest.objects.create(
+                    user=user, **info
+                )
+
                 uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
                 reset_link = request.build_absolute_uri(reverse('reset_password_confirm', kwargs={'uidb64': uidb64}))
 
                 send_mail(
                     subject="Восстановление пароля",
                     message=f"Перейдите по ссылке, чтобы сбросить пароль: {reset_link}",
-                    from_email="your-email@gmail.com",
+                    from_email="code-io.no-reply@yandex.ru",
                     recipient_list=[email],
                     fail_silently=False,
                 )
@@ -198,19 +205,22 @@ class ResetPasswordConfirmView(View):
             messages.error(request, "Недействительная ссылка для сброса пароля.")
             return redirect('reset_password')
 
-        new_password = generate_password()
-        user.set_password(new_password)
-        user.save()
+        reset_request = ResetRequest.objects.filter(user=user).first()
 
-        send_mail(
-            subject="Ваш новый пароль",
-            message=f"Ваш новый пароль: {new_password}",
-            from_email="your-email@gmail.com",
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
+        if is_author(request, reset_request):
+            new_password = generate_password()
+            user.set_password(new_password)
+            user.save()
 
-        messages.success(request, "Новый пароль отправлен вам на почту.")
+            send_mail(
+                subject="Ваш новый пароль",
+                message=f"Ваш новый пароль: {new_password}",
+                from_email="code-io.no-reply@yandex.ru",
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+            messages.success(request, "Новый пароль отправлен вам на почту.")
         return redirect('login')
 
 
