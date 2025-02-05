@@ -44,14 +44,14 @@ class LoginForm(forms.Form):
     """
     Форма для входа в аккаунт
 
-    :param auth: Имя пользователя или электронная почта
+    :param email: Электронная почта
     :param password: Пароль
     """
-    auth = forms.CharField(
+    email = forms.EmailField(
         label='', max_length=255,
         widget=forms.TextInput(attrs={
             'class': 'auth-form-control',
-            'placeholder': 'Имя пользователя или электронная почта'
+            'placeholder': 'Электронная почта'
         })
     )
     password = forms.CharField(

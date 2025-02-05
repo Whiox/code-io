@@ -10,6 +10,7 @@ from authentication.methods import generate_password, user_info_view, is_author
 from authentication.models import ResetRequest
 from django.core.mail import send_mail
 from main.models import User
+import secrets
 
 
 class RegisterView(View):
@@ -102,20 +103,18 @@ class LoginView(View):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
 
-            user = authenticate(request, username=email, password=password)
-            errors = None
-
-            if user:
-                if user.is_active is False:
-                    errors = True
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                if not user.is_active:
                     messages.error(request, "Ваш аккаунт отключён. Обратитесь к администратору.")
 
-                if errors is None:
+                else:
                     login(request, user)
-
                     messages.success(request, "Вы успешно вошли!")
+                    return redirect('/')
+
             else:
-                messages.error(request, 'Неверный email или пароль.')
+                messages.error(request, "Такого пользователя не существует.")
 
         return render(request, 'login.html', {'LoginForm': LoginForm})
 
@@ -171,12 +170,15 @@ class ResetPasswordView(View):
             if user:
                 info = user_info_view(request)
 
-                ResetRequest.objects.create(
-                    user=user, **info
+                token = secrets.token_urlsafe(32)
+
+                reset_request = ResetRequest.objects.create(
+                    user=user, url=token, **info
                 )
 
-                uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-                reset_link = request.build_absolute_uri(reverse('reset_password_confirm', kwargs={'uidb64': uidb64}))
+                reset_link = request.build_absolute_uri(
+                    reverse('reset_password_confirm', kwargs={'token': reset_request.url})
+                )
 
                 send_mail(
                     subject="Восстановление пароля",
@@ -198,22 +200,21 @@ class ResetPasswordConfirmView(View):
     """
 
     @staticmethod
-    def get(request, uidb64):
+    def get(request, token):
         """
         Генерирует новый пароль и отправляет его пользователю.
 
         :param request:
-        :param uidb64: Id пользователя
+        :param token: Уникальная ссылка
         :return: Перенаправление на страницу входа
         """
-        try:
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except (User.DoesNotExist, ValueError):
-            messages.error(request, "Недействительная ссылка для сброса пароля.")
+        reset_request = ResetRequest.objects.filter(url=token).first()
+
+        if not reset_request:
+            messages.error(request, "Недействительная или устаревшая ссылка для сброса пароля.")
             return redirect('reset_password')
 
-        reset_request = ResetRequest.objects.filter(user=user).first()
+        user = reset_request.user
 
         if is_author(request, reset_request):
             new_password = generate_password()
