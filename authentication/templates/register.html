@@ -25,7 +25,10 @@
         {{ RegisterForm.repeat_password }}
     </div>
 
-    <input type="submit" class="submit-button" value="Создать аккаунт">
+    <div class="auth-form-inline">
+        <input type="submit" class="submit-button" value="Создать аккаунт">
+        <a href="http://localhost:8000/login" class="submit-button">Уже зарегистрированы?</a>
+    </div>
 </form>
 
 {% endblock %}

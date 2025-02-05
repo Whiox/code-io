@@ -41,6 +41,12 @@
     line-height: 1.4;
 }
 
+.auth-form-inline {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: auto;
+}
 
 .submit-button {
     width: 30%;
@@ -52,8 +58,11 @@
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    margin-top: auto;
-    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    text-align: center;
 }
 
 .submit-button:hover {

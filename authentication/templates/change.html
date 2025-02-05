@@ -23,6 +23,9 @@
         {{ ChangePasswordForm.new_password }}
     </div>
 
-    <input type="submit" class="submit-button" value="Сменить пароль">
+    <div class="auth-form-inline">
+        <input type="submit" class="submit-button" value="Сменить пароль">
+        <a href="http://localhost:8000/reset" class="submit-button">Забыли пароль?</a>
+    </div>
 </form>
 {% endblock %}
