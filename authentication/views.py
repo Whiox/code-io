@@ -212,7 +212,7 @@ class ResetPasswordConfirmView(View):
 
         if not reset_request:
             messages.error(request, "Недействительная или устаревшая ссылка для сброса пароля.")
-            return redirect('reset_password')
+            return render(request, 'reset.html', {'ResetPasswordForm': ResetPasswordForm()})
 
         user = reset_request.user
 
@@ -236,7 +236,7 @@ class ResetPasswordConfirmView(View):
         else:
             messages.error(request, "Вы должны осуществлять все действия с одного устройства")
 
-        return redirect('login')
+        return render(request, 'reset.html', {'ResetPasswordForm': ResetPasswordForm()})
 
 
 class ChangePasswordView(View):

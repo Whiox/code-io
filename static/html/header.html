@@ -1,3 +1,4 @@
+{% load static %}
 
 <header class="header">
     <div class="logo"><a href="{% url 'home' %}">CODE.IO</a></div>
@@ -15,9 +16,9 @@
     </nav>
     {% if request.user.is_authenticated %}
         <div class="user-area">
-            <span class="user-name">{{ request.user }}</span>
+            <span class="user-name">{{ request.user.username }}</span>
             <div class="profile-pic">
-                <img src="profile-pic.jpg" alt="Фото профиля" class="profile-image">
+                <img src="{% static 'assets/profile-default.png' %}" alt="Фото профиля" class="profile-image">
             </div>
             <div class="dropdown">
                 <button class="dropbtn">▼</button>

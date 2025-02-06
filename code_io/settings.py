@@ -27,10 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static/css", 'static/html',
-]
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -134,7 +130,11 @@ EMAIL_HOST_PASSWORD = 'bmearbtklgghditk'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static/css", 'static/html', 'static',
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
