@@ -6,7 +6,7 @@
     height: 600px;
     margin: 20px auto 0 auto;
     padding: 20px;
-    background-color: #ccc;
+    background-color: #424242;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
@@ -17,9 +17,9 @@
     height: 60px;
     padding: 5px 10px;
     font-size: 16px;
-    border: 1px solid #555;
+    border: 1px solid #474747;
     border-radius: 5px;
-    background-color: white;
+    background-color: #ffffff;
     color: #000000;
 }
 
@@ -28,12 +28,12 @@
 }
 
 .auth-form-control:focus {
-    border-color: #28a745;
+    border-color: #ff4d00;
     outline: none;
 }
 
 .auth-label {
-    color: #000000;
+    color: #ffffff;
     margin-bottom: 15px;
     font-size: 20px;
     font-weight: bold;

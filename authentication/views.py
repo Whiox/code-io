@@ -70,6 +70,9 @@ class RegisterView(View):
 
                 messages.success(request, "Вы успешно вошли!")
 
+        else:
+            messages.error(request, "Форма заполнена неправильно")
+
         return render(request, 'register.html', {'RegisterForm': RegisterForm})
 
 
@@ -116,6 +119,9 @@ class LoginView(View):
             else:
                 messages.error(request, "Такого пользователя не существует.")
 
+        else:
+            messages.error(request, "Форма заполнена неправильно")
+
         return render(request, 'login.html', {'LoginForm': LoginForm})
 
 
@@ -158,6 +164,7 @@ class ResetPasswordView(View):
         """
         Обработчик сброса.
         Получает информацию из формы Django.
+        Отправляет пользователю случайную ссылку для сброса пароля.
 
         :param request:
         :return: Сообщение об успехе/ошибке
@@ -191,6 +198,9 @@ class ResetPasswordView(View):
             else:
                 messages.error(request, "Пользователь с таким email не найден.")
 
+        else:
+            messages.error(request, "Форма заполнена неправильно")
+
         return render(request, 'reset.html', {'ResetPasswordForm': ResetPasswordForm()})
 
 
@@ -202,7 +212,7 @@ class ResetPasswordConfirmView(View):
     @staticmethod
     def get(request, token):
         """
-        Генерирует новый пароль и отправляет его пользователю.
+        Генерирует новый пароль и отправляет его пользователю на его почту.
 
         :param request:
         :param token: Уникальная ссылка
@@ -277,5 +287,8 @@ class ChangePasswordView(View):
 
             else:
                 messages.error(request, "Старый пароль не совпадает")
+
+        else:
+            messages.error(request, "Форма заполнена неправильно")
 
         return render(request, 'change.html', {'ChangePasswordForm': ChangePasswordForm})
