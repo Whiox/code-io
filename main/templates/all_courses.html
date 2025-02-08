@@ -2,6 +2,17 @@
 
 {% block content %}
 
-<!-- Основной контент страницы -->
+<head>
+    <meta charset="UTF-8">
+    <title>Список курсов</title>
+</head>
+<body>
+    <h1>Список курсов</h1>
+    <ul>
+        {% for course in courses %}
+            <li>{{ course.title }} - {{ course.description }}</li>
+        {% endfor %}
+    </ul>
+</body>
 
 {% endblock %}

@@ -59,26 +59,32 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # Курсы
 class Course(models.Model):
-    course_id = models.AutoField(primary_key=True)  # Автоинкрементный ID курса
-    additional_info = models.TextField(blank=True)  # Дополнительная информация о курсе
+    course_id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=200,default='text')
+    description = models.TextField(default='text')
 
     def __str__(self):
-        return f"Course {self.course_id}"
+        return self.title
 
-class Curriculum(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE)  # Исправлено на ForeignKey к модели User
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)  # Связь с курсом
-    additional_info = models.TextField(blank=True)  # Дополнительная информация о учебном плане
+class Lesson(models.Model):
+    lesson_id = models.AutoField(primary_key=True)
+    course = models.ForeignKey(Course, related_name='lessons', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200,default='text')
+    content = models.TextField(default='text')
 
     def __str__(self):
-        return f"Curriculum for Student {self.student.email} in Course {self.course.course_id}"
+        return self.title
 
 class Task(models.Model):
-    task_id = models.AutoField(primary_key=True)  # Автоинкрементный ID задачи
-    correct_answer = models.TextField()  # Правильный ответ на задачу
+    task_id = models.AutoField(primary_key=True)
+    lesson = models.ForeignKey(Lesson, related_name='tasks', on_delete=models.CASCADE,default=0)
+    title = models.CharField(max_length=200,default='text')
+    content = models.TextField(default='text')
+    correct_answer = models.CharField(max_length=200)
 
     def __str__(self):
-        return f"Task {self.task_id}"
+        return self.title
+
 
 class UserProgress(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)  # Связь с курсом
