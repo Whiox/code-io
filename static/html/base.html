@@ -9,11 +9,15 @@
 
         <!-- css -->
 
-        <link rel="stylesheet" href="{% static 'styles.css' %}">
-
-        {% if request.user.theme == light %}
+        {% if request.user.theme == "light" %}
+            <link rel="stylesheet" href="{% static 'light-body.css' %}">
+            <link rel="stylesheet" href="{% static 'light-header.css' %}">
+            <link rel="stylesheet" href="{% static 'light-footer.css' %}">
             <link rel="stylesheet" href="{% static 'light-auth-form.css' %}">
         {% else %}
+            <link rel="stylesheet" href="{% static 'dark-body.css' %}">
+            <link rel="stylesheet" href="{% static 'dark-header.css' %}">
+            <link rel="stylesheet" href="{% static 'dark-footer.css' %}">
             <link rel="stylesheet" href="{% static 'dark-auth-form.css' %}">
         {% endif %}
 

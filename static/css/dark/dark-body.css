@@ -1,0 +1,15 @@
+body {
+    margin: 0;
+    background-color: #5c5858;
+    font-family: Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+main {
+    margin-top: 70px;
+    min-height: calc(100vh - 70px - 130px);
+    padding: 20px;
+}
