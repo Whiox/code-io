@@ -133,7 +133,7 @@ EMAIL_HOST_PASSWORD = 'bmearbtklgghditk'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    BASE_DIR / "static/css", 'static/html', 'static',
+    BASE_DIR / "static/css", 'static/html', 'static/javascript', 'static',
 ]
 
 # Default primary key field type

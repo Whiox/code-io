@@ -6,6 +6,9 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}Code-io{% endblock %}</title>
+
+        <!-- css -->
+
         <link rel="stylesheet" href="{% static 'styles.css' %}">
 
         {% if request.user.theme == light %}
@@ -13,6 +16,12 @@
         {% else %}
             <link rel="stylesheet" href="{% static 'dark-auth-form.css' %}">
         {% endif %}
+
+        <!-- javascript -->
+
+        <script src="{% static 'dropdown-menu.js' %}"></script>
+
+        <!-- icon -->
 
         <link rel="icon" href="{% static 'assets/favicon.ico' %}" type="image/x-icon">
     </head>
@@ -22,7 +31,7 @@
         {% include 'header.html' %}
 
             {% block content %}
-                Здесь написан код, который будет переопределён во всех наследных шаблонах
+                <!-- код, который будет переопределён в других шаблонах -->
             {% endblock %}
 
         </main>
@@ -31,19 +40,3 @@
 
     </body>
 </html>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const dropdown = document.querySelector('.dropdown');
-        const dropdownMenu = dropdown.querySelector('.dropdown-menu');
-    
-        dropdown.addEventListener('mouseenter', function () {
-            dropdown.classList.add('show');
-            dropdownMenu.style.height = dropdownMenu.scrollHeight + 'px'; // Устанавливаем высоту на полную
-        });
-    
-        dropdown.addEventListener('mouseleave', function () {
-            dropdown.classList.remove('show');
-            dropdownMenu.style.height = '0'; // Сбрасываем высоту
-        });
-    });
-</script>
