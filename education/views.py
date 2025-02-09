@@ -85,7 +85,8 @@ def add_course(request):
             for lesson_form, lesson_id in zip(lesson_formset, lesson_ids):
                 lesson_file = lesson_form.cleaned_data.get('lesson_file')
                 if lesson_file:
-                    file_path = os.path.join(course_folder, lesson_file.name)
+                    new_file_name = f"lesson_{lesson_id}{os.path.splitext(lesson_file.name)[1]}"
+                    file_path = os.path.join(course_folder, new_file_name)
                     with open(file_path, 'wb+') as destination:
                         for chunk in lesson_file.chunks():
                             destination.write(chunk)
