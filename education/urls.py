@@ -1,8 +1,9 @@
 from django.urls import path
 from education.views import (
-    view_course
+    view_course, all_courses
 )
 
 urlpatterns = [
+    path('all/', all_courses, name='all'),
     path('course/<str:token>/', view_course, name='course'),
 ]
