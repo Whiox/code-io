@@ -7,7 +7,7 @@
             <li class="menu-item"><a href="{% url 'all' %}" class="menu-link">Все курсы</a></li>
             {% if request.user.is_authenticated %}
                 <li class="menu-item"><a href="{% url 'register' %}" class="menu-link">Мои курсы</a></li>
-                <li class="menu-item"><a href="{% url 'register' %}" class="menu-link">Создать курс</a></li>
+                <li class="menu-item"><a href="{% url 'add_course' %}" class="menu-link">Создать курс</a></li>
             {% else %}
                 <li class="menu-item"><a href="{% url 'register' %}" class="menu-link">Регистрация</a></li>
                 <li class="menu-item"><a href="{% url 'login' %}" class="menu-link">Вход</a></li>

@@ -1,8 +1,12 @@
-from django.shortcuts import render
 import os
 import markdown
-from education.models import Courses, Lessons, Task
 import re
+from django.shortcuts import render
+from education.models import Courses, Lessons, Task
+from django.shortcuts import redirect
+from django.forms import formset_factory
+from .forms import AddCourseForm, AddLessonForm
+from django.conf import settings
 def view_course(request, token):
     course_path = os.path.join('courses', token)
     if not os.path.exists(course_path):
@@ -63,4 +67,35 @@ def all_courses(request):
     print(content['courses'])
 
     return render(request, 'all_courses.html', content)
+def add_course(request):
+    LessonFormSet = formset_factory(AddLessonForm, extra=2)
+    if request.method == 'POST':
+        course_form = AddCourseForm(request.POST)
+        lesson_formset = LessonFormSet(request.POST, request.FILES)
+        if course_form.is_valid() and lesson_formset.is_valid():
+            course = Courses.objects.create(title=course_form.cleaned_data['course_name'])
+            lesson_ids = []
+            for lesson_form in lesson_formset:
+                if lesson_form.cleaned_data:
+                    lesson_title = lesson_form.cleaned_data['lesson_description']
+                    lesson = Lessons.objects.create(course=course, title=lesson_title)
+                    lesson_ids.append(lesson.lesson_id)
+            course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
+            os.makedirs(course_folder, exist_ok=True)
+            for lesson_form, lesson_id in zip(lesson_formset, lesson_ids):
+                lesson_file = lesson_form.cleaned_data.get('lesson_file')
+                if lesson_file:
+                    file_path = os.path.join(course_folder, lesson_file.name)
+                    with open(file_path, 'wb+') as destination:
+                        for chunk in lesson_file.chunks():
+                            destination.write(chunk)
+            return redirect('course/all')
 
+    else:
+        course_form = AddCourseForm()
+        lesson_formset = LessonFormSet()
+
+    return render(request, 'add_course.html', {
+        'course_form': course_form,
+        'lesson_formset': lesson_formset,
+    })
