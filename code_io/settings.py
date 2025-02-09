@@ -36,7 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authentication'
+    'authentication',
+    'education'
 ]
 
 MIDDLEWARE = [
@@ -57,7 +58,8 @@ TEMPLATES = [
         'DIRS': [
             'static/css',
             'static/html',
-            'authentication/templates'
+            'authentication/templates',
+            'education/templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -84,7 +86,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'main.User'
+AUTH_USER_MODEL = 'authentication.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

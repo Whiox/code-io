@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %} Смена пароля {% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Markdown Rendered</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/default.min.css">
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            margin-left: 100px;
+        }
+        p{
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        {{ content|safe }}
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</body>
+{% endblock %}

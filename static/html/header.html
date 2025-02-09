@@ -1,13 +1,13 @@
 {% load static %}
 
 <header class="header">
-    <div class="logo"><a href="{% url 'home' %}">CODE.IO</a></div>
+    <div class="logo"><a href="">CODE.IO</a></div>
     <nav class="navbar">
-        <ul class="menu">
-            <li class="menu-item"><a href="{% url 'all_courses' %}" class="menu-link">Все курсы</a></li>
+       <ul class="menu">
+            <li class="menu-item"><a href="{% url 'register' %}" class="menu-link">Все курсы</a></li>
             {% if request.user.is_authenticated %}
-                <li class="menu-item"><a href="{% url 'my_courses' %}" class="menu-link">Мои курсы</a></li>
-                <li class="menu-item"><a href="{% url 'add_courses' %}" class="menu-link">Создать курс</a></li>
+                <li class="menu-item"><a href="{% url 'register' %}" class="menu-link">Мои курсы</a></li>
+                <li class="menu-item"><a href="{% url 'register' %}" class="menu-link">Создать курс</a></li>
             {% else %}
                 <li class="menu-item"><a href="{% url 'register' %}" class="menu-link">Регистрация</a></li>
                 <li class="menu-item"><a href="{% url 'login' %}" class="menu-link">Вход</a></li>
