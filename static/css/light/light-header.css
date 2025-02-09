@@ -99,7 +99,7 @@
     display: none;
     position: absolute;
     right: 0;
-    background-color: #444;
+    background-color: #65e759;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
@@ -120,7 +120,7 @@
 }
 
 .dropdown-item {
-    color: white;
+    color: rgb(32, 30, 30);
     padding: 10px 15px;
     text-decoration: none;
     display: block;
@@ -128,5 +128,5 @@
 }
 
 .dropdown-item:hover {
-    background-color: #555;
+    background-color: #479c3f;
 }
