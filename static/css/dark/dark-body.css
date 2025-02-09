@@ -13,3 +13,48 @@ main {
     min-height: calc(100vh - 70px - 130px);
     padding: 20px;
 }
+    .course-list {
+    display: flex;
+    flex-wrap: wrap;
+    list-style-type: none; /* Убираем маркеры списка */
+    padding: 0; /* Убираем отступы */
+    margin: 0; /* Убираем внешние отступы */
+}
+
+.course-item {
+    background-color: #f9f9f9; /* Цвет фона плитки */
+    border: 1px solid #ddd; /* Рамка плитки */
+    border-radius: 8px; /* Закругление углов */
+    padding: 16px; /* Внутренние отступы */
+    margin: 10px; /* Внешние отступы между плитками */
+    flex: 1 1 calc(25% - 20px); /* Плитки занимают 25% ширины контейнера с учетом отступов */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Тень для плиток */
+    transition: transform 0.2s; /* Плавный эффект при наведении */
+}
+
+.course-item:hover {
+    transform: scale(1.05); /* Увеличение плитки при наведении */
+}
+.btn {
+    display: inline-block; /* Делаем кнопку блочным элементом */
+    margin-top: 10px; /* Отступ сверху */
+    padding: 10px 15px; /* Внутренние отступы */
+    background-color: #007bff; /* Цвет фона кнопки */
+    color: white; /* Цвет текста */
+    text-decoration: none; /* Убираем подчеркивание */
+    border-radius: 5px; /* Закругление углов */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.btn:hover {
+    background-color: #0056b3; /* Темнее при наведении */
+}
+.course-item {
+    margin-bottom: 20px; /* Отступ между элементами списка */
+}
+
+.course-image {
+    max-width: 100%; /* Ограничиваем ширину изображения */
+    height: auto; /* Высота автоматически пропорциональна ширине */
+    border-radius: 8px; /* Закругление углов изображения */
+}

@@ -4,6 +4,6 @@ from education.views import (
 )
 
 urlpatterns = [
-    path('all/', all_courses, name='all'),
+    path('course/all/', all_courses, name='all'),
     path('course/<str:token>/', view_course, name='course'),
 ]

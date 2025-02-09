@@ -3,15 +3,19 @@
 {% block title %} Курс{% endblock %}
 
 {% block content %}
+
 <h1>Список всех курсов</h1>
-<ul>
+<ul class="course-list">
     {% for course in courses %}
-        <li>
-            <strong><a href="{% url 'course' course.id %}">ID:</a></strong> {{ course.id }} <br>
-            <strong>Название:</strong> {{ course.title }}
+        <li class="course-item">
+            <h2>{{ course.title }}</h2> <!-- Изменил h1 на h2 для лучшей семантики -->
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw6qfhLxgOC74goIb87QjfajhAaC1doc-usA&s" alt="Случайное изображение" class="course-image"> <!-- Случайное изображение -->
+            <br>
+            <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
         </li>
     {% empty %}
         <li>Курсы не найдены.</li>
     {% endfor %}
 </ul>
+
 {% endblock %}

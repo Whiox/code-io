@@ -9,7 +9,7 @@
 
         <!-- css -->
 
-        {% if request.user.theme == "light" %}
+        {% if request.user %}
             <link rel="stylesheet" href="{% static 'light-body.css' %}">
             <link rel="stylesheet" href="{% static 'light-header.css' %}">
             <link rel="stylesheet" href="{% static 'light-footer.css' %}">
