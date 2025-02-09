@@ -4,12 +4,10 @@ from django.views import View
 from django.urls import reverse
 from django.contrib import messages
 from authentication.forms import RegisterForm, LoginForm, ResetPasswordForm, ChangePasswordForm
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
 from authentication.methods import generate_password, user_info_view, is_author
 from authentication.models import ResetRequest
 from django.core.mail import send_mail
-from main.models import User
+from authentication.models import User
 import secrets
 
 
