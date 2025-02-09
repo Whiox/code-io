@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
-    'education'
+    'education',
+    'home'
 ]
 
 MIDDLEWARE = [
@@ -59,7 +60,8 @@ TEMPLATES = [
             'static/css',
             'static/html',
             'authentication/templates',
-            'education/templates'
+            'education/templates',
+            'home/templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
