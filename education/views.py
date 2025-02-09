@@ -13,7 +13,7 @@ def view_course(request, token):
 
     def extract_lesson_number(lesson_name):
         match = re.search(r'(\d+)', lesson_name)
-        return int(match.group(1)) if match else float('inf')  # Если нет номера, ставим в конец
+        return int(match.group(1)) if match else float('inf')
 
     lessons.sort(key=extract_lesson_number)
 
@@ -27,9 +27,9 @@ def view_course(request, token):
                     html_content = markdown.markdown(
                         md_content,
                         extensions=[
-                            'fenced_code',  # Для поддержки fenced code blocks
-                            'codehilite',   # Для выделения кода
-                            'tables',       # Если у вас есть таблицы
+                            'fenced_code',
+                            'codehilite',
+                            'tables',
                         ]
                     )
                     lesson_title = f"Урок {index + 1}"

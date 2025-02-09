@@ -35,15 +35,13 @@
         hljs.highlightAll();
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active'); // Переключаем класс 'active'
+            sidebar.classList.toggle('active');
         }
-        // Закрываем боковую панель при клике вне неё
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById('sidebar');
             const button = document.querySelector('.toggle-button');
-            
             if (!sidebar.contains(event.target) && !button.contains(event.target)) {
-                sidebar.classList.remove('active'); // Закрываем панель
+                sidebar.classList.remove('active');
             }
         });
     </script>
