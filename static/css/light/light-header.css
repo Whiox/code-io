@@ -17,9 +17,15 @@
     color: white;
 }
 
-.logo {
-    font-size: 28px;
-    font-weight: bold;
+.logo a {
+    text-decoration: none; /* Убираем подчеркивание */
+    font-family: 'Roboto', sans-serif; /* Применяем шрифт Roboto */
+    font-size: 24px; /* Устанавливаем размер шрифта */
+    font-weight: 700; /* Делаем текст жирным */
+    background: linear-gradient(135deg, #32CD32, #FFA500); /* Устанавливаем градиент от зеленого до оранжевого по диагонали */
+    -webkit-background-clip: text; /* Обрезаем фон по тексту для WebKit */
+    -webkit-text-fill-color: transparent; /* Делаем цвет текста прозрачным, чтобы видеть градиент */
+    color: transparent; /* Делаем цвет текста прозрачным */
 }
 
 .navbar {

@@ -3,6 +3,11 @@ body {
     background-color: #5c5858;
     font-family: Arial, sans-serif;
 }
+html, body {
+    margin: 0; /* Убираем отступы */
+    padding: 0; /* Убираем внутренние отступы */
+    overflow-x: hidden; /* Скрываем горизонтальную прокрутку */
+}
 
 * {
     box-sizing: border-box;
@@ -47,14 +52,87 @@ main {
 }
 
 .btn:hover {
-    background-color: #0056b3; /* Темнее при наведении */
+    background-color: #0056b3;
 }
 .course-item {
-    margin-bottom: 20px; /* Отступ между элементами списка */
+    margin-bottom: 20px;
 }
 
 .course-image {
-    max-width: 100%; /* Ограничиваем ширину изображения */
-    height: auto; /* Высота автоматически пропорциональна ширине */
-    border-radius: 8px; /* Закругление углов изображения */
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+/*/*/
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa; /* Светлый фон */
+    color: #333; /* Темный текст */
+}
+
+.sidebar {
+    position: fixed; /* Фиксированное позиционирование */
+    left: 0;
+    top: 60px; /* Отступ от верхней части для шапки */
+    width: 250px; /* Ширина боковой панели */
+    height: calc(100% - 60px); /* Высота на всю страницу минус высота шапки */
+    background-color: #ffffff; /* Белый фон для боковой панели */
+    color: #333; /* Темный текст */
+    padding: 20px; /* Отступы внутри боковой панели */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); /* Тень */
+    z-index: 1000; /* Обеспечиваем, что боковая панель всегда сверху */
+    transition: transform 0.3s ease; /* Плавный переход для трансформации */
+    transform: translateX(-100%); /* Скрываем панель */
+    box-sizing: border-box; 
+}
+
+.sidebar.active {
+    transform: translateX(0); /* Показываем панель */
+}
+
+.sidebar ul {
+    list-style-type: none; /* Убираем маркеры списка */
+    padding: 0; /* Убираем отступы */
+}
+
+.sidebar ul li a {
+    color: #333; /* Цвет ссылок */
+    text-decoration: none; /* Убираем подчеркивание */
+    display: block; /* Делаем ссылки блочными элементами */
+    margin: 10px 0; /* Отступы между ссылками */
+}
+
+.toggle-button {
+    position: fixed; /* Фиксированное позиционирование для кнопки */
+    bottom: 20px; /* Опустим ниже */
+    left: 20px; /* Отступ слева */
+    z-index: 1001; /* Обеспечиваем, что кнопка всегда сверху */
+    padding: 10px 15px; /* Отступы внутри кнопки */
+    background-color: #28a745; /* Зеленый цвет кнопки */
+    color: white; /* Цвет текста кнопки */
+    border: none; /* Убираем рамку */
+    border-radius: 5px; /* Скругленные углы */
+    cursor: pointer; /* Указатель при наведении */
+    transition: background-color 0.3s ease; /* Плавный переход для цвета кнопки */
+}
+
+.toggle-button:hover {
+    background-color: #218838; /* Цвет кнопки при наведении */
+}
+
+.content {
+    margin-left: 20px; /* Отступ для контента */
+    padding: 20px; /* Отступы внутри контента */
+}
+
+/* Скрываем кнопку при активной боковой панели */
+.sidebar.active + .toggle-button {
+    display: none; /* Скрываем кнопку */
+}
+img {
+    max-width: 1000px; /* Устанавливаем максимальную ширину 1000 пикселей */
+    width: 100%; /* Чтобы изображение занимало всю доступную ширину контейнера */
+    height: auto; /* Сохраняем пропорции изображения */
 }

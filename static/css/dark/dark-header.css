@@ -124,3 +124,9 @@
 .dropdown-item:hover {
     background-color: #555;
 }
+.logo a {
+    text-decoration: none; /* Убираем подчеркивание */
+    font-family: 'Roboto', sans-serif; /* Применяем шрифт Roboto */
+    font-size: 24px; /* Устанавливаем размер шрифта (по желанию) */
+    color: #333; /* Устанавливаем цвет текста (по желанию) */
+}

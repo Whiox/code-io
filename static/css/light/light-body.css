@@ -58,3 +58,78 @@ main {
     height: auto; /* Высота автоматически пропорциональна ширине */
     border-radius: 8px; /* Закругление углов изображения */
 }
+/*/*/
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa; /* Светлый фон */
+    color: #333; /* Темный текст */
+}
+
+.sidebar {
+    position: fixed; /* Фиксированное позиционирование */
+    left: 0;
+    top: 60px; /* Отступ от верхней части для шапки */
+    width: 250px; /* Ширина боковой панели */
+    height: calc(100% - 60px); /* Высота на всю страницу минус высота шапки */
+    background-color: #ffffff; /* Белый фон для боковой панели */
+    color: #333; /* Темный текст */
+    padding: 20px; /* Отступы внутри боковой панели */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); /* Тень */
+    z-index: 1000; /* Обеспечиваем, что боковая панель всегда сверху */
+    transition: transform 0.3s ease; /* Плавный переход для трансформации */
+    transform: translateX(-100%); /* Скрываем панель */
+    box-sizing: border-box; 
+}
+
+
+.sidebar.active {
+    transform: translateX(0); /* Показываем панель */
+}
+
+.sidebar ul {
+    list-style-type: none; /* Убираем маркеры списка */
+    padding: 0; /* Убираем отступы */
+}
+
+.sidebar ul li a {
+    color: #333; /* Цвет ссылок */
+    text-decoration: none; /* Убираем подчеркивание */
+    display: block; /* Делаем ссылки блочными элементами */
+    margin: 10px 0; /* Отступы между ссылками */
+}
+
+.toggle-button {
+    position: fixed; /* Фиксированное позиционирование для кнопки */
+    bottom: 20px; /* Опустим ниже */
+    left: 20px; /* Отступ слева */
+    z-index: 1001; /* Обеспечиваем, что кнопка всегда сверху */
+    padding: 10px 15px; /* Отступы внутри кнопки */
+    background: linear-gradient(135deg, #32CD32, #FFA500);
+    color: white; /* Цвет текста кнопки */
+    border: none; /* Убираем рамку */
+    border-radius: 5px; /* Скругленные углы */
+    cursor: pointer; /* Указатель при наведении */
+    transition: background-color 0.3s ease; /* Плавный переход для цвета кнопки */
+}
+
+.toggle-button:hover {
+    background-color: #218838; /* Цвет кнопки при наведении */
+}
+
+.content {
+    margin-left: 20px; /* Отступ для контента */
+    padding: 20px; /* Отступы внутри контента */
+}
+
+/* Скрываем кнопку при активной боковой панели */
+.sidebar.active + .toggle-button {
+    display: none; /* Скрываем кнопку */
+}
+img {
+    max-width: 1000px; /* Устанавливаем максимальную ширину 1000 пикселей */
+    width: 100%; /* Чтобы изображение занимало всю доступную ширину контейнера */
+    height: auto; /* Сохраняем пропорции изображения */
+}
+
