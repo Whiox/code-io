@@ -9,6 +9,7 @@ from education.models import Courses, Lessons, Task
 from authentication.models import User
 from django.conf import settings
 def view_course(request, token):
+    course = Courses.objects.filter(course_id=token).first()
     course_path = os.path.join('courses', token)
     if not os.path.exists(course_path):
         return render(request, '404.html', {'error': 'Курс не найден.'})
@@ -47,7 +48,7 @@ def view_course(request, token):
             lesson_title = f"Урок {index + 1}"
             lessons_content.append({'title': lesson_title, 'content': "<p>Урок пуст.</p>"})
 
-    return render(request, 'course.html', {'lessons': lessons_content})
+    return render(request, 'course.html', {'lessons': lessons_content, 'name': course.title})
 
 
 def all_courses(request):
@@ -62,11 +63,22 @@ def all_courses(request):
             'author': course.author.username if course.author else 'Неизвестный автор'
         }
         content['courses'].append(course_info)
-
-    print(content['courses'])
-
     return render(request, 'all_courses.html', content)
 
+def my_courses(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    courses = Courses.objects.filter(author=request.user)
+    content = {
+        'courses': []
+    }
+    for course in courses:
+        course_info = {
+            'id': course.course_id,
+            'title': course.title,
+        }
+        content['courses'].append(course_info)
+    return render(request, 'my_courses.html', content)
 
 def add_course(request):
     LessonFormSet = formset_factory(AddLessonForm, extra=2)
