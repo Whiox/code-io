@@ -5,6 +5,7 @@ from authentication.models import User
 class Courses(models.Model):
     course_id = models.AutoField(primary_key=True)
     title = models.TextField()
+    author = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
 
 
 class Lessons(models.Model):

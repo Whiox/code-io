@@ -2,10 +2,11 @@ import os
 import markdown
 import re
 from django.shortcuts import render
-from education.models import Courses, Lessons, Task
 from django.shortcuts import redirect
 from django.forms import formset_factory
 from .forms import AddCourseForm, AddLessonForm
+from education.models import Courses, Lessons, Task
+from authentication.models import User
 from django.conf import settings
 def view_course(request, token):
     course_path = os.path.join('courses', token)
@@ -49,9 +50,6 @@ def view_course(request, token):
     return render(request, 'course.html', {'lessons': lessons_content})
 
 
-
-
-
 def all_courses(request):
     courses = Courses.objects.all()
     content = {
@@ -60,20 +58,23 @@ def all_courses(request):
     for course in courses:
         course_info = {
             'id': course.course_id,
-            'title': course.title
+            'title': course.title,
+            'author': course.author.username if course.author else 'Неизвестный автор'
         }
         content['courses'].append(course_info)
 
     print(content['courses'])
 
     return render(request, 'all_courses.html', content)
+
+
 def add_course(request):
     LessonFormSet = formset_factory(AddLessonForm, extra=2)
     if request.method == 'POST':
         course_form = AddCourseForm(request.POST)
         lesson_formset = LessonFormSet(request.POST, request.FILES)
         if course_form.is_valid() and lesson_formset.is_valid():
-            course = Courses.objects.create(title=course_form.cleaned_data['course_name'])
+            course = Courses.objects.create(title=course_form.cleaned_data['course_name'],author=request.user)
             lesson_ids = []
             for lesson_form in lesson_formset:
                 if lesson_form.cleaned_data:
