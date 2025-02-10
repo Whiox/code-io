@@ -1,5 +1,5 @@
 from django import forms
-
+from education.models import Courses, Lessons, Task,Topic
 class AddCourseForm(forms.Form):
     """
     Форма для добавления курсов
@@ -31,4 +31,9 @@ class AddLessonForm(forms.Form):
             'class': 'auth-form-control'
         })
     )
-
+class TopicChoiceForm(forms.Form):
+    topics = forms.ModelMultipleChoiceField(
+        queryset=Topic.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )

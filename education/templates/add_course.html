@@ -5,6 +5,8 @@
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ course_form.as_p }}
+    <h3>Выберите темы:</h3>
+    {{ topic_form.topics }}
     <h3>Добавить уроки</h3>
     <div id="lesson-formset">
         {{ lesson_formset.management_form }}

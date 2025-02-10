@@ -4,7 +4,7 @@ import re
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.forms import formset_factory
-from .forms import AddCourseForm, AddLessonForm
+from .forms import AddCourseForm, AddLessonForm,TopicChoiceForm
 from education.models import Courses, Lessons, Task
 from authentication.models import User
 from django.conf import settings
@@ -90,11 +90,15 @@ def my_courses(request):
 
 def add_course(request):
     LessonFormSet = formset_factory(AddLessonForm, extra=1)
+    topic_form = TopicChoiceForm()
     if request.method == 'POST':
         course_form = AddCourseForm(request.POST)
         lesson_formset = LessonFormSet(request.POST, request.FILES)
-        if course_form.is_valid() and lesson_formset.is_valid():
+        topic_form = TopicChoiceForm(request.POST)
+        if course_form.is_valid() and lesson_formset.is_valid() and topic_form.is_valid():
             course = Courses.objects.create(title=course_form.cleaned_data['course_name'], author=request.user)
+            selected_topics = topic_form.cleaned_data['topics']
+            course.topics.set(selected_topics)
             lesson_ids = []
             for lesson_form in lesson_formset:
                 if lesson_form.cleaned_data and lesson_form.cleaned_data.get('lesson_description'):
@@ -122,4 +126,5 @@ def add_course(request):
     return render(request, 'add_course.html', {
         'course_form': course_form,
         'lesson_formset': lesson_formset,
+        'topic_form': topic_form,  # Передаем форму выбора тем в шаблон
     })
