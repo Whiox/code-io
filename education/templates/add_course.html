@@ -11,11 +11,50 @@
         {% for form in lesson_formset %}
             <div class="lesson-form">
                 {{ form.as_p }}
-                <button type="button" class="remove-lesson">Удалить урок</button>
+                <button type="button" class="remove-lesson" {% if lesson_formset.total_form_count == 1 %}disabled{% endif %}>Удалить урок</button>
             </div>
         {% endfor %}
     </div>
     <button type="button" id="add-lesson">Добавить урок</button>
     <button type="submit" class="btn btn-primary">Добавить курс</button>
 </form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var lessonFormCount = {{ lesson_formset.total_form_count }};
+
+        $('#add-lesson').click(function() {
+            var newForm = $('.lesson-form:first').clone();
+            newForm.find('input, select, textarea').each(function() {
+                var name = $(this).attr('name').replace(/-\d+-/, '-' + lessonFormCount + '-');
+                $(this).attr('name', name);
+                $(this).val('');
+            });
+            newForm.find('.remove-lesson').prop('disabled', false);
+            $('#lesson-formset').append(newForm);
+            lessonFormCount++;
+            updateManagementForm();
+        });
+
+        $(document).on('click', '.remove-lesson', function() {
+            if (lessonFormCount > 1) {
+                $(this).closest('.lesson-form').remove();
+                lessonFormCount--;
+                updateManagementForm();
+            }
+        });
+        function updateManagementForm() {
+            $('#id_form-TOTAL_FORMS').val(lessonFormCount); // Обновляем общее количество форм(не забуть посмотреть через f12 название скрытого поля отвечающего за количество форм)
+            $('#lesson-formset .lesson-form').each(function(index) {
+                $(this).find('input, select, textarea').each(function() {
+                    var name = $(this).attr('name').replace(/-\d+-/, '-' + index + '-');
+                    $(this).attr('name', name);
+                });
+            });
+        }
+    });
+</script>
+
+
 {% endblock %}

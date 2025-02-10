@@ -83,20 +83,22 @@ def my_courses(request):
     return render(request, 'my_courses.html', content)
 
 def add_course(request):
-    LessonFormSet = formset_factory(AddLessonForm, extra=2)
+    LessonFormSet = formset_factory(AddLessonForm, extra=1)
     if request.method == 'POST':
         course_form = AddCourseForm(request.POST)
         lesson_formset = LessonFormSet(request.POST, request.FILES)
         if course_form.is_valid() and lesson_formset.is_valid():
-            course = Courses.objects.create(title=course_form.cleaned_data['course_name'],author=request.user)
+            course = Courses.objects.create(title=course_form.cleaned_data['course_name'], author=request.user)
             lesson_ids = []
             for lesson_form in lesson_formset:
-                if lesson_form.cleaned_data:
+                if lesson_form.cleaned_data and lesson_form.cleaned_data.get('lesson_description'):
                     lesson_title = lesson_form.cleaned_data['lesson_description']
                     lesson = Lessons.objects.create(course=course, title=lesson_title)
                     lesson_ids.append(lesson.lesson_id)
+
             course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
             os.makedirs(course_folder, exist_ok=True)
+
             for lesson_form, lesson_id in zip(lesson_formset, lesson_ids):
                 lesson_file = lesson_form.cleaned_data.get('lesson_file')
                 if lesson_file:
@@ -105,8 +107,8 @@ def add_course(request):
                     with open(file_path, 'wb+') as destination:
                         for chunk in lesson_file.chunks():
                             destination.write(chunk)
-            return redirect('my_courses')
 
+            return redirect('my_courses')
     else:
         course_form = AddCourseForm()
         lesson_formset = LessonFormSet()
