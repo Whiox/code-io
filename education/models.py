@@ -1,11 +1,16 @@
 from django.db import models
 from authentication.models import User
 
+class Topic(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
 
 class Courses(models.Model):
     course_id = models.AutoField(primary_key=True)
     title = models.TextField()
     author = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    topics = models.ManyToManyField(Topic, related_name='courses', blank=True)
 
 
 class Lessons(models.Model):
@@ -17,3 +22,4 @@ class Lessons(models.Model):
 class Task(models.Model):
     tusk_id = models.AutoField(primary_key=True)
     lesson = models.ForeignKey(Lessons, on_delete=models.CASCADE)
+

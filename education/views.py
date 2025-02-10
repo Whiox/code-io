@@ -59,12 +59,18 @@ def all_courses(request):
         'courses': []
     }
     for course in courses:
+        topics = course.topics.all()
+        topic_names = [topic.name for topic in topics]
+        if not topic_names:
+            topic_names = ['Свободная тема']
         course_info = {
             'id': course.course_id,
             'title': course.title,
-            'author': course.author.username if course.author else 'Неизвестный автор'
+            'author': course.author.username if course.author else 'Неизвестный автор',
+            'topics': topic_names
         }
         content['courses'].append(course_info)
+
     return render(request, 'all_courses.html', content)
 
 def my_courses(request):
