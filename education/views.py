@@ -8,6 +8,8 @@ from .forms import AddCourseForm, AddLessonForm
 from education.models import Courses, Lessons, Task
 from authentication.models import User
 from django.conf import settings
+
+
 def view_course(request, token):
     course = Courses.objects.filter(course_id=token).first()
     course_path = os.path.join('courses', token)
@@ -103,7 +105,7 @@ def add_course(request):
                     with open(file_path, 'wb+') as destination:
                         for chunk in lesson_file.chunks():
                             destination.write(chunk)
-            return redirect('course/all')
+            return redirect('my_courses')
 
     else:
         course_form = AddCourseForm()
