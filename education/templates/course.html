@@ -16,7 +16,7 @@
     <div class="sidebar" id="sidebar">
         <ul>
             {% for lesson in lessons %}
-                <li><a href="#lesson-{{ forloop.counter }}">{{ lesson.title }}</a></li>
+                <li><a href="#lesson-{{ forloop.counter }}">Урок {{ forloop.counter }}</a></li>
             {% endfor %}
         </ul>
     </div>
@@ -24,11 +24,11 @@
     <div class="content">
         {% for lesson in lessons %}
             <div class="lesson" id="lesson-{{ forloop.counter }}">
-                <h1>{{ lesson.title }}</h1>
+                <h1>Урок {{ forloop.counter }}</h1>
                 <div>{{ lesson.content | safe }}</div>
 
                 {% if lesson.tasks %}
-                    <h3>Задачи</h3>
+                    <h2>Задачи</h2>
                     {% for task in lesson.tasks %}
                         <div>
                             <p>{{ task.content | safe }}</p>
@@ -75,4 +75,3 @@
     </script>
 
 {% endblock %}
-
