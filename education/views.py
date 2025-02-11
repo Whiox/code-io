@@ -3,6 +3,7 @@ import markdown
 import re
 from django.shortcuts import render
 from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404
 from django.forms import formset_factory
 from .forms import AddCourseForm, AddLessonForm,TopicChoiceForm
 from education.models import Courses, Lessons, Task
@@ -126,5 +127,12 @@ def add_course(request):
     return render(request, 'add_course.html', {
         'course_form': course_form,
         'lesson_formset': lesson_formset,
-        'topic_form': topic_form,  # Передаем форму выбора тем в шаблон
+        'topic_form': topic_form,
     })
+
+def delete_course(request, course_id):
+    course = get_object_or_404(Courses, pk=course_id)
+    if request.method == 'POST':
+        course.delete()
+        return redirect('my_courses')
+    return render(request, 'confirm_delete.html', {'course': course})
