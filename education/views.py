@@ -10,7 +10,7 @@ from .forms import AddCourseForm, AddLessonForm,TopicChoiceForm
 from education.models import Courses, Lessons, Task
 from authentication.models import User
 from django.conf import settings
-
+from education.methods import get_metadata
 class CourseViewer:
     @staticmethod
     def view_course(request, token):
@@ -42,6 +42,10 @@ class CourseViewer:
                 try:
                     with open(lesson_path, 'r', encoding='utf-8') as f:
                         md_content = f.read()
+                        # Извлечение метаданных
+                        metadata, md_content = get_metadata(md_content)
+                        # Конвертация основного контента в HTML
+
                         html_content = markdown.markdown(
                             md_content,
                             extensions=[
