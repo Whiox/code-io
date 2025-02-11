@@ -55,14 +55,53 @@ class CourseViewer:
                             ]
                         )
                         lesson_title = f"Урок {index + 1}"
-                        lessons_content.append({'title': lesson_title, 'content': html_content})
+
+                        # Загрузка задач
+                        tasks_path = os.path.join(course_path, 'tasks')
+                        tasks = os.listdir(tasks_path)
+                        tasks_content = []
+
+                        for task in tasks:
+                            task_path = os.path.join(tasks_path, task)
+                            if os.path.isfile(task_path):
+                                with open(task_path, 'r', encoding='utf-8') as f:
+                                    task_content = f.read()
+                                    # Извлечение метаданных
+                                    task_metadata, task_content = get_metadata(task_content)
+                                    task_html_content = markdown.markdown(
+                                        task_content,
+                                        extensions=[
+                                            'fenced_code',
+                                            'codehilite',
+                                            'tables',
+                                        ]
+                                    )
+                                    tasks_content.append({
+                                        'content': task_html_content,
+                                        'right_answer': task_metadata.get('right_answer', ''),
+                                        'lesson_id': task_metadata.get('lesson_id', ''),
+                                    })
+
+                        lessons_content.append({
+                            'title': lesson_title,
+                            'content': html_content,
+                            'tasks': tasks_content,
+                        })
                 except Exception as e:
                     print(f"Ошибка при чтении файла {lesson}: {e}")
                     lesson_title = f"Урок {index + 1}"
-                    lessons_content.append({'title': lesson_title, 'content': f"<p>Ошибка при загрузке урока: {lesson}</p>"})
+                    lessons_content.append({
+                        'title': lesson_title,
+                        'content': f"<p>Ошибка при загрузке урока: {lesson}</p>",
+                        'tasks': [],
+                    })
             else:
                 lesson_title = f"Урок {index + 1}"
-                lessons_content.append({'title': lesson_title, 'content': "<p>Урок пуст.</p>"})
+                lessons_content.append({
+                    'title': lesson_title,
+                    'content': "<p>Урок пуст.</p>",
+                    'tasks': [],
+                })
 
         return render(request, 'course.html', {'lessons': lessons_content, 'name': course.title})
 

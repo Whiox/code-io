@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %} {{name}}{% endblock %}
+{% block title %} {{ name }}{% endblock %}
 
 {% block content %}
 
@@ -20,14 +20,24 @@
             {% endfor %}
         </ul>
     </div>
-    
     <button class="toggle-button" onclick="toggleSidebar()">☰ Открыть меню</button>
-    
     <div class="content">
         {% for lesson in lessons %}
             <div class="lesson" id="lesson-{{ forloop.counter }}">
                 <h1>{{ lesson.title }}</h1>
-                <div>{{ lesson.content|safe }}</div>
+                <div>{{ lesson.content | safe }}</div>
+
+                {% if lesson.tasks %}
+                    <h3>Задачи</h3>
+                    {% for task in lesson.tasks %}
+                        <div>
+                            <p>{{ task.content | safe }}</p>
+                            <input type="text" id="task-{{ forloop.counter0 }}" placeholder="Введите ответ">
+                            <button onclick="checkAnswer({{ forloop.counter0 }}, '{{ task.right_answer }}')">Проверить</button>
+                            <p id="task-{{ forloop.counter0 }}-result"></p>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </div>
         {% endfor %}
     </div>
@@ -45,6 +55,19 @@
             }
         });
     </script>
-</body>
+    <script>
+        function checkAnswer(taskId, rightAnswer) {
+            var userAnswer = document.getElementById('task-' + taskId).value.trim(); // Убираем пробелы у пользователя
+            var trimmedRightAnswer = String(rightAnswer).trim(); // Убираем пробелы у правильного ответа
+            userAnswer = userAnswer.replace(/"/g, '');
+            trimmedRightAnswer = trimmedRightAnswer.replace(/"/g, '');
+            if (userAnswer === trimmedRightAnswer || (userAnswer === "" && trimmedRightAnswer === "")) {
+                document.getElementById('task-' + taskId + '-result').innerHTML = 'Правильно!';
+
+            } else {
+                document.getElementById('task-' + taskId + '-result').innerHTML = 'Неправильно!';
+            }
+        }
+    </script>
 
 {% endblock %}
