@@ -1,6 +1,7 @@
 import os
 import markdown
 import re
+import shutil
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
@@ -133,6 +134,9 @@ def add_course(request):
 def delete_course(request, course_id):
     course = get_object_or_404(Courses, pk=course_id)
     if request.method == 'POST':
+        course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
         course.delete()
+        if os.path.exists(course_folder):
+            shutil.rmtree(course_folder)
         return redirect('my_courses')
     return render(request, 'confirm_delete.html', {'course': course})
