@@ -32,9 +32,10 @@
                     {% for task in lesson.tasks %}
                         <div>
                             <p>{{ task.content | safe }}</p>
-                            <input type="text" id="task-{{ forloop.counter0 }}" placeholder="Введите ответ">
-                            <button onclick="checkAnswer({{ forloop.counter0 }}, '{{ task.right_answer }}')">Проверить</button>
-                            <p id="task-{{ forloop.counter0 }}-result"></p>
+                            <input type="text" id="task-{{ forloop.counter0 }}-lesson-{{ forloop.parentloop.counter0 }}" placeholder="Введите ответ">
+                            <button onclick="checkAnswer({{ forloop.counter0 }}, '{{ task.right_answer }}', {{ forloop.parentloop.counter0 }})">Проверить</button>
+                            <p id="task-{{ forloop.counter0 }}-lesson-{{ forloop.parentloop.counter0 }}-result"></p>
+                            <p id="task-{{ forloop.counter0 }}-lesson-{{ forloop.parentloop.counter0 }}-correct-answer" class="correct-answer" style="display: none;">Правильный ответ: {{ task.right_answer }}</p>
                         </div>
                     {% endfor %}
                 {% endif %}
@@ -47,6 +48,7 @@
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('active');
         }
+
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById('sidebar');
             const button = document.querySelector('.toggle-button');
@@ -54,20 +56,23 @@
                 sidebar.classList.remove('active');
             }
         });
-    </script>
-    <script>
-        function checkAnswer(taskId, rightAnswer) {
-            var userAnswer = document.getElementById('task-' + taskId).value.trim(); // Убираем пробелы у пользователя
+
+        function checkAnswer(taskId, rightAnswer, lessonId) {
+            var userAnswer = document.getElementById('task-' + taskId + '-lesson-' + lessonId).value.trim(); // Убираем пробелы у пользователя
             var trimmedRightAnswer = String(rightAnswer).trim(); // Убираем пробелы у правильного ответа
+            // Удаляем двойные кавычки из обоих ответов
             userAnswer = userAnswer.replace(/"/g, '');
             trimmedRightAnswer = trimmedRightAnswer.replace(/"/g, '');
+            // Проверяем, если оба ответа пустые или равны
             if (userAnswer === trimmedRightAnswer || (userAnswer === "" && trimmedRightAnswer === "")) {
-                document.getElementById('task-' + taskId + '-result').innerHTML = 'Правильно!';
-
+                document.getElementById('task-' + taskId + '-lesson-' + lessonId + '-result').innerHTML = 'Правильно!';
+                document.getElementById('task-' + taskId + '-lesson-' + lessonId + '-correct-answer').style.display = 'none'; // Скрываем правильный ответ
             } else {
-                document.getElementById('task-' + taskId + '-result').innerHTML = 'Неправильно!';
+                document.getElementById('task-' + taskId + '-lesson-' + lessonId + '-result').innerHTML = 'Неправильно!';
+                document.getElementById('task-' + taskId + '-lesson-' + lessonId + '-correct-answer').style.display = 'block'; // Показываем правильный ответ
             }
         }
     </script>
 
 {% endblock %}
+

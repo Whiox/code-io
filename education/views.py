@@ -22,6 +22,8 @@ class CourseViewer:
         :return: render: course.html с содержимым уроков
         """
         course = Courses.objects.filter(course_id=token).first()
+        if not course:
+            return render(request, 'error.html', {'error': 'Курс не найден.'})
         course_path = os.path.join('courses', token)
         if not os.path.exists(course_path):
             return render(request, 'error.html', {'error': 'Курс не найден.'})
@@ -39,13 +41,11 @@ class CourseViewer:
             lesson_path = os.path.join(course_path, lesson)
 
             if os.path.isfile(lesson_path):
+                # Обработка обычного урока
                 try:
                     with open(lesson_path, 'r', encoding='utf-8') as f:
                         md_content = f.read()
-                        # Извлечение метаданных
-                        metadata, md_content = get_metadata(md_content)
                         # Конвертация основного контента в HTML
-
                         html_content = markdown.markdown(
                             md_content,
                             extensions=[
@@ -54,33 +54,42 @@ class CourseViewer:
                                 'tables',
                             ]
                         )
-                        lesson_title = f"Урок {index + 1}"
+                        lesson_id = re.search(r'(\d+)', lesson).group(1)  # Извлечение ID урока из имени файла
+                        lesson_title = f"Урок {lesson_id}"
 
                         # Загрузка задач
                         tasks_path = os.path.join(course_path, 'tasks')
-                        tasks = os.listdir(tasks_path)
                         tasks_content = []
 
-                        for task in tasks:
-                            task_path = os.path.join(tasks_path, task)
-                            if os.path.isfile(task_path):
-                                with open(task_path, 'r', encoding='utf-8') as f:
-                                    task_content = f.read()
-                                    # Извлечение метаданных
-                                    task_metadata, task_content = get_metadata(task_content)
-                                    task_html_content = markdown.markdown(
-                                        task_content,
-                                        extensions=[
-                                            'fenced_code',
-                                            'codehilite',
-                                            'tables',
-                                        ]
-                                    )
-                                    tasks_content.append({
-                                        'content': task_html_content,
-                                        'right_answer': task_metadata.get('right_answer', ''),
-                                        'lesson_id': task_metadata.get('lesson_id', ''),
-                                    })
+                        # Проверка наличия папки с задачами
+                        if os.path.exists(tasks_path):
+                            tasks = os.listdir(tasks_path)
+
+                            for task in tasks:
+                                task_path = os.path.join(tasks_path, task)
+                                if os.path.isfile(task_path):
+                                    # Извлечение ID урока из имени файла задачи
+                                    task_match = re.match(r'(\d+)_task_lesson_(\d+)\.md', task)
+                                    if task_match:
+                                        task_id, task_lesson_id = task_match.groups()
+                                        if task_lesson_id == lesson_id:  # Сравниваем с ID текущего урока
+                                            with open(task_path, 'r', encoding='utf-8') as f:
+                                                task_content = f.read()
+                                                # Извлечение метаданных и контента задачи
+                                                task_metadata, task_content = get_metadata(task_content)
+                                                task_html_content = markdown.markdown(
+                                                    task_content,
+                                                    extensions=[
+                                                        'fenced_code',
+                                                        'codehilite',
+                                                        'tables',
+                                                    ]
+                                                )
+                                                tasks_content.append({
+                                                    'content': task_html_content,
+                                                    'right_answer': task_metadata.get('right_answer', ''),  # Извлечение правильного ответа
+                                                    'task_id': task_id,  # Добавляем ID задачи
+                                                })
 
                         lessons_content.append({
                             'title': lesson_title,
@@ -95,16 +104,10 @@ class CourseViewer:
                         'content': f"<p>Ошибка при загрузке урока: {lesson}</p>",
                         'tasks': [],
                     })
+            # Игнорируем папки, не добавляя их в lessons_content
             else:
-                lesson_title = f"Урок {index + 1}"
-                lessons_content.append({
-                    'title': lesson_title,
-                    'content': "<p>Урок пуст.</p>",
-                    'tasks': [],
-                })
-
+                continue
         return render(request, 'course.html', {'lessons': lessons_content, 'name': course.title})
-
     @staticmethod
     def all_courses(request):
         """

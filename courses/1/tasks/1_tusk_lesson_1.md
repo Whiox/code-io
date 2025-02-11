@@ -1,6 +1,5 @@
 [metadata]
 right_answer: "прив"
-lesson_id : "1"
 [/metadata]
 
 Ответ: прив
