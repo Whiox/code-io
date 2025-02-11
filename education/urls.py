@@ -1,12 +1,14 @@
 from django.urls import path
 from education.views import (
-    view_course, all_courses,add_course,my_courses, delete_course
+    CourseViewer,
+    CourseManager
 )
 
 urlpatterns = [
-    path('course/all/', all_courses, name='all'),
-    path('course/<str:token>/', view_course, name='course'),
-    path('add', add_course, name='add_course'),
-    path('my_courses', my_courses, name='my_courses'),
-    path('delete/<int:course_id>/', delete_course, name='delete'),
+    path('course/all/', CourseViewer.all_courses, name='all'),
+    path('course/<str:token>/', CourseViewer.view_course, name='course'),
+    path('add/', CourseManager.add_course, name='add_course'),
+    path('my_courses/', CourseViewer.my_courses, name='my_courses'),
+    path('delete/<int:course_id>/', CourseManager.delete_course, name='delete'),
 ]
+
