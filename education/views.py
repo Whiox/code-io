@@ -16,7 +16,7 @@ def view_course(request, token):
     course = Courses.objects.filter(course_id=token).first()
     course_path = os.path.join('courses', token)
     if not os.path.exists(course_path):
-        return render(request, '404.html', {'error': 'Курс не найден.'})
+        return render(request, 'error.html', {'error': 'Курс не найден.'})
 
     lessons = os.listdir(course_path)
     lessons_content = []
@@ -133,6 +133,8 @@ def add_course(request):
 
 def delete_course(request, course_id):
     course = get_object_or_404(Courses, pk=course_id)
+    if request.user != course.author:
+        return render(request, 'error.html', {'error': 'Вы не автор курса.'})
     if request.method == 'POST':
         course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
         course.delete()
