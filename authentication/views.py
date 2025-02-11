@@ -13,7 +13,7 @@ import secrets
 
 class RegisterView(View):
     """
-    Классовое представление регистрации.
+    Регистрация.
     """
 
     @staticmethod
@@ -22,19 +22,20 @@ class RegisterView(View):
         Возвращает шаблон для регистрации.
         Используются формы Django.
 
-        :param request:
-        :return: Шаблон + форма
+        :param request: HTTP Django request
+        :return: render: register.html + RegisterForm
         """
         return render(request, 'register.html', {'RegisterForm': RegisterForm})
 
     @staticmethod
     def post(request):
         """
-        Обработчик регистрации аккаунта.
+        Создаёт аккаунт для пользователя.
         Получает информацию из формы Django.
+        Отправляет Email с информацией о регистрации.
 
-        :param request:
-        :return: Сообщение об успехе/ошибке
+        :param request: HTTP Django request
+        :return: render: register.html + RegisterForm
         """
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -76,17 +77,17 @@ class RegisterView(View):
 
 class LoginView(View):
     """
-    Классовое представление входа в аккаунт.
+    Вход в аккаунт.
     """
 
     @staticmethod
     def get(request):
         """
         Возвращает шаблон для входа в аккаунт.
-        Используются формы Django.
+        Отправляет форму Django.
 
-        :param request:
-        :return: Шаблон + форма
+        :param request: HTTP Django request
+        :return: render: login.html + LoginForm
         """
         return render(request, 'login.html', {'LoginForm': LoginForm})
 
@@ -96,8 +97,8 @@ class LoginView(View):
         Обработчик входа в аккаунт.
         Получает информацию из формы Django.
 
-        :param request:
-        :return: Сообщение об успехе/ошибке
+        :param request: HTTP Django request
+        :return: render: login.html + LoginForm + message
         """
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -125,7 +126,7 @@ class LoginView(View):
 
 class LogoutView(View):
     """
-    Классовое представления выхода из аккаунта
+    Выход из аккаунта.
     """
 
     @staticmethod
@@ -133,8 +134,8 @@ class LogoutView(View):
         """
         Обработчик выхода из аккаунта.
 
-        :param request:
-        :return: Перенаправляет на главную страницу.
+        :param request: HTTP Django request
+        :return: redirect: '/'
         """
         logout(request)
 
@@ -143,29 +144,30 @@ class LogoutView(View):
 
 class ResetPasswordView(View):
     """
-    Классовое представление сброса пароля
+    Сброс пароля.
     """
 
     @staticmethod
     def get(request):
         """
         Возвращает шаблон для сброса пароля.
-        Используются формы Django.
+        Отправляет форму Django.
 
-        :param request:
-        :return: Шаблон + форма
+        :param request: HTTP Django request
+        :return: render: reset.html + ResetPasswordForm
         """
         return render(request, 'reset.html', {'ResetPasswordForm': ResetPasswordForm})
 
     @staticmethod
     def post(request):
         """
-        Обработчик сброса.
-        Получает информацию из формы Django.
-        Отправляет пользователю случайную ссылку для сброса пароля.
+        Отправляет пользователю на Email ссылку на подтверждения сброса.
+        Email пользователя получается из формы.
+        Для генерации ссылки используется secrets.
+        Сохраняет данные о текущем устройстве пользователя.
 
-        :param request:
-        :return: Сообщение об успехе/ошибке
+        :param request: HTTP Django request
+        :return: render: reset.html + ResetPasswordForm + message
         """
         form = ResetPasswordForm(request.POST)
         if form.is_valid():
@@ -211,10 +213,12 @@ class ResetPasswordConfirmView(View):
     def get(request, token):
         """
         Генерирует новый пароль и отправляет его пользователю на его почту.
+        Генерируемый пароль имеет формат XXX-XXX-XXX, где X - любой символ.
+        Проверяет устройство с которого был отправлен запрос на сброс и текущее.
 
-        :param request:
-        :param token: Уникальная ссылка
-        :return: Перенаправление на страницу входа
+        :param request: HTTP Django request.
+        :param token: Уникальная ссылка, отправленная пользователю на Email
+        :return: render: reset.html + ResetPasswordForm + message
         """
         reset_request = ResetRequest.objects.filter(url=token).first()
 
@@ -249,22 +253,30 @@ class ResetPasswordConfirmView(View):
 
 class ChangePasswordView(View):
     """
-    Классовое представление смены пароля
+    Смена пароля.
     """
 
     @staticmethod
     def get(request):
         """
         Возвращает шаблон для смены пароля.
-        Используются формы Django.
+        Отправляет форму Django.
 
-        :param request:
-        :return: Шаблон + форма
+        :param request: HTTP Django request
+        :return: render: change.html + ChangePasswordForm
         """
         return render(request, 'change.html', {'ChangePasswordForm': ChangePasswordForm})
 
     @staticmethod
     def post(request):
+        """
+        Получает старый и новый пароль из формы Django.
+        В случае совпадения старого и текущего пароля, изменяет пароль на новый.
+        Отправляет Email пользователю о смене пароля.
+
+        :param request: HTTP Django request
+        :return: render: change.html + ChangePasswordForm + message
+        """
         form = ChangePasswordForm(request.POST)
         if form.is_valid():
             old_password = form.cleaned_data['old_password']
