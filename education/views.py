@@ -7,8 +7,7 @@ from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 from django.forms import formset_factory
 from .forms import AddCourseForm, AddLessonForm,TopicChoiceForm
-from education.models import Courses, Lessons, Task
-from authentication.models import User
+from education.models import Courses, Lessons
 from django.views import View
 from django.conf import settings
 
@@ -16,6 +15,13 @@ from django.conf import settings
 class ViewCourseView(View):
     @staticmethod
     def get(request, course_id):
+        """
+        Отображает курс по его id.
+
+        :param request: HTTP Django request
+        :param course_id: Уникальный идентификатор курса
+        :return: render: course.html с содержимым уроков
+        """
         course = Courses.objects.filter(course_id=course_id).first()
         course_path = os.path.join('courses', course_id)
         if not os.path.exists(course_path):
@@ -62,6 +68,12 @@ class ViewCourseView(View):
 class AllCoursesView(View):
     @staticmethod
     def get(request):
+        """
+        Отображает все доступные курсы.
+
+        :param request: HTTP Django request
+        :return: render: all_courses.html со списком курсов
+        """
         courses = Courses.objects.all()
         content = {
             'courses': []
@@ -85,6 +97,12 @@ class AllCoursesView(View):
 class MyCoursesView(View):
     @staticmethod
     def get(request):
+        """
+        Отображает курсы, созданные текущим пользователем.
+
+        :param request: HTTP Django request
+        :return: render: my_courses.html со списком курсов пользователя
+        """
         if not request.user.is_authenticated:
             return redirect('login')
         courses = Courses.objects.filter(author=request.user)
@@ -103,6 +121,14 @@ class MyCoursesView(View):
 class AddCourseView(View):
     @staticmethod
     def add_course(request):
+        """
+        Возвращает шаблон для добавления курса.
+        Используются формы Django для создания курса и добавления уроков.
+        Сначала отправляет все кроме файла урока в базу потом добавляет сам урок в папку на сервер
+
+        :param request: HTTP Django request
+        :return: render: add_course.html + AddCourseForm, LessonFormSet, TopicChoiceForm
+        """
         LessonFormSet = formset_factory(AddLessonForm, extra=1)
         topic_form = TopicChoiceForm()
 
@@ -160,7 +186,18 @@ class AddCourseView(View):
 class DeleteCourseView(View):
     @staticmethod
     def delete_course(request, course_id):
+        """
+        Возвращает шаблон для подтверждения удаления курса.
+        Проверяет, является ли пользователь автором курса.
+        Удаляет и из базы данных и из папки курсов
+
+        :param request: HTTP Django request
+        :param course_id: ID курса для удаления
+        :return: render: confirm_delete.html или error.html
+        """
         course = get_object_or_404(Courses, pk=course_id)
+        if request.user != course.author:
+            return render(request, 'error.html', {'error': 'Вы не автор курса.'})
         if request.method == 'POST':
             course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
             course.delete()
