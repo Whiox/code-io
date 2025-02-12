@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %} {{name}}{% endblock %}
+{% block title %} {{ name }}{% endblock %}
 
 {% block content %}
 
@@ -16,18 +16,29 @@
     <div class="sidebar" id="sidebar">
         <ul>
             {% for lesson in lessons %}
-                <li><a href="#lesson-{{ forloop.counter }}">{{ lesson.title }}</a></li>
+                <li><a href="#lesson-{{ forloop.counter }}">Урок {{ forloop.counter }}</a></li>
             {% endfor %}
         </ul>
     </div>
-    
     <button class="toggle-button" onclick="toggleSidebar()">☰ Открыть меню</button>
-    
     <div class="content">
         {% for lesson in lessons %}
             <div class="lesson" id="lesson-{{ forloop.counter }}">
-                <h1>{{ lesson.title }}</h1>
-                <div>{{ lesson.content|safe }}</div>
+                <h1>Урок {{ forloop.counter }}</h1>
+                <div>{{ lesson.content | safe }}</div>
+
+                {% if lesson.tasks %}
+                    <h2>Задачи</h2>
+                    {% for task in lesson.tasks %}
+                        <div>
+                            <p>{{ task.content | safe }}</p>
+                            <input type="text" id="task-{{ forloop.counter0 }}-lesson-{{ forloop.parentloop.counter0 }}" placeholder="Введите ответ">
+                            <button onclick="checkAnswer({{ forloop.counter0 }}, '{{ task.right_answer }}', {{ forloop.parentloop.counter0 }})">Проверить</button>
+                            <p id="task-{{ forloop.counter0 }}-lesson-{{ forloop.parentloop.counter0 }}-result"></p>
+                            <p id="task-{{ forloop.counter0 }}-lesson-{{ forloop.parentloop.counter0 }}-correct-answer" class="correct-answer" style="display: none;">Правильный ответ: {{ task.right_answer }}</p>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </div>
         {% endfor %}
     </div>
@@ -37,6 +48,7 @@
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('active');
         }
+
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById('sidebar');
             const button = document.querySelector('.toggle-button');
@@ -44,7 +56,22 @@
                 sidebar.classList.remove('active');
             }
         });
+
+        function checkAnswer(taskId, rightAnswer, lessonId) {
+            var userAnswer = document.getElementById('task-' + taskId + '-lesson-' + lessonId).value.trim(); // Убираем пробелы у пользователя
+            var trimmedRightAnswer = String(rightAnswer).trim(); // Убираем пробелы у правильного ответа
+            // Удаляем двойные кавычки из обоих ответов
+            userAnswer = userAnswer.replace(/"/g, '');
+            trimmedRightAnswer = trimmedRightAnswer.replace(/"/g, '');
+            // Проверяем, если оба ответа пустые или равны
+            if (userAnswer === trimmedRightAnswer || (userAnswer === "" && trimmedRightAnswer === "")) {
+                document.getElementById('task-' + taskId + '-lesson-' + lessonId + '-result').innerHTML = 'Правильно!';
+                document.getElementById('task-' + taskId + '-lesson-' + lessonId + '-correct-answer').style.display = 'none'; // Скрываем правильный ответ
+            } else {
+                document.getElementById('task-' + taskId + '-lesson-' + lessonId + '-result').innerHTML = 'Неправильно!';
+                document.getElementById('task-' + taskId + '-lesson-' + lessonId + '-correct-answer').style.display = 'block'; // Показываем правильный ответ
+            }
+        }
     </script>
-</body>
 
 {% endblock %}

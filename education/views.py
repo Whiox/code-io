@@ -2,6 +2,7 @@ import os
 import markdown
 import re
 import shutil
+from education.methods import get_metadata
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
@@ -25,7 +26,7 @@ class ViewCourseView(View):
         course = Courses.objects.filter(course_id=course_id).first()
         course_path = os.path.join('courses', course_id)
         if not os.path.exists(course_path):
-            return render(request, '404.html', {'error': 'Курс не найден.'})
+            return render(request, 'error.html', {'error': 'Курс не найден.'})
 
         lessons = os.listdir(course_path)
         lessons_content = []
@@ -43,6 +44,7 @@ class ViewCourseView(View):
                 try:
                     with open(lesson_path, 'r', encoding='utf-8') as f:
                         md_content = f.read()
+                        # Конвертация основного контента в HTML
                         html_content = markdown.markdown(
                             md_content,
                             extensions=[
@@ -51,17 +53,66 @@ class ViewCourseView(View):
                                 'tables',
                             ]
                         )
-                        lesson_title = f"Урок {index + 1}"
-                        lessons_content.append({'title': lesson_title, 'content': html_content})
+                        lesson_id = re.search(r'(\d+)', lesson).group(1)  # Извлечение ID урока из имени файла
+                        lesson_title = f"Урок {lesson_id}"
+
+                        # Загрузка задач
+                        tasks_path = os.path.join(course_path, 'tasks')
+                        tasks = os.listdir(tasks_path)
+                        tasks_content = []
+
+                        for task in tasks:
+                            task_path = os.path.join(tasks_path, task)
+                            if os.path.isfile(task_path):
+                                # Извлечение ID урока из имени файла задачи
+                                task_match = re.match(r'(\d+)_tusk_lesson_(\d+)\.md', task)
+                                if task_match:
+                                    task_id, task_lesson_id = task_match.groups()
+
+                                    if task_lesson_id == lesson_id:  # Сравниваем с ID текущего урока
+                                        with open(task_path, 'r', encoding='utf-8') as f:
+                                            task_content = f.read()
+                                            # Извлечение метаданных и контента задачи
+                                            task_metadata, task_content = get_metadata(task_content)
+                                            task_html_content = markdown.markdown(
+                                                task_content,
+                                                extensions=[
+                                                    'fenced_code',
+                                                    'codehilite',
+                                                    'tables',
+                                                ]
+                                            )
+                                            tasks_content.append({
+                                                'content': task_html_content,
+                                                'right_answer': task_metadata.get('right_answer', ''),
+                                                # Извлечение правильного ответа
+                                                'task_id': task_id,  # Добавляем ID задачи
+                                            })
+
+                        lessons_content.append({
+                            'content': html_content,
+                            'tasks': tasks_content,
+                        })
                 except Exception as e:
                     print(f"Ошибка при чтении файла {lesson}: {e}")
                     lesson_title = f"Урок {index + 1}"
-                    lessons_content.append(
-                        {'title': lesson_title, 'content': f"<p>Ошибка при загрузке урока: {lesson}</p>"})
+                    lessons_content.append({
+                        'title': lesson_title,
+                        'content': f"<p>Ошибка при загрузке урока: {lesson}</p>",
+                        'tasks': [],
+                    })
             else:
                 lesson_title = f"Урок {index + 1}"
-                lessons_content.append({'title': lesson_title, 'content': "<p>Урок пуст.</p>"})
-
+                lessons_content.append({
+                    'title': lesson_title,
+                    'content': "<p>Урок пуст.</p>",
+                    'tasks': [],
+                })
+        # Удаляем последний урок, если папка tasks найдена
+        tasks_path = os.path.join(course_path, 'tasks')
+        if os.path.exists(tasks_path):
+            if lessons_content:
+                lessons_content.pop()
         return render(request, 'course.html', {'lessons': lessons_content, 'name': course.title})
 
 
@@ -161,17 +212,17 @@ class AddCourseView(View):
                     lesson = Lessons.objects.create(course=course, title=lesson_title)
                     lesson_ids.append(lesson.lesson_id)
 
-            course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
-            os.makedirs(course_folder, exist_ok=True)
+                course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
+                os.makedirs(course_folder, exist_ok=True)
 
-            for lesson_form, lesson_id in zip(lesson_formset, lesson_ids):
-                lesson_file = lesson_form.cleaned_data.get('lesson_file')
-                if lesson_file:
-                    new_file_name = f"lesson_{lesson_id}{os.path.splitext(lesson_file.name)[1]}"
-                    file_path = os.path.join(course_folder, new_file_name)
-                    with open(file_path, 'wb+') as destination:
-                        for chunk in lesson_file.chunks():
-                            destination.write(chunk)
+                for lesson_form, lesson_id in zip(lesson_formset, lesson_ids):
+                    lesson_file = lesson_form.cleaned_data.get('lesson_file')
+                    if lesson_file:
+                        new_file_name = f"lesson_{lesson_id}{os.path.splitext(lesson_file.name)[1]}"
+                        file_path = os.path.join(course_folder, new_file_name)
+                        with open(file_path, 'wb+') as destination:
+                            for chunk in lesson_file.chunks():
+                                destination.write(chunk)
 
             return redirect('my_courses')
 
