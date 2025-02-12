@@ -171,20 +171,11 @@ class MyCoursesView(View):
 
 class AddCourseView(View):
     @staticmethod
-    def add_course(request):
-        """
-        Возвращает шаблон для добавления курса.
-        Используются формы Django для создания курса и добавления уроков.
-        Сначала отправляет все кроме файла урока в базу потом добавляет сам урок в папку на сервер
-
-        :param request: HTTP Django request
-        :return: render: add_course.html + AddCourseForm, LessonFormSet, TopicChoiceForm
-        """
+    def get(request):
         LessonFormSet = formset_factory(AddLessonForm, extra=1)
-        topic_form = TopicChoiceForm()
-
         course_form = AddCourseForm()
         lesson_formset = LessonFormSet()
+        topic_form = TopicChoiceForm()
 
         content = {
             'course_form': course_form,
@@ -197,32 +188,33 @@ class AddCourseView(View):
     @staticmethod
     def post(request):
         LessonFormSet = formset_factory(AddLessonForm, extra=1)
-
         course_form = AddCourseForm(request.POST)
         lesson_formset = LessonFormSet(request.POST, request.FILES)
         topic_form = TopicChoiceForm(request.POST)
+
         if course_form.is_valid() and lesson_formset.is_valid() and topic_form.is_valid():
             course = Courses.objects.create(title=course_form.cleaned_data['course_name'], author=request.user)
             selected_topics = topic_form.cleaned_data['topics']
             course.topics.set(selected_topics)
             lesson_ids = []
+
             for lesson_form in lesson_formset:
                 if lesson_form.cleaned_data and lesson_form.cleaned_data.get('lesson_description'):
                     lesson_title = lesson_form.cleaned_data['lesson_description']
                     lesson = Lessons.objects.create(course=course, title=lesson_title)
                     lesson_ids.append(lesson.lesson_id)
 
-                course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
-                os.makedirs(course_folder, exist_ok=True)
+            course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
+            os.makedirs(course_folder, exist_ok=True)
 
-                for lesson_form, lesson_id in zip(lesson_formset, lesson_ids):
-                    lesson_file = lesson_form.cleaned_data.get('lesson_file')
-                    if lesson_file:
-                        new_file_name = f"lesson_{lesson_id}{os.path.splitext(lesson_file.name)[1]}"
-                        file_path = os.path.join(course_folder, new_file_name)
-                        with open(file_path, 'wb+') as destination:
-                            for chunk in lesson_file.chunks():
-                                destination.write(chunk)
+            for lesson_form, lesson_id in zip(lesson_formset, lesson_ids):
+                lesson_file = lesson_form.cleaned_data.get('lesson_file')
+                if lesson_file:
+                    new_file_name = f"lesson_{lesson_id}{os.path.splitext(lesson_file.name)[1]}"
+                    file_path = os.path.join(course_folder, new_file_name)
+                    with open(file_path, 'wb+') as destination:
+                        for chunk in lesson_file.chunks():
+                            destination.write(chunk)
 
             return redirect('my_courses')
 
