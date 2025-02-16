@@ -9,18 +9,24 @@
 
         <!-- css -->
 
-        {% if request.user.theme == "light" and request.user %}
+        {% if request.user.theme == "light" %}
             <link rel="stylesheet" href="{% static 'light-body.css' %}">
             <link rel="stylesheet" href="{% static 'light-header.css' %}">
             <link rel="stylesheet" href="{% static 'light-footer.css' %}">
             <link rel="stylesheet" href="{% static 'light-auth-form.css' %}">
             <link rel="stylesheet" href="{% static 'light-course.css' %}">
-        {% else %}
+        {% elif request.user.theme == "dark" %}
             <link rel="stylesheet" href="{% static 'dark-body.css' %}">
             <link rel="stylesheet" href="{% static 'dark-header.css' %}">
             <link rel="stylesheet" href="{% static 'dark-footer.css' %}">
             <link rel="stylesheet" href="{% static 'dark-auth-form.css' %}">
             <link rel="stylesheet" href="{% static 'dark-course.css' %}">
+        {% else %}
+            <link rel="stylesheet" href="{% static 'light-body.css' %}">
+            <link rel="stylesheet" href="{% static 'light-header.css' %}">
+            <link rel="stylesheet" href="{% static 'light-footer.css' %}">
+            <link rel="stylesheet" href="{% static 'light-auth-form.css' %}">
+            <link rel="stylesheet" href="{% static 'light-course.css' %}">
         {% endif %}
 
         <!-- javascript -->
