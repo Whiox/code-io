@@ -1,10 +1,13 @@
 from django.db import models
 from authentication.models import User
 
+
 class Topic(models.Model):
     name = models.CharField(max_length=100)
+
     def __str__(self):
         return self.name
+
 
 class Courses(models.Model):
     course_id = models.AutoField(primary_key=True)
@@ -23,3 +26,8 @@ class Task(models.Model):
     tusk_id = models.AutoField(primary_key=True)
     lesson = models.ForeignKey(Lessons, on_delete=models.CASCADE)
 
+
+class Stars(models.Model):
+    course = models.ForeignKey(Courses, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    data = models.IntegerField(default=0)  # Хранит текущее время в формате UNIX
