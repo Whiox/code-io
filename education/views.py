@@ -135,11 +135,16 @@ class AllCoursesView(View):
             topic_names = [topic.name for topic in topics]
             if not topic_names:
                 topic_names = ['Свободная тема']
+            if request.user.is_authenticated:
+                is_stared = Stars.objects.filter(user=request.user, course=course)
+            else:
+                is_stared = False
             course_info = {
                 'id': course.course_id,
                 'title': course.title,
                 'author': course.author.username if course.author else 'Неизвестный автор',
-                'topics': topic_names
+                'topics': topic_names,
+                'is_stared': True if is_stared else False
             }
             content['courses'].append(course_info)
 

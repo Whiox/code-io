@@ -15,7 +15,7 @@
                 <p>Темы: {{ course.topics|join:", " }}</p>
             <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
             {% if course.is_stared %}
-                <img src="{% static 'assets/star-fill.svg' %}" alt="star">
+                <img src="{% static 'assets/star-fill.png' %}" alt="star">
             {% else %}
                 <img src="{% static 'assets/star-empty.svg' %}" alt="star">
             {% endif %}
