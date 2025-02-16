@@ -2,13 +2,14 @@ import os
 import markdown
 import re
 import shutil
+import time
 from education.methods import get_metadata
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 from django.forms import formset_factory
 from .forms import AddCourseForm, AddLessonForm,TopicChoiceForm
-from education.models import Courses, Lessons
+from education.models import Courses, Lessons, Stars
 from django.views import View
 from django.conf import settings
 
@@ -248,3 +249,21 @@ class DeleteCourseView(View):
                 shutil.rmtree(course_folder)
             return redirect('my_courses')
         return render(request, 'confirm_delete.html', {'course': course})
+
+
+class AddStar(View):
+    """
+    Логика для поставления звёзды на курс
+    """
+    @staticmethod
+    def post(request, course_id):
+        course = Courses.objects.get(course_id=course_id)
+        is_stared = Stars.objects.filter(user=request.user, course=course)
+        if is_stared:
+            is_stared.delete()
+        else:
+            Stars.objects.create(
+                user=request.user,
+                course=course,
+                data=time.time()
+            )
