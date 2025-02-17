@@ -232,13 +232,12 @@ class AddCourseView(View):
 
         return render(request, 'add_course.html', content)
 
+
 class DeleteCourseView(View):
-    @staticmethod
-    def delete_course(request, course_id):
+    def get(self, request, course_id):
         """
         Возвращает шаблон для подтверждения удаления курса.
         Проверяет, является ли пользователь автором курса.
-        Удаляет и из базы данных и из папки курсов
 
         :param request: HTTP Django request
         :param course_id: ID курса для удаления
@@ -247,13 +246,28 @@ class DeleteCourseView(View):
         course = get_object_or_404(Courses, pk=course_id)
         if request.user != course.author:
             return render(request, 'error.html', {'error': 'Вы не автор курса.'})
-        if request.method == 'POST':
-            course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
-            course.delete()
-            if os.path.exists(course_folder):
-                shutil.rmtree(course_folder)
-            return redirect('my_courses')
         return render(request, 'confirm_delete.html', {'course': course})
+
+    def post(self, request, course_id):
+        """
+        Обрабатывает POST запрос для удаления курса.
+        Удаляет курс из базы данных и его папку из файловой системы.
+
+        :param request: HTTP Django request
+        :param course_id: ID курса для удаления
+        :return: redirect: my_courses
+        """
+        course = get_object_or_404(Courses, pk=course_id)
+        if request.user != course.author:
+            return render(request, 'error.html', {'error': 'Вы не автор курса.'})
+
+        # Удаляем курс и его папку
+        course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
+        course.delete()
+        if os.path.exists(course_folder):
+            shutil.rmtree(course_folder)
+
+        return redirect('my_courses')
 
 
 class AddStar(View):
