@@ -17,6 +17,12 @@
     transition: transform 0.2s; /* Плавный эффект при наведении */
 }
 
+.course-item img {
+    width: 30px;
+    margin-top: auto;
+    margin-left: 110px;
+}
+
 .course-item:hover {
     transform: scale(1.05); /* Увеличение плитки при наведении */
 }

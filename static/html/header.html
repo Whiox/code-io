@@ -17,6 +17,11 @@
     </nav>
     {% if request.user.is_authenticated %}
         <div class="user-area">
+            {% if request.user.theme == "light" %}
+                <img src="{% static 'assets/light-theme.svg' %}" id="theme-toggle" alt="theme" class="theme-toggle">
+            {% else %}
+                <img src="{% static 'assets/dark-theme.svg' %}" id="theme-toggle" alt="theme" class="theme-toggle">
+            {% endif %}
             <span class="user-name">{{ request.user.username }}</span>
             <div class="profile-pic">
                 <img src="{% static 'assets/profile-default.png' %}" alt="Фото профиля" class="profile-image">
@@ -32,5 +37,4 @@
             </div>
         </div>
     {% endif %}
-    <button id="theme-toggle" class="button">Сменить тему</button>
 </header>

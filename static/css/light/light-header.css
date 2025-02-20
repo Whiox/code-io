@@ -61,6 +61,11 @@
     margin-left: auto;
 }
 
+.theme-toggle {
+    width: 30px;
+    margin-right: 10px;
+}
+
 .user-name {
     margin-right: 10px;
     color: white;

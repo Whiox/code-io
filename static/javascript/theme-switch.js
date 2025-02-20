@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.status === "success") {
-                location.reload();  // Перезагружаем страницу для применения темы
+                location.reload();
             }
         })
         .catch(error => console.error("Ошибка при смене темы:", error));
