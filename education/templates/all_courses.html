@@ -9,17 +9,18 @@
 <h1>Список всех курсов</h1>
 <ul class="course-list">
     {% for course in courses %}
-        <li class="course-item">
-                <h2>{{ course.title }}</h2>
-                <p>Автор: {{ course.author }}</p>
-                <p>Темы: {{ course.topics|join:", " }}</p>
-            <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
-            {% if course.is_stared %}
-                <img src="{% static 'assets/star-fill.png' %}" alt="star">
-            {% else %}
-                <img src="{% static 'assets/star-empty.svg' %}" alt="star">
-            {% endif %}
-        </li>
+    <li class="course-item">
+        <h2>{{ course.title }}</h2>
+        <p>Автор: {{ course.author }}</p>
+        <p>Темы: {{ course.topics|join:", " }}</p>
+        <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
+
+        {% if course.is_stared %}
+            <img src="{% static 'assets/star-fill.png' %}" alt="star" class="star" data-course-id="{{ course.id }}">
+        {% else %}
+            <img src="{% static 'assets/star-empty.svg' %}" alt="star" class="star" data-course-id="{{ course.id }}">
+        {% endif %}
+    </li>
     {% empty %}
         <li>Курсы не найдены.</li>
     {% endfor %}

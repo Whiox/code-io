@@ -12,6 +12,7 @@ from .forms import AddCourseForm, AddLessonForm,TopicChoiceForm
 from education.models import Courses, Lessons, Stars
 from django.views import View
 from django.conf import settings
+from django.http import JsonResponse
 
 
 class ViewCourseView(View):
@@ -271,18 +272,18 @@ class DeleteCourseView(View):
 
 
 class AddStar(View):
-    """
-    Логика для поставления звёзды на курс
-    """
+    """Логика для постановки звезды на курс"""
+
     @staticmethod
     def post(request, course_id):
         course = Courses.objects.get(course_id=course_id)
-        is_stared = Stars.objects.filter(user=request.user, course=course)
+        is_stared = Stars.objects.filter(user=request.user, course=course).first()
+
         if is_stared:
             is_stared.delete()
+            status = False
         else:
-            Stars.objects.create(
-                user=request.user,
-                course=course,
-                data=time.time()
-            )
+            Stars.objects.create(user=request.user, course=course, data=time.time())
+            status = True
+
+        return JsonResponse({"status": status})
