@@ -152,6 +152,41 @@ class AllCoursesView(View):
         return render(request, 'all_courses.html', content)
 
 
+class StaredCoursesView(View):
+    @staticmethod
+    def get(request):
+        """
+        Отображает курсы, на которые пользователь поставил звёздочку.
+
+        :param request: HTTP Django request
+        :return: render: stared_courses.html со списком курсов
+        """
+
+        if request.user.is_anonymous:
+            return redirect('/login')
+
+        stared_courses_ids = Stars.objects.filter(user=request.user).values_list('course_id', flat=True)
+
+        stared_courses = Courses.objects.filter(
+            course_id__in=stared_courses_ids
+        ).select_related('author').prefetch_related('topics')
+
+        content = {
+            'courses': [
+                {
+                    'id': course.course_id,
+                    'title': course.title,
+                    'author': course.author.username if course.author else 'Неизвестный автор',
+                    'topics': [topic.name for topic in course.topics.all()] or ['Свободная тема'],
+                    'is_stared': True
+                }
+                for course in stared_courses
+            ]
+        }
+
+        return render(request, 'stared_courses.html', content)
+
+
 class MyCoursesView(View):
     @staticmethod
     def get(request):
