@@ -137,6 +137,9 @@ class LogoutView(View):
         :param request: HTTP Django request
         :return: redirect: '/'
         """
+        if request.user.is_anonymous:
+            return redirect("/login/")
+
         logout(request)
 
         return redirect('/')
@@ -265,6 +268,9 @@ class ChangePasswordView(View):
         :param request: HTTP Django request
         :return: render: change.html + ChangePasswordForm
         """
+        if request.user.is_anonymous:
+            return redirect("/login/")
+
         return render(request, 'change.html', {'ChangePasswordForm': ChangePasswordForm})
 
     @staticmethod
@@ -277,6 +283,9 @@ class ChangePasswordView(View):
         :param request: HTTP Django request
         :return: render: change.html + ChangePasswordForm + message
         """
+        if request.user.is_anonymous:
+            return redirect("/login/")
+
         form = ChangePasswordForm(request.POST)
         if form.is_valid():
             old_password = form.cleaned_data['old_password']
