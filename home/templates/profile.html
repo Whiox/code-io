@@ -1,0 +1,64 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Все курсы{% endblock %}
+
+{% block content %}
+
+{% load static %}
+
+<div class="profile-container">
+    <div class="profile-info">
+        <img src="{% static 'assets/profile-default.png' %}" alt="Аватар пользователя" class="avatar">
+        <h1>{{ username }}</h1>
+
+        <div class="section">
+            <div class="section-title">О себе:</div>
+            <p>{{ user_profile.about }}</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Контактная информация:</div>
+            <p>Email: {{ user_profile.email }}</p>
+            <p>Телефон: {{ user_profile.phone }}</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Социальные сети:</div>
+            <div class="social-links">
+                <a href="#">Facebook</a>
+                <a href="#">Instagram</a>
+                <a href="#">Twitter</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Интересы:</div>
+            <ul>
+                <li>Интерес 1</li>
+                <li>Интерес 2</li>
+                <li>Интерес 3</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Последние достижения:</div>
+            <ul>
+                <li>Достижение 1</li>
+                <li>Достижение 2</li>
+                <li>Достижение 3</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="popular-courses">
+        <h2>Популярные курсы</h2>
+        <ul>
+            <li>Курс 1</li>
+            <li>Курс 2</li>
+            <li>Курс 3</li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

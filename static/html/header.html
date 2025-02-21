@@ -29,7 +29,7 @@
             <div class="dropdown">
                 <button class="drop-button">▼</button>
                 <div class="dropdown-menu">
-                    <a href="#" class="dropdown-item">Мой профиль</a>
+                    <a href="{% url 'my_profile' %}" class="dropdown-item">Мой профиль</a>
                     <a href="#" class="dropdown-item">Редактировать профиль</a>
                     <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>
                     <a href="{% url 'change_password' %}" class="dropdown-item">Смена пароля</a>
