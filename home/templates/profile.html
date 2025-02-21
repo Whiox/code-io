@@ -26,18 +26,22 @@
         <div class="section">
             <div class="section-title">Социальные сети:</div>
             <div class="social-links">
-                <a href="#">Facebook</a>
-                <a href="#">Instagram</a>
-                <a href="#">Twitter</a>
+                {% for sn in social_network %}
+                    <a href="{{ sn.linc }}">{{ sn.label }}</a>
+                {% empty %}
+                    <p>Не указаны</p>
+                {% endfor %}
             </div>
         </div>
 
         <div class="section">
             <div class="section-title">Интересы:</div>
             <ul>
-                <li>Интерес 1</li>
-                <li>Интерес 2</li>
-                <li>Интерес 3</li>
+                {% for int in interest %}
+                    <p>{{ int.label }}</p>
+                {% empty %}
+                    <p>Временно отсутствуют</p>
+                {% endfor %}
             </ul>
         </div>
 
