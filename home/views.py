@@ -42,7 +42,8 @@ class MyProfileView(View):
             'username': request.user.username,
             'user_profile': user_profile,
             'social_network': SocialNetwork.objects.filter(user_profile=user_profile),
-            'interest': Interest.objects.filter(user_profile=user_profile)
+            'interest': Interest.objects.filter(user_profile=user_profile),
+            'is_owner': True
         }
 
         return render(request, 'profile.html', content)
