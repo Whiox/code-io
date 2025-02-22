@@ -7,10 +7,35 @@
 
 {% load static %}
 
+<div class="modal" id="edit-profile-modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Редактирование профиля</h2>
+        <form id="edit-profile-form">
+            <label for="username">Имя:</label>
+            <input type="text" id="username" name="username" value="{{ username }}">
+
+            <label for="about">О себе:</label>
+            <textarea id="about" name="about">{{ user_profile.about }}</textarea>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="{{ user_profile.email }}">
+
+            <label for="phone">Телефон:</label>
+            <input type="text" id="phone" name="phone" value="{{ user_profile.phone }}">
+
+            <button type="submit">Сохранить</button>
+        </form>
+    </div>
+</div>
+
 <div class="profile-container">
     <div class="profile-info">
-        <img src="{% static 'assets/profile-default.png' %}" alt="Аватар пользователя" class="avatar">
-        <h1>{{ username }}</h1>
+        <div class="profile-header">
+            <img src="{% static 'assets/profile-default.png' %}" alt="Аватар пользователя" class="avatar">
+            <h1>{{ username }}</h1>
+            <img src="{% static 'assets/edit.svg' %}" alt="Изменить" class="edit" id="edit-profile">
+        </div>
 
         <div class="section">
             <div class="section-title">О себе:</div>
