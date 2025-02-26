@@ -135,16 +135,11 @@ EMAIL_HOST_PASSWORD = 'bmearbtklgghditk'
 
 STATIC_URL = "/static/"
 
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 STATICFILES_DIRS = [
     BASE_DIR / "static",
-    BASE_DIR / "static/css",
-    BASE_DIR / "static/css/light",
-    BASE_DIR / "static/css/dark",
-    BASE_DIR / "static/html",
-    BASE_DIR / "static/javascript",
 ]
-
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
