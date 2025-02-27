@@ -18,6 +18,39 @@ body {
 .profile-info {
     flex: 2; /* Занимает 2/3 ширины */
     padding: 20px;
+    gap: 20px;
+}
+
+.profile-header {
+    display: flex;
+    width: 100%;
+}
+
+.profile-header .avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    border: 2px solid #ff4d00;
+}
+
+.profile-header .edit {
+    width: 25px;
+    height: 25px;
+    margin-bottom: 25px;
+    margin-right: 20px;
+    margin-left: auto;
+}
+
+.profile-header h1 {
+    color: #ff4d00;
+    margin-top: 1px;
+    margin-left: 20px;
+}
+
+.profile-info {
+    flex: 2; /* Занимает 2/3 ширины */
+    padding: 20px;
 }
 
 .popular-courses {
@@ -69,4 +102,47 @@ h1 {
 ul {
     list-style-type: none; /* Убираем маркеры списка */
     padding: 0; /* Убираем отступы */
+}
+
+.edit-profile-menu {
+    display: none;
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.edit-profile-menu.show {
+    display: block;
+}
+
+.modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Затемнение фона */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
 }
