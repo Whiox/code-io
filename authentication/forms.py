@@ -17,8 +17,8 @@ class RegisterForm(forms.Form):
             'placeholder': 'Введите имя пользователя'
         })
     )
-    email = forms.CharField(
-        label='', max_length=255,
+    email = forms.EmailField(
+        label='',
         widget=forms.TextInput(attrs={
             'class': 'auth-form-control',
             'placeholder': 'Электронная почта'
