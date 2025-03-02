@@ -1,6 +1,11 @@
+:root {
+    --background-dark: #222222;
+}
+
 body {
     margin: 0;
     background-color: #5c5858;
+    background: var(--background-dark);
     font-family: Arial, sans-serif;
 }
 html, body {
