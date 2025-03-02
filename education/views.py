@@ -248,7 +248,7 @@ class AddCourseView(View):
 
             course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
             os.makedirs(course_folder, exist_ok=True)
-
+            os.makedirs(course_folder + "/tasks", exist_ok=True)
             for lesson_form, lesson_id in zip(lesson_formset, lesson_ids):
                 lesson_file = lesson_form.cleaned_data.get('lesson_file')
                 if lesson_file:
