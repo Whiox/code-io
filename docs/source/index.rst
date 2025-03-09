@@ -10,5 +10,8 @@ Code-io documentation
    :maxdepth: 2
    :caption: Contents:
 
-   ./dev.rst
-   authentication.rst
+   ./home.rst
+   ./authentication.rst
+   ./education.rst
+   ./models.rst
+   ./forms.rst

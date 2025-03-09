@@ -6,6 +6,8 @@
 *********
 .. automodule:: home.models
     :members:
+    :undoc-members:
+    :show-inheritance:
 
 .. automodule:: authentication.models
     :members:
@@ -18,9 +20,15 @@
 *****
 .. automodule:: home.forms
     :members:
+    :undoc-members:
+    :show-inheritance:
 
 .. automodule:: authentication.forms
     :members:
+    :undoc-members:
+    :show-inheritance:
 
 .. automodule:: education.forms
     :members:
+    :undoc-members:
+    :show-inheritance:

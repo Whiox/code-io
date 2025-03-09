@@ -8,5 +8,4 @@ ua-parser-builtins==0.18.0.post1
 user-agents==2.2.0
 markdown==3.7
 gunicorn
-sphinxcontrib_django
 sphinx
