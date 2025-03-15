@@ -10,27 +10,7 @@ def get_all_lessons(course, course_path, lessons, lessons_content):
 
         if os.path.isfile(lesson_path):
             try:
-                with open(lesson_path, 'r', encoding='utf-8') as f:
-                    md_content = f.read()
-                    # Конвертация основного контента в HTML
-                    html_content = markdown.markdown(
-                        md_content,
-                        extensions=[
-                            'fenced_code',
-                            'codehilite',
-                            'tables',
-                        ]
-                    )
-                    lesson_id = re.search(r'(\d+)', lesson).group(1)  # Извлечение ID урока из имени файла
-                    lesson_title = f"Урок {lesson_id}"
-
-                    # Загрузка задач
-                    tasks_content = get_task_from_lesson(course_path, lesson_id)
-
-                    lessons_content.append({
-                        'content': html_content,
-                        'tasks': tasks_content,
-                    })
+                lessons_content.append(get_file_content(lesson_path, lesson, course_path))
             except Exception as e:
                 print(f"Ошибка при чтении файла {lesson}: {e}")
                 lesson_title = f"Урок {index + 1}"
@@ -52,6 +32,28 @@ def get_all_lessons(course, course_path, lessons, lessons_content):
         if lessons_content:
             lessons_content.pop()
     return {'lessons': lessons_content, 'name': course.title}
+
+
+def get_file_content(lesson_path, lesson, course_path):
+    with open(lesson_path, 'r', encoding='utf-8') as file:
+        md_content = file.read()
+
+        html_content = markdown.markdown(
+            md_content,
+            extensions=[
+                'fenced_code',
+                'codehilite',
+                'tables',
+            ]
+        )
+        lesson_id = re.search(r'(\d+)', lesson).group(1)
+
+        tasks_content = get_task_from_lesson(course_path, lesson_id)
+
+        return {
+            'content': html_content,
+            'tasks': tasks_content,
+        }
 
 
 def get_task_from_lesson(course_path, lesson_id):
