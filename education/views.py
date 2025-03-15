@@ -3,12 +3,12 @@ import markdown
 import re
 import shutil
 import time
-from education.methods import get_metadata
+from education.files import get_all_lessons, get_lesson_number
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 from django.forms import formset_factory
-from .forms import AddCourseForm, AddLessonForm,TopicChoiceForm
+from education.forms import AddCourseForm, AddLessonForm,TopicChoiceForm
 from education.models import Courses, Lessons, Stars
 from django.views import View
 from django.conf import settings
@@ -33,97 +33,10 @@ class ViewCourseView(View):
         lessons = os.listdir(course_path)
         lessons_content = []
 
-        def extract_lesson_number(lesson_name):
-            match = re.search(r'(\d+)', lesson_name)
-            return int(match.group(1)) if match else float('inf')
+        lessons.sort(key=get_lesson_number)
 
-        lessons.sort(key=extract_lesson_number)
-
-        return ViewCourseView.extract_all_lessons(course, course_path, lessons, lessons_content, request)
-
-    @staticmethod
-    def extract_all_lessons(course, course_path, lessons, lessons_content, request):
-        for index, lesson in enumerate(lessons):
-            lesson_path = os.path.join(course_path, lesson)
-
-            if os.path.isfile(lesson_path):
-                try:
-                    with open(lesson_path, 'r', encoding='utf-8') as f:
-                        md_content = f.read()
-                        # Конвертация основного контента в HTML
-                        html_content = markdown.markdown(
-                            md_content,
-                            extensions=[
-                                'fenced_code',
-                                'codehilite',
-                                'tables',
-                            ]
-                        )
-                        lesson_id = re.search(r'(\d+)', lesson).group(1)  # Извлечение ID урока из имени файла
-                        lesson_title = f"Урок {lesson_id}"
-
-                        # Загрузка задач
-                        tasks_content = ViewCourseView.extract_task_from_lesson(course_path, lesson_id)
-
-                        lessons_content.append({
-                            'content': html_content,
-                            'tasks': tasks_content,
-                        })
-                except Exception as e:
-                    print(f"Ошибка при чтении файла {lesson}: {e}")
-                    lesson_title = f"Урок {index + 1}"
-                    lessons_content.append({
-                        'title': lesson_title,
-                        'content': f"<p>Ошибка при загрузке урока: {lesson}</p>",
-                        'tasks': [],
-                    })
-            else:
-                lesson_title = f"Урок {index + 1}"
-                lessons_content.append({
-                    'title': lesson_title,
-                    'content': "<p>Урок пуст.</p>",
-                    'tasks': [],
-                })
-        # Удаляем последний урок, если папка tasks найдена
-        tasks_path = os.path.join(course_path, 'tasks')
-        if os.path.exists(tasks_path):
-            if lessons_content:
-                lessons_content.pop()
-        return render(request, 'course.html', {'lessons': lessons_content, 'name': course.title})
-
-    @staticmethod
-    def extract_task_from_lesson(course_path, lesson_id):
-        tasks_path = os.path.join(course_path, 'tasks')
-        tasks = os.listdir(tasks_path)
-        tasks_content = []
-        for task in tasks:
-            task_path = os.path.join(tasks_path, task)
-            if os.path.isfile(task_path):
-                # Извлечение ID урока из имени файла задачи
-                task_match = re.match(r'(\d+)_tusk_lesson_(\d+)\.md', task)
-                if task_match:
-                    task_id, task_lesson_id = task_match.groups()
-
-                    if task_lesson_id == lesson_id:  # Сравниваем с ID текущего урока
-                        with open(task_path, 'r', encoding='utf-8') as f:
-                            task_content = f.read()
-                            # Извлечение метаданных и контента задачи
-                            task_metadata, task_content = get_metadata(task_content)
-                            task_html_content = markdown.markdown(
-                                task_content,
-                                extensions=[
-                                    'fenced_code',
-                                    'codehilite',
-                                    'tables',
-                                ]
-                            )
-                            tasks_content.append({
-                                'content': task_html_content,
-                                'right_answer': task_metadata.get('right_answer', ''),
-                                # Извлечение правильного ответа
-                                'task_id': task_id,  # Добавляем ID задачи
-                            })
-        return tasks_content
+        content = get_all_lessons(course, course_path, lessons, lessons_content)
+        return render(request, 'course.html', content)
 
 
 class AllCoursesView(View):
