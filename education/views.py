@@ -232,6 +232,9 @@ class AddStar(View):
 
     @staticmethod
     def post(request, course_id):
+        if request.user.is_anonymous:
+            return JsonResponse({"status": False})
+
         course = Courses.objects.get(course_id=course_id)
         is_stared = Stars.objects.filter(user=request.user, course=course).first()
 
