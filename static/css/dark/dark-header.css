@@ -3,7 +3,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    background-color: white;
+    background-color: #333333; /* Темный фон */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
 }
@@ -12,7 +12,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #333;
+    background-color: #333333; /* Темный фон */
     padding: 10px 20px;
     color: white;
 }
@@ -46,7 +46,7 @@
 }
 
 .menu-link:hover {
-    background-color: #555;
+    background-color: #555555; /* Темный фон при наведении */
 }
 
 .user-area {
@@ -98,7 +98,7 @@
     display: none;
     position: absolute;
     right: 0;
-    background-color: #444;
+    background-color: #444444; /* Темный фон */
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
@@ -127,11 +127,12 @@
 }
 
 .dropdown-item:hover {
-    background-color: #555;
+    background-color: #555555; /* Темный фон при наведении */
 }
+
 .logo a {
-    text-decoration: none; /* Убираем подчеркивание */
-    font-family: 'Roboto', sans-serif; /* Применяем шрифт Roboto */
-    font-size: 24px; /* Устанавливаем размер шрифта (по желанию) */
-    color: #333; /* Устанавливаем цвет текста (по желанию) */
+    text-decoration: none;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    color: white; /* Белый текст */
 }
