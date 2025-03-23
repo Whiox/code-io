@@ -59,7 +59,7 @@ class RegisterView(View):
 
                 send_mail(
                     subject="Добро пожаловать!",
-                    message=f"Вы зарегистрировались на сайте",
+                    message="Вы зарегистрировались на сайте",
                     from_email="code-io.no-reply@yandex.ru",
                     recipient_list=[user.email],
                     fail_silently=False,

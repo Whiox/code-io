@@ -1,3 +1,5 @@
+"""Формы аунтефикации"""
+
 from django import forms
 
 
