@@ -1,3 +1,5 @@
+"""Модели пользвателей и токена сброса пароля"""
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
@@ -5,6 +7,7 @@ from django.contrib.auth.hashers import make_password, check_password
 
 
 class UserManager(BaseUserManager):
+    """Класс для создание пользователей"""
     def create_user(self, email, password=None, **extra_fields):
         """
         Создает и сохраняет пользователя с указанным email и паролем.
@@ -34,6 +37,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    """Пользователь"""
     username = models.CharField(max_length=128)
     email = models.EmailField(unique=True)
     theme = models.TextField(default='light')
@@ -46,8 +50,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
-    def __str__(self):
-        return self.email
+    def __str__(self) -> str:
+        return str(self.email)
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
@@ -60,6 +64,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class ResetRequest(models.Model):
+    """Запрос на сброс пароля"""
     request_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     url = models.TextField()
