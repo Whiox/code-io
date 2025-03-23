@@ -1,3 +1,5 @@
+"""Представления для аунтефикации в формате классов"""
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.views import View
@@ -8,7 +10,7 @@ from authentication.methods import generate_password, user_info_view, is_author
 from authentication.models import ResetRequest
 from django.core.mail import send_mail
 from authentication.models import User
-import secrets
+from secrets import token_urlsafe
 
 
 class RegisterView(View):
@@ -52,10 +54,12 @@ class RegisterView(View):
 
             if User.objects.filter(email=email).exists():
                 errors = True
-                messages.error(request, "Пользователь с такой почтой уже зарегистрирован.")
+                messages.error(
+                    request, "Пользователь с такой почтой уже зарегистрирован.")
 
             if errors is None:
-                user = User.objects.create_user(email=email, password=password, username=username)
+                user = User.objects.create_user(
+                    email=email, password=password, username=username)
 
                 send_mail(
                     subject="Добро пожаловать!",
@@ -108,7 +112,8 @@ class LoginView(View):
             user = authenticate(request, email=email, password=password)
             if user is not None:
                 if not user.is_active:
-                    messages.error(request, "Ваш аккаунт отключён. Обратитесь к администратору.")
+                    messages.error(
+                        request, "Ваш аккаунт отключён. Обратитесь к администратору.")
 
                 else:
                     login(request, user)
@@ -159,7 +164,8 @@ class ResetPasswordView(View):
         :param request: HTTP Django request
         :return: render: reset.html + ResetPasswordForm
         """
-        return render(request, 'reset.html', {'ResetPasswordForm': ResetPasswordForm})
+        return render(request, 'reset.html', {
+                      'ResetPasswordForm': ResetPasswordForm})
 
     @staticmethod
     def post(request):
@@ -180,14 +186,16 @@ class ResetPasswordView(View):
             if user:
                 info = user_info_view(request)
 
-                token = secrets.token_urlsafe(32)
+                token = token_urlsafe(32)
 
                 reset_request = ResetRequest.objects.create(
                     user=user, url=token, **info
                 )
 
                 reset_link = request.build_absolute_uri(
-                    reverse('reset_password_confirm', kwargs={'token': reset_request.url})
+                    reverse(
+                        'reset_password_confirm', kwargs={
+                            'token': reset_request.url})
                 )
 
                 send_mail(
@@ -197,14 +205,17 @@ class ResetPasswordView(View):
                     recipient_list=[email],
                     fail_silently=False,
                 )
-                messages.success(request, "Ссылка для сброса пароля отправлена на почту.")
+                messages.success(
+                    request, "Ссылка для сброса пароля отправлена на почту.")
             else:
-                messages.error(request, "Пользователь с таким email не найден.")
+                messages.error(
+                    request, "Пользователь с таким email не найден.")
 
         else:
             messages.error(request, "Форма заполнена неправильно")
 
-        return render(request, 'reset.html', {'ResetPasswordForm': ResetPasswordForm()})
+        return render(request, 'reset.html', {
+                      'ResetPasswordForm': ResetPasswordForm()})
 
 
 class ResetPasswordConfirmView(View):
@@ -226,8 +237,11 @@ class ResetPasswordConfirmView(View):
         reset_request = ResetRequest.objects.filter(url=token).first()
 
         if not reset_request:
-            messages.error(request, "Недействительная или устаревшая ссылка для сброса пароля.")
-            return render(request, 'reset.html', {'ResetPasswordForm': ResetPasswordForm()})
+            messages.error(
+                request,
+                "Недействительная или устаревшая ссылка для сброса пароля.")
+            return render(request, 'reset.html', {
+                          'ResetPasswordForm': ResetPasswordForm()})
 
         user = reset_request.user
 
@@ -249,9 +263,12 @@ class ResetPasswordConfirmView(View):
             messages.success(request, "Новый пароль отправлен вам на почту.")
 
         else:
-            messages.error(request, "Вы должны осуществлять все действия с одного устройства")
+            messages.error(
+                request,
+                "Вы должны осуществлять все действия с одного устройства")
 
-        return render(request, 'reset.html', {'ResetPasswordForm': ResetPasswordForm()})
+        return render(request, 'reset.html', {
+                      'ResetPasswordForm': ResetPasswordForm()})
 
 
 class ChangePasswordView(View):
@@ -271,7 +288,8 @@ class ChangePasswordView(View):
         if request.user.is_anonymous:
             return redirect("/login/")
 
-        return render(request, 'change.html', {'ChangePasswordForm': ChangePasswordForm})
+        return render(request, 'change.html', {
+                      'ChangePasswordForm': ChangePasswordForm})
 
     @staticmethod
     def post(request):
@@ -310,4 +328,5 @@ class ChangePasswordView(View):
         else:
             messages.error(request, "Форма заполнена неправильно")
 
-        return render(request, 'change.html', {'ChangePasswordForm': ChangePasswordForm})
+        return render(request, 'change.html', {
+                      'ChangePasswordForm': ChangePasswordForm})
