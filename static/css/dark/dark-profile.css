@@ -1,22 +1,23 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #FFFFFF; /* белый фон */
-    color: #333333; /* темно-серый текст */
+    background-color: #434343; /* Темный фон */
+    color: #ffffff; /* Белый текст */
     margin: 0;
     padding: 20px;
 }
 
 .profile-container {
-    display: flex; /* Используем Flexbox для двухколоночного макета */
+    display: flex;
     max-width: 900px;
     margin: auto;
-    border: 1px solid #5c5858; /* зеленая рамка */
+    border: 1px solid #555555; /* Темная рамка */
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: #333333; /* Темный фон */
 }
 
 .profile-info {
-    flex: 2; /* Занимает 2/3 ширины */
+    flex: 2;
     padding: 20px;
     gap: 20px;
 }
@@ -31,7 +32,7 @@ body {
     height: 100px;
     border-radius: 50%;
     margin-bottom: 20px;
-    border: 2px solid #ff4d00;
+    border: 2px solid #ff8c42; /* Оранжевая рамка */
 }
 
 .profile-header .edit {
@@ -43,17 +44,18 @@ body {
 }
 
 .profile-header h1 {
-    color: #ff4d00;
+    color: #ff8c42; /* Оранжевый текст */
     margin-top: 1px;
     margin-left: 20px;
 }
 
 .popular-courses {
-    flex: 1; /* Занимает 1/3 ширины */
-    background-color: #E8F5E9; /* Светло-зеленый фон */
+    flex: 1;
+    background-color: #444444; /* Темный фон */
     padding: 20px;
-    border-left: 2px solid #424242; /* Зеленая линия слева */
-    border-radius: 0 8px 8px 0; /* Закругляем правые углы */
+    border-left: 2px solid #555555; /* Темная рамка */
+    border-radius: 0 8px 8px 0;
+    color: #ffffff; /* Белый текст */
 }
 
 .section {
@@ -67,13 +69,13 @@ body {
 
 .social-links {
     display: flex;
-    justify-content: center; /* Центрируем ссылки */
+    justify-content: center;
     margin-top: 10px;
 }
 
 .social-links a {
     margin-right: 10px;
-    color: #ff4d00; /* зеленый цвет ссылок */
+    color: #ff8c42; /* Оранжевый цвет ссылок */
     text-decoration: none;
 }
 
@@ -82,8 +84,8 @@ body {
 }
 
 ul {
-    list-style-type: none; /* Убираем маркеры списка */
-    padding: 0; /* Убираем отступы */
+    list-style-type: none;
+    padding: 0;
 }
 
 .edit-profile-menu {
@@ -91,10 +93,11 @@ ul {
     position: absolute;
     top: 50px;
     left: 50px;
-    background: white;
-    border: 1px solid #ddd;
+    background: #333333; /* Темный фон */
+    border: 1px solid #555555; /* Темная рамка */
     padding: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: #ffffff; /* Белый текст */
 }
 
 .edit-profile-menu.show {
@@ -102,29 +105,116 @@ ul {
 }
 
 .modal {
-    display: none; /* Скрыто по умолчанию */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Затемнение фона */
+    background: rgba(0, 0, 0, 0.7);
     justify-content: center;
     align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
 .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 400px;
+    background: #333333; /* Темный фон */
+    padding: 30px;
+    border-radius: 12px;
+    width: 450px;
+    color: #ffffff; /* Белый текст */
     position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease-in-out;
+}
+
+.modal-content h2 {
+    color: #ff8c42; /* Оранжевый цвет для заголовка */
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-align: center;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #cccccc; /* Светло-серый текст */
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #555555; /* Темная рамка */
+    border-radius: 6px;
+    background-color: #444444; /* Темный фон */
+    color: #ffffff; /* Белый текст */
+    font-size: 14px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal-content input:focus,
+.modal-content textarea:focus {
+    border-color: #ff8c42; /* Оранжевая рамка при фокусе */
+    box-shadow: 0 0 8px rgba(255, 140, 66, 0.5); /* Свечение при фокусе */
+    outline: none;
+}
+
+.modal-content textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.modal-content button {
+    width: 100%;
+    background-color: #ff8c42; /* Оранжевый цвет кнопки */
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content button:hover {
+    background-color: #e67e3b; /* Темнее оранжевый при наведении */
 }
 
 .close {
     position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 20px;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    color: #ffffff;
     cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #ff8c42; /* Оранжевый цвет при наведении на крестик */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }

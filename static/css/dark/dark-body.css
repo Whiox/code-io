@@ -1,17 +1,15 @@
-:root {
-    --background-dark: #222222;
-}
 
 body {
     margin: 0;
-    background-color: #5c5858;
-    background: var(--background-dark);
+    background-color: #434343;
     font-family: Arial, sans-serif;
+    color: #ffffff; /* Белый текст */
 }
+
 html, body {
-    margin: 0; /* Убираем отступы */
-    padding: 0; /* Убираем внутренние отступы */
-    overflow-x: hidden; /* Скрываем горизонтальную прокрутку */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
 
 * {

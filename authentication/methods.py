@@ -1,3 +1,5 @@
+"""Методы, необходимые для аунтефикации"""
+
 import random
 import string
 from user_agents import parse

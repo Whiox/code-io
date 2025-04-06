@@ -1,6 +1,10 @@
+"""Пути, связанные с аунтефикацией"""
+
 from django.urls import path
 from authentication.views import (
-    RegisterView, LoginView, LogoutView, ResetPasswordView, ResetPasswordConfirmView, ChangePasswordView
+    RegisterView, LoginView, LogoutView,
+    ResetPasswordView, ResetPasswordConfirmView,
+    ChangePasswordView
 )
 
 urlpatterns = [

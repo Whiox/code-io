@@ -15,3 +15,4 @@ def get_metadata(md_content):
         md_content = md_content[metadata_end + len("[/metadata]"):].strip()
 
     return metadata, md_content
+

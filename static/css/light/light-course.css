@@ -123,3 +123,168 @@ img {
     width: 100%; /* Чтобы изображение занимало всю доступную ширину контейнера */
     height: auto; /* Сохраняем пропорции изображения */
 }
+
+/* Стили формы */
+form {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: #ffffff; /* Белый фон формы */
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовки */
+h1, h2, h3 {
+    color: #e67e22; /* Оранжевый цвет для заголовков */
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+h1 {
+    font-size: 28px;
+    text-align: center;
+}
+
+h3 {
+    font-size: 20px;
+    border-bottom: 2px solid #f0b27a; /* Светло-оранжевая линия под заголовком */
+    padding-bottom: 5px;
+}
+
+/* Поля формы */
+form p {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #e67e22; /* Оранжевый цвет для меток */
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="file"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #333;
+    font-size: 16px;
+}
+
+input[type="text"]:focus,
+input[type="file"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #e67e22;
+    outline: none;
+    box-shadow: 0 0 5px rgba(230, 126, 34, 0.3);
+}
+
+/* Чекбоксы тем */
+#id_topics {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+#id_topics li {
+    display: flex;
+    align-items: center;
+}
+
+#id_topics input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: #e67e22; /* Оранжевый цвет для чекбоксов */
+}
+
+/* Формы уроков */
+.lesson-form {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #f0b27a;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Кнопки */
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#add-lesson {
+    background-color: #e67e22;
+    color: white;
+    margin-bottom: 20px;
+}
+
+#add-lesson:hover {
+    background-color: #d35400;
+    transform: translateY(-2px);
+}
+
+.remove-lesson {
+    background-color: #e74c3c;
+    color: white;
+    margin-top: 10px;
+}
+
+.remove-lesson:hover {
+    background-color: #c0392b;
+}
+
+.remove-lesson:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+button[type="submit"] {
+    background-color: #e67e22;
+    color: white;
+    font-weight: bold;
+    padding: 12px 25px;
+    display: block;
+    margin: 30px auto 0;
+    width: 200px;
+}
+
+button[type="submit"]:hover {
+    background-color: #d35400;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Дополнительные элементы */
+::placeholder {
+    color: #bbb;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    form {
+        padding: 20px;
+    }
+
+    .lesson-form {
+        padding: 10px;
+    }
+
+    #id_topics {
+        flex-direction: column;
+        gap: 8px;
+    }
+}

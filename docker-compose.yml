@@ -1,7 +1,9 @@
-
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: code_io-web
     command: gunicorn code_io.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/app/static
@@ -23,6 +25,5 @@ services:
       - web
 
 volumes:
-  pgdata:
   static_volume:
   media_volume:

@@ -126,23 +126,111 @@ ul {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Затемнение фона */
+    background: rgba(0, 0, 0, 0.5); /* Полупрозрачный тёмный фон */
     justify-content: center;
     align-items: center;
+    z-index: 1000; /* Убедимся, что модальное окно поверх всех элементов */
+    animation: fadeIn 0.3s ease-in-out; /* Плавное появление */
 }
 
 .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 400px;
+    background: #ffffff; /* Белый фон */
+    padding: 30px;
+    border-radius: 12px;
+    width: 450px;
+    color: #333333; /* Тёмный текст */
     position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease-in-out; /* Плавное появление с анимацией */
+}
+
+.modal-content h2 {
+    color: #ff4d00; /* Оранжевый цвет для заголовка */
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-align: center;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555555; /* Серый цвет для текста */
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc; /* Светлая рамка */
+    border-radius: 6px;
+    background-color: #f9f9f9; /* Светлый фон для полей ввода */
+    color: #333333;
+    font-size: 14px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal-content input:focus,
+.modal-content textarea:focus {
+    border-color: #ff4d00; /* Оранжевая рамка при фокусе */
+    box-shadow: 0 0 8px rgba(255, 77, 0, 0.3); /* Свечение при фокусе */
+    outline: none;
+}
+
+.modal-content textarea {
+    resize: vertical; /* Разрешаем изменение высоты текстового поля */
+    min-height: 100px;
+}
+
+.modal-content button {
+    width: 100%;
+    background-color: #ff4d00; /* Оранжевый цвет кнопки */
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content button:hover {
+    background-color: #e64400; /* Темнее оранжевый при наведении */
 }
 
 .close {
     position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 20px;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    color: #333333; /* Тёмный цвет крестика */
     cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #ff4d00; /* Оранжевый цвет при наведении на крестик */
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
