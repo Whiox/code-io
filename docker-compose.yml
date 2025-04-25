@@ -13,7 +13,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - code_io_network
 
   nginx:
     image: nginx:latest
@@ -25,15 +28,30 @@ services:
       - "80:80"
     depends_on:
       - web
+    networks:
+      - code_io_network
 
   db:
-    image: postgres:13.0-alpine
+    image: postgres:14
+    container_name: db
+    restart: always
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=hello_django
-      - POSTGRES_USER=hello_django
-      - POSTGRES_DB=hello_django_dev
+      POSTGRES_USER: hello_django
+      POSTGRES_PASSWORD: hello_django
+      POSTGRES_DB: hello_django_dev
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U hello_django -d hello_django_dev" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - code_io_network
+
+networks:
+  code_io_network:
+    driver: bridge
 
 
 volumes:
