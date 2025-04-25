@@ -1,5 +1,11 @@
 /* Общие переменные */
 :root {
+    --form-section-bg: #ffffff;
+    --secondary-text: #666;
+    --accent-color: #ff8c42;
+    --primary-button-bg: #28a745;
+    --primary-button-hover: #218838;
+    --border-color: #e0e0e0;
     --body-bg: #f8f9fa;
     --text-color: #333;
     --course-item-bg: #f9f9f9;
@@ -23,6 +29,12 @@
 }
 
 [data-theme="dark"] {
+    --form-section-bg: #2a2a2a;
+    --secondary-text: #888;
+    --accent-color: #ff6b35;
+    --primary-button-bg: #1b752e;
+    --primary-button-hover: #155724;
+    --border-color: #404040;
     --body-bg: #434343;
     --text-color: #ffffff;
     --course-item-bg: #333333;
@@ -230,4 +242,160 @@ img {
 .course-item {
     position: relative;
     padding-right: 40px;
+}
+
+/* Стили для формы создания курса */
+.course-creation {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    color: var(--heading-color);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.form-section {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: var(--form-section-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+    color: var(--heading-color);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.form-helptext {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--secondary-text);
+    font-size: 0.875rem;
+}
+
+/* Стили для уроков */
+.lessons-container {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.lesson-form {
+    background: var(--lesson-form-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.lesson-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.lesson-number {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--heading-color);
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--secondary-text);
+    transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+    color: var(--text-color);
+}
+
+.btn-icon:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+/* Кнопки */
+.btn-add {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.btn-add:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--primary-button-bg);
+    color: white;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: var(--primary-button-hover);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .course-creation {
+        padding: 0 0.5rem;
+    }
+
+    .form-section {
+        padding: 1rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
 }
