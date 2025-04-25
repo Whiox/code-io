@@ -1,12 +1,147 @@
 {% extends 'base.html' %}
 
-{% block title %} Курс{% endblock %}
+{% block title %}Главная страница{% endblock %}
 
 {% block content %}
 
-<h1>Приветствую на сайте Code.io</h1>
-<p>Здесь вы можете найти различные курсы и материалы для обучения.</p>
-<h2>Сейчас</h2>
-<h2>{{ content.data }}</h2>
+{% load static %}
 
+<section class="main-content">
+    <h1>Добро пожаловать на Code.io</h1>
+    <p class="subtitle">Курсы для обучения программированию</p>
+
+    <h2>Популярные курсы</h2>
+    <ul class="course-list">
+    {% for course in popular_courses %}
+    <li class="course-item">
+        <div class="star-wrapper">
+            {% if course.is_stared %}
+                <img src="{% static 'assets/star-fill.png' %}" alt="star" class="star" data-course-id="{{ course.id }}">
+            {% else %}
+                <img src="{% static 'assets/star-empty.svg' %}" alt="star" class="star" data-course-id="{{ course.id }}">
+            {% endif %}
+        </div>
+        <h2>{{ course.title }}</h2>
+        <p>Автор: {{ course.author }}</p>
+        <p>Темы: {{ course.topics|join:", " }}</p>
+        <a href="{% url 'course' course_id=course.course_id %}" class="btn">Перейти на курс</a>
+    </li>
+    {% empty %}
+        <li>Курсы не найдены.</li>
+    {% endfor %}
+</ul>
+</section>
+<style>
+.main-content {
+    max-width: 1200px;
+    margin: 4rem auto;
+    padding: 0 1.5rem;
+}
+
+h1 {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    background: linear-gradient(
+        45deg,
+        var(--main-gradient-start),
+        var(--main-gradient-end)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    font-size: 1.25rem;
+    text-align: center;
+    color: var(--secondary-text);
+    margin-bottom: 3rem;
+}
+
+.course-list {
+    display: grid;
+    gap: 2rem;
+}
+
+.course-item {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease;
+    border: 1px solid var(--border-color);
+}
+
+.course-item:hover {
+    transform: translateY(-3px);
+}
+
+.star-wrapper {
+    margin-bottom: 1rem;
+}
+
+.star-wrapper img {
+    width: 32px;
+    height: 32px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    background: var(--primary-color);
+    color: white !important;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 1rem;
+    transition: filter 0.2s;
+}
+
+.btn:hover {
+    filter: brightness(1.1);
+}
+
+/* Цветовые темы */
+[data-theme="dark"] {
+    --main-gradient-start: #FF6B35;
+    --main-gradient-end: #FF914D;
+    --card-bg: #2d2d2d;
+    --border-color: #404040;
+    --primary-color: #FF6B35;
+    --secondary-text: #a0aec0;
+}
+
+[data-theme="light"] {
+    --main-gradient-start: #28a745;
+    --main-gradient-end: #1b752e;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --primary-color: #28a745;
+    --secondary-text: #718096;
+}
+
+/* Анимации и дополнительные стили */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.course-item {
+    animation: fadeIn 0.6s ease forwards;
+    opacity: 0;
+}
+
+.course-item:nth-child(1) { animation-delay: 0.1s; }
+.course-item:nth-child(2) { animation-delay: 0.2s; }
+.course-item:nth-child(3) { animation-delay: 0.3s; }
+
+h2 {
+    color: var(--main-gradient-start);
+    margin-bottom: 1rem;
+}
+
+p {
+    color: var(--secondary-text);
+    margin: 0.5rem 0;
+}
+</style>
 {% endblock %}

@@ -28,6 +28,10 @@ class Task(models.Model):
 
 
 class Stars(models.Model):
-    course = models.ForeignKey(Courses, on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        Courses,
+        on_delete=models.CASCADE,
+        related_name='stars'
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    data = models.IntegerField(default=0)  # Хранит текущее время в формате UNIX
+    data = models.IntegerField(default=0)

@@ -62,3 +62,28 @@ main {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+.courses-row::-webkit-scrollbar {
+    height: 8px;
+}
+
+.courses-row::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 4px;
+}
+
+.courses-row::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 4px;
+}
+
+/* Обновить CSS-переменные */
+:root {
+    --scrollbar-track: #f1f1f1;
+    --scrollbar-thumb: #888;
+}
+
+[data-theme="dark"] {
+    --scrollbar-track: #2a2a2a;
+    --scrollbar-thumb: #555;
+}
