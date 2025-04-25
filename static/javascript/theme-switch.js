@@ -1,26 +1,37 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const themeToggle = document.getElementById("theme-toggle");
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
 
-    themeToggle.addEventListener("click", function () {
-        fetch("/change-theme/", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": getCSRFToken(),
-                "Content-Type": "application/json",
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                location.reload();
-            }
-        })
-        .catch(error => console.error("Ошибка при смене темы:", error));
-    });
+    // Функция инициализации темы
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    function getCSRFToken() {
-        return document.cookie.split("; ")
-            .find(row => row.startsWith("csrftoken="))
-            ?.split("=")[1];
+        const initialTheme = savedTheme || (systemDark ? 'dark' : 'light');
+        htmlElement.setAttribute('data-theme', initialTheme);
     }
+
+    // Функция переключения темы
+    function toggleTheme() {
+        const currentTheme = htmlElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        htmlElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+
+        // Анимация иконки
+        themeToggle.classList.add('theme-rotate');
+        setTimeout(() => themeToggle.classList.remove('theme-rotate'), 300);
+    }
+
+    // Инициализация и обработчики
+    initTheme();
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // Синхронизация с системными настройками
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (!localStorage.getItem('theme')) {
+            htmlElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+        }
+    });
 });

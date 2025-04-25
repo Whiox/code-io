@@ -1,16 +1,32 @@
+from django.db.models import Exists, OuterRef
+from django.db.models.aggregates import Count
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.utils import timezone
 from django.http import JsonResponse
 from home.models import UserProfile, SocialNetwork, Interest
 from authentication.models import User
+from education.models import Courses, Stars
+
 
 def home_view(request):
-    current_time = timezone.now().strftime('%Y-%m-%d %H:%M:%S.%f %Z')
-    content = {
-        'data': current_time
-    }
-    return render(request, 'home.html', {'content': content})
+    if request.user.is_authenticated:
+        subquery = Stars.objects.filter(
+            course=OuterRef('pk'),
+            user=request.user
+        )
+        popular_courses = Courses.objects.annotate(
+            stars_count=Count('stars'),
+            is_stared=Exists(subquery)
+        ).order_by('-stars_count')[:3]
+    else:
+        popular_courses = Courses.objects.annotate(
+            stars_count=Count('stars')
+        ).order_by('-stars_count')[:3]
+
+    return render(request, 'home.html', {
+        'popular_courses': popular_courses
+    })
 
 
 class ProfileView(View):
@@ -67,15 +83,3 @@ class MyProfileView(View):
             'is_owner': True
         }
         return render(request, 'profile.html', content)
-
-
-class ChangeThemeView(View):
-    @staticmethod
-    def post(request):
-        if request.user.is_anonymous:
-            return redirect('/login')
-
-        user = request.user
-        user.theme = "dark" if user.theme == "light" else "light"
-        user.save()
-        return JsonResponse({"status": "success", "new_theme": user.theme})

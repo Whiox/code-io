@@ -1,31 +1,49 @@
+/* Общие переменные */
+:root {
+    --header-bg: #1b752e;
+    --menu-link-hover: #1c682d;
+    --dropdown-bg: #65e759;
+    --dropdown-item-color: rgb(32, 30, 30);
+    --dropdown-item-hover: #479c3f;
+    --logo-gradient: linear-gradient(135deg, #32CD32, #FFA500);
+    --logo-color: transparent;
+}
+
+[data-theme="dark"] {
+    --header-bg: #333333;
+    --menu-link-hover: #555555;
+    --dropdown-bg: #444444;
+    --dropdown-item-color: white;
+    --dropdown-item-hover: #555555;
+    --logo-gradient: none;
+    --logo-color: white;
+}
+
+/* Общие стили хедера */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    background-color: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #1b752e;
+    background-color: var(--header-bg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     padding: 10px 20px;
     color: white;
+    z-index: 1000;
 }
 
 .logo a {
-    text-decoration: none; /* Убираем подчеркивание */
-    font-family: 'Roboto', sans-serif; /* Применяем шрифт Roboto */
-    font-size: 24px; /* Устанавливаем размер шрифта */
-    font-weight: 700; /* Делаем текст жирным */
-    background: linear-gradient(135deg, #32CD32, #FFA500); /* Устанавливаем градиент от зеленого до оранжевого по диагонали */
-    -webkit-background-clip: text; /* Обрезаем фон по тексту для WebKit */
-    -webkit-text-fill-color: transparent; /* Делаем цвет текста прозрачным, чтобы видеть градиент */
-    color: transparent; /* Делаем цвет текста прозрачным */
+    text-decoration: none;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    background: var(--logo-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: var(--logo-color);
+    color: var(--logo-color);
 }
 
 .navbar {
@@ -52,9 +70,10 @@
 }
 
 .menu-link:hover {
-    background-color: #1c682d;
+    background-color: var(--menu-link-hover);
 }
 
+/* Общие стили для пользовательской области */
 .user-area {
     display: flex;
     align-items: center;
@@ -86,6 +105,7 @@
     transform: scale(1.1);
 }
 
+/* Стили выпадающего меню */
 .dropdown {
     position: relative;
     display: inline-block;
@@ -104,7 +124,7 @@
     display: none;
     position: absolute;
     right: 0;
-    background-color: #65e759;
+    background-color: var(--dropdown-bg);
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
@@ -120,12 +140,8 @@
     height: auto;
 }
 
-.dropdown-menu.show {
-    height: 100px;
-}
-
 .dropdown-item {
-    color: rgb(32, 30, 30);
+    color: var(--dropdown-item-color);
     padding: 10px 15px;
     text-decoration: none;
     display: block;
@@ -133,5 +149,5 @@
 }
 
 .dropdown-item:hover {
-    background-color: #479c3f;
+    background-color: var(--dropdown-item-hover);
 }

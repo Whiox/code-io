@@ -1,62 +1,230 @@
-
 {% extends 'base.html' %}
+
 {% block title %}Добавить курс{% endblock %}
+
 {% block content %}
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ course_form.as_p }}
-    <h3>Выберите темы:</h3>
-    {{ topic_form.topics }}
-    <h3>Добавить уроки</h3>
-    <div id="lesson-formset">
-        {{ lesson_formset.management_form }}
-        {% for form in lesson_formset %}
-            <div class="lesson-form">
-                {{ form.as_p }}
-                <button type="button" class="remove-lesson" {% if lesson_formset.total_form_count == 1 %}disabled{% endif %}>Удалить урок</button>
+<section class="course-creation">
+    <h1 class="page-title">Создание нового курса</h1>
+
+    <form method="post" enctype="multipart/form-data" class="creation-form">
+        {% csrf_token %}
+
+        <!-- Основная информация о курсе -->
+        <div class="form-section">
+            <h2 class="section-title">Основная информация</h2>
+            <div class="form-grid">
+                {% for field in course_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <small class="form-helptext">{{ field.help_text }}</small>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-    </div>
-    <button type="button" id="add-lesson">Добавить урок</button>
-    <button type="submit" class="btn btn-primary">Добавить курс</button>
-</form>
+        </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Выбор тем -->
+        <div class="form-section">
+            <h2 class="section-title">Выбор тематик</h2>
+            <div class="topics-wrapper">
+                {{ topic_form.topics }}
+            </div>
+        </div>
+
+        <!-- Уроки -->
+        <div class="form-section">
+            <h2 class="section-title">Программа курса</h2>
+            <div id="lesson-formset" class="lessons-container">
+                {{ lesson_formset.management_form }}
+
+                {% for form in lesson_formset %}
+                <div class="lesson-form card">
+                    <div class="lesson-header">
+                        <h3 class="lesson-number">Урок {{ forloop.counter }}</h3>
+                        <button type="button" class="remove-lesson btn-icon"
+                                {% if lesson_formset.total_form_count == 1 %}disabled{% endif %}>
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                        </button>
+                    </div>
+                    <div class="lesson-content">
+                        {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {% if field.name == 'lesson_file' %}
+                            <div class="file-input-wrapper">
+                                <label class="file-input">
+                                    {{ field }}
+                                    Выбрать файл
+                                </label>
+                                <span class="file-name">Файл не выбран</span>
+                            </div>
+                            {% else %}
+                            {{ field }}
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" id="add-lesson" class="btn-add">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                Добавить урок
+            </button>
+        </div>
+
+        <!-- Кнопка отправки -->
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">
+                Опубликовать курс
+                <svg class="icon" viewBox="0 0 24 24"><path d="M5 13h11.17l-4.88 4.88c-.39.39-.39 1.03 0 1.42.39.39 1.02.39 1.41 0l6.59-6.59a.996.996 0 0 0 0-1.41l-6.58-6.6a.996.996 0 1 0-1.41 1.41L16.17 11H5c-.55 0-1 .45-1 1s.45 1 1 1z"/></svg>
+            </button>
+        </div>
+    </form>
+</section>
+
+<style>
+/* Общие стили */
+.form-section {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: var(--form-section-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Стилизация загрузки файлов */
+.file-input-wrapper {
+    position: relative;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.file-input {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--btn-bg);
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.file-input:hover {
+    background: var(--btn-hover);
+}
+
+.file-input input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.file-name {
+    margin-left: 10px;
+    color: var(--secondary-text);
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* Темная тема */
+[data-theme="dark"] .file-input {
+    background: var(--accent-color);
+}
+
+[data-theme="dark"] .file-input:hover {
+    background: var(--btn-hover);
+}
+
+/* Остальные стили */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.lesson-number {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.btn-add {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+</style>
+
 <script>
-    $(document).ready(function() {
-        var lessonFormCount = {{ lesson_formset.total_form_count }};
-
-        $('#add-lesson').click(function() {
-            var newForm = $('.lesson-form:first').clone();
-            newForm.find('input, select, textarea').each(function() {
-                var name = $(this).attr('name').replace(/-\d+-/, '-' + lessonFormCount + '-');
-                $(this).attr('name', name);
-                $(this).val('');
-            });
-            newForm.find('.remove-lesson').prop('disabled', false);
-            $('#lesson-formset').append(newForm);
-            lessonFormCount++;
-            updateManagementForm();
+document.addEventListener('DOMContentLoaded', function() {
+    // Обновление имени файла
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || 'Файл не выбран';
+            this.closest('.file-input-wrapper').querySelector('.file-name').textContent = fileName;
         });
+    });
 
-        $(document).on('click', '.remove-lesson', function() {
-            if (lessonFormCount > 1) {
-                $(this).closest('.lesson-form').remove();
-                lessonFormCount--;
-                updateManagementForm();
+    // Управление уроками
+    let lessonFormCount = document.querySelectorAll('.lesson-form').length;
+    const addButton = document.getElementById('add-lesson');
+    const formsetContainer = document.getElementById('lesson-formset');
+    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+
+    function updateFormIndices() {
+        document.querySelectorAll('.lesson-form').forEach((form, index) => {
+            form.querySelectorAll('input, select, textarea').forEach(field => {
+                const name = field.name.replace(/-\d+-/, `-${index}-`);
+                field.name = name;
+                field.id = `id_${name}`;
+            });
+        });
+        totalForms.value = lessonFormCount;
+    }
+
+    function updateLessonNumbers() {
+        document.querySelectorAll('.lesson-number').forEach((el, index) => {
+            el.textContent = `Урок ${index + 1}`;
+        });
+    }
+
+    addButton.addEventListener('click', function() {
+        const newForm = document.querySelector('.lesson-form').cloneNode(true);
+        newForm.querySelectorAll('input, select, textarea').forEach(field => {
+            field.value = '';
+            field.removeAttribute('id');
+            if(field.type === 'file') {
+                field.closest('.file-input-wrapper').querySelector('.file-name').textContent = 'Файл не выбран';
             }
         });
-        function updateManagementForm() {
-            $('#id_form-TOTAL_FORMS').val(lessonFormCount); // Обновляем общее количество форм(не забуть посмотреть через f12 название скрытого поля отвечающего за количество форм)
-            $('#lesson-formset .lesson-form').each(function(index) {
-                $(this).find('input, select, textarea').each(function() {
-                    var name = $(this).attr('name').replace(/-\d+-/, '-' + index + '-');
-                    $(this).attr('name', name);
-                });
-            });
+        newForm.querySelector('.remove-lesson').disabled = false;
+        formsetContainer.appendChild(newForm);
+        lessonFormCount++;
+        updateFormIndices();
+        updateLessonNumbers();
+    });
+
+    formsetContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-lesson')) {
+            if (lessonFormCount > 1) {
+                e.target.closest('.lesson-form').remove();
+                lessonFormCount--;
+                updateFormIndices();
+                updateLessonNumbers();
+            }
         }
     });
+});
 </script>
-
-
 {% endblock %}

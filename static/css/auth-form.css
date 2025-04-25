@@ -1,3 +1,22 @@
+/* Общие переменные */
+:root {
+    --auth-form-bg: #ccc;
+    --auth-label-color: #000000;
+    --input-border: #555;
+    --input-focus-border: #28a745;
+    --message-bg-error: #f8d7da;
+    --message-border-error: #f5c6cb;
+    --message-color-error: #721c24;
+}
+
+[data-theme="dark"] {
+    --auth-form-bg: #424242;
+    --auth-label-color: #ffffff;
+    --input-border: #474747;
+    --input-focus-border: #ff4d00;
+}
+
+/* Общие стили для формы */
 .auth-form {
     display: flex;
     justify-content: flex-start;
@@ -6,7 +25,7 @@
     height: 600px;
     margin: 20px auto 0 auto;
     padding: 20px;
-    background-color: #ccc;
+    background-color: var(--auth-form-bg);
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
@@ -17,9 +36,9 @@
     height: 60px;
     padding: 5px 10px;
     font-size: 16px;
-    border: 1px solid #555;
+    border: 1px solid var(--input-border);
     border-radius: 5px;
-    background-color: white;
+    background-color: #ffffff;
     color: #000000;
 }
 
@@ -28,12 +47,12 @@
 }
 
 .auth-form-control:focus {
-    border-color: #28a745;
+    border-color: var(--input-focus-border);
     outline: none;
 }
 
 .auth-label {
-    color: #000000;
+    color: var(--auth-label-color);
     margin-bottom: 15px;
     font-size: 20px;
     font-weight: bold;
@@ -41,6 +60,7 @@
     line-height: 1.4;
 }
 
+/* Общие стили для кнопок и сообщений (остаются одинаковыми для обеих тем) */
 .auth-form-inline {
     display: flex;
     justify-content: center;
@@ -90,9 +110,9 @@
 }
 
 .message.error {
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    color: #721c24;
+    background-color: var(--message-bg-error, #f8d7da);
+    border: 1px solid var(--message-border-error, #f5c6cb);
+    color: var(--message-color-error, #721c24);
 }
 
 .message.success {
