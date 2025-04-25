@@ -1,0 +1,64 @@
+/* Общие стили для всех тем */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* Базовые переменные для светлой темы */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --main-bg-color: #ffffff;
+}
+
+/* Темная тема */
+[data-theme="dark"] {
+    --bg-color: #434343;
+    --text-color: #ffffff;
+    --main-bg-color: #434343;
+}
+
+/* Стилизация элементов с использованием переменных */
+body {
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: Arial, sans-serif;
+}
+
+main {
+    margin-top: 70px;
+    min-height: calc(100vh - 70px - 130px);
+    padding: 20px;
+    background-color: var(--main-bg-color);
+}
+
+.theme-toggle {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    width: 32px;
+    height: 32px;
+    filter: invert(30%);
+}
+
+[data-theme="dark"] .theme-toggle {
+    filter: invert(80%);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+.theme-rotate {
+    animation: rotate 0.6s ease-in-out;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

@@ -6,9 +6,9 @@
        <ul class="menu">
             <li class="menu-item"><a href="{% url 'all' %}" class="menu-link">Все курсы</a></li>
             {% if request.user.is_authenticated %}
-                <li class="menu-item"><a href="{% url 'stared' %}" class="menu-link">Мои звёзды</a></li>
-                <li class="menu-item"><a href="{% url 'my_courses' %}" class="menu-link">Мои курсы</a></li>
-                <li class="menu-item"><a href="{% url 'add_course' %}" class="menu-link">Создать курс</a></li>
+                <li class="menu-item"><a href="{% url 'stared' %}" class="menu-link">Избранные</a></li>
+                <li class="menu-item"><a href="{% url 'my_courses' %}" class="menu-link">Созданные</a></li>
+                <li class="menu-item"><a href="{% url 'add_course' %}" class="menu-link">Создать</a></li>
             {% else %}
                 <li class="menu-item"><a href="{% url 'register' %}" class="menu-link">Регистрация</a></li>
                 <li class="menu-item"><a href="{% url 'login' %}" class="menu-link">Вход</a></li>
@@ -17,11 +17,7 @@
     </nav>
     {% if request.user.is_authenticated %}
         <div class="user-area">
-            {% if request.user.theme == "light" %}
-                <img src="{% static 'assets/light-theme.svg' %}" id="theme-toggle" alt="theme" class="theme-toggle">
-            {% else %}
-                <img src="{% static 'assets/dark-theme.svg' %}" id="theme-toggle" alt="theme" class="theme-toggle">
-            {% endif %}
+            <img src="{% static 'assets/theme-icon.svg' %}" id="theme-toggle" alt="Toggle theme" class="theme-toggle">
             <span class="user-name">{{ request.user.username }}</span>
             <div class="profile-pic">
                 <img src="{% static 'assets/profile-default.png' %}" alt="Фото профиля" class="profile-image">

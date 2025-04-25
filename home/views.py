@@ -67,15 +67,3 @@ class MyProfileView(View):
             'is_owner': True
         }
         return render(request, 'profile.html', content)
-
-
-class ChangeThemeView(View):
-    @staticmethod
-    def post(request):
-        if request.user.is_anonymous:
-            return redirect('/login')
-
-        user = request.user
-        user.theme = "dark" if user.theme == "light" else "light"
-        user.save()
-        return JsonResponse({"status": "success", "new_theme": user.theme})
