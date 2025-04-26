@@ -1,6 +1,9 @@
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
 from django.db.models.aggregates import Count
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.decorators import method_decorator
 from django.views import View
 from home.models import UserProfile, SocialNetwork, Interest
 from authentication.models import User
@@ -30,8 +33,8 @@ class HomeView(View):
 
 
 class ProfileView(View):
-    @staticmethod
-    def get(request, user_id):
+    @method_decorator(login_required)
+    def get(self, request, user_id):
         profile_owner = get_object_or_404(User, id=user_id)
         user_profile, created = UserProfile.objects.get_or_create(user=profile_owner)
 
@@ -40,46 +43,33 @@ class ProfileView(View):
             'user_profile': user_profile,
             'social_network': SocialNetwork.objects.filter(user_profile=user_profile),
             'interest': Interest.objects.filter(user_profile=user_profile),
-            'is_owner': True if profile_owner == request.user else False
+            'is_owner': profile_owner == request.user,
         }
 
         return render(request, 'profile.html', content)
 
+    @method_decorator(login_required)
+    def post(self, request, user_id):
+        if request.user.id != int(user_id):
+            messages.error(request, "У вас нет прав на редактирование этого профиля.")
+            return redirect('profile', user_id=user_id)
 
-class MyProfileView(View):
-    @staticmethod
-    def get(request):
-        if request.user.is_anonymous:
-            return redirect('/login')
+        profile_owner = request.user
+        user_profile, _ = UserProfile.objects.get_or_create(user=profile_owner)
 
-        user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+        new_username = request.POST.get('username', '').strip()
+        new_about    = request.POST.get('about', '').strip()
+        new_email    = request.POST.get('email', '').strip()
+        new_phone    = request.POST.get('phone', '').strip()
 
-        content = {
-            'username': request.user.username,
-            'user_profile': user_profile,
-            'social_network': SocialNetwork.objects.filter(user_profile=user_profile),
-            'interest': Interest.objects.filter(user_profile=user_profile),
-            'is_owner': True
-        }
-        return render(request, 'profile.html', content)
+        if new_username:
+            profile_owner.username = new_username
+        profile_owner.save()
 
-    @staticmethod
-    def post(request):
-        user_profile, created = UserProfile.objects.get_or_create(user=request.user)
-
-        username = request.POST.get('username')
-        about = request.POST.get('about')
-        email = request.POST.get('email')
-        phone = request.POST.get('phone')
-        user_profile.about = about
-        user_profile.email = email
-        user_profile.phone = phone
+        user_profile.about = new_about
+        user_profile.email = new_email
+        user_profile.phone = new_phone
         user_profile.save()
-        content = {
-            'username': request.user.username,
-            'user_profile': user_profile,
-            'social_network': SocialNetwork.objects.filter(user_profile=user_profile),
-            'interest': Interest.objects.filter(user_profile=user_profile),
-            'is_owner': True
-        }
-        return render(request, 'profile.html', content)
+
+        messages.success(request, "Профиль успешно сохранён.")
+        return redirect('profile', user_id=user_id)
