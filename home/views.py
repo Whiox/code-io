@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
 from django.db.models.aggregates import Count
@@ -51,20 +52,25 @@ class ProfileView(View):
     @method_decorator(login_required)
     def post(self, request, user_id):
         if request.user.id != int(user_id):
-            messages.error(request, "У вас нет прав на редактирование этого профиля.")
+            messages.error(request, "У вас нет прав на изменение этого профиля.")
             return redirect('profile', user_id=user_id)
 
-        profile_owner = request.user
-        user_profile, _ = UserProfile.objects.get_or_create(user=profile_owner)
+        if request.POST.get('action') == 'delete_account':
+            request.user.delete()
+            logout(request)
+            messages.success(request, "Ваш аккаунт удалён.")
+            return redirect('home')
+
+        user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
         new_username = request.POST.get('username', '').strip()
-        new_about    = request.POST.get('about', '').strip()
-        new_email    = request.POST.get('email', '').strip()
-        new_phone    = request.POST.get('phone', '').strip()
+        new_about = request.POST.get('about', '').strip()
+        new_email = request.POST.get('email', '').strip()
+        new_phone = request.POST.get('phone', '').strip()
 
         if new_username:
-            profile_owner.username = new_username
-        profile_owner.save()
+            request.user.username = new_username
+            request.user.save()
 
         user_profile.about = new_about
         user_profile.email = new_email

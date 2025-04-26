@@ -28,6 +28,14 @@
 
                 <button type="submit">Сохранить</button>
             </form>
+            <form method="POST" style="margin-top: 30px;">
+            {% csrf_token %}
+            <button type="submit" name="action" value="delete_account"
+                    onclick="return confirm('Вы точно хотите удалить аккаунт? Это действие необратимо.')"
+                    style="background: #e53935; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+              Удалить аккаунт
+            </button>
+          </form>
         </div>
     </div>
 {% endif %}
