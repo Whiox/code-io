@@ -1,60 +1,55 @@
 services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: code_io-web
-    command: gunicorn code_io.wsgi:application --bind 0.0.0.0:8000
-    volumes:
-      - static_volume:/app/static
-      - media_volume:/app/media
-    expose:
-      - "8000"
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - code_io_network
-
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - static_volume:/app/static
-      - media_volume:/app/media
-    ports:
-      - "80:80"
-    depends_on:
-      - web
-    networks:
-      - code_io_network
-
   db:
     image: postgres:14
-    container_name: db
     restart: always
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: hello_django
       POSTGRES_PASSWORD: hello_django
       POSTGRES_DB: hello_django_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U hello_django -d hello_django_dev" ]
+      test: ["CMD-SHELL", "pg_isready -U hello_django -d hello_django_dev"]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - code_io_network
 
-networks:
-  code_io_network:
-    driver: bridge
+  migrate:
+    image: code_io-web:latest
+    command: python manage.py migrate --noinput
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    restart: "no"
 
+  web:
+    image: code_io-web:latest
+    command: gunicorn code_io.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    expose:
+      - "8000"
+    depends_on:
+      - db
+      - migrate
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - web
+    restart: unless-stopped
 
 volumes:
+  postgres_data:
   static_volume:
   media_volume:
-  postgres_data:
