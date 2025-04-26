@@ -1,37 +1,41 @@
+from django.contrib import messages
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
 from django.db.models.aggregates import Count
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.decorators import method_decorator
 from django.views import View
-from django.utils import timezone
-from django.http import JsonResponse
 from home.models import UserProfile, SocialNetwork, Interest
 from authentication.models import User
 from education.models import Courses, Stars
 
 
-def home_view(request):
-    if request.user.is_authenticated:
-        subquery = Stars.objects.filter(
-            course=OuterRef('pk'),
-            user=request.user
-        )
-        popular_courses = Courses.objects.annotate(
-            stars_count=Count('stars'),
-            is_stared=Exists(subquery)
-        ).order_by('-stars_count')[:3]
-    else:
-        popular_courses = Courses.objects.annotate(
-            stars_count=Count('stars')
-        ).order_by('-stars_count')[:3]
+class HomeView(View):
+    @staticmethod
+    def get(request):
+        if request.user.is_authenticated:
+            subquery = Stars.objects.filter(
+                course=OuterRef('pk'),
+                user=request.user
+            )
+            popular_courses = Courses.objects.annotate(
+                stars_count=Count('stars'),
+                is_stared=Exists(subquery)
+            ).order_by('-stars_count')[:3]
+        else:
+            popular_courses = Courses.objects.annotate(
+                stars_count=Count('stars')
+            ).order_by('-stars_count')[:3]
 
-    return render(request, 'home.html', {
-        'popular_courses': popular_courses
+        return render(request, 'home.html', {
+            'popular_courses': popular_courses
     })
 
 
 class ProfileView(View):
-    @staticmethod
-    def get(request, user_id):
+    @method_decorator(login_required)
+    def get(self, request, user_id):
         profile_owner = get_object_or_404(User, id=user_id)
         user_profile, created = UserProfile.objects.get_or_create(user=profile_owner)
 
@@ -40,46 +44,38 @@ class ProfileView(View):
             'user_profile': user_profile,
             'social_network': SocialNetwork.objects.filter(user_profile=user_profile),
             'interest': Interest.objects.filter(user_profile=user_profile),
-            'is_owner': True if profile_owner == request.user else False
+            'is_owner': profile_owner == request.user,
         }
 
         return render(request, 'profile.html', content)
 
+    @method_decorator(login_required)
+    def post(self, request, user_id):
+        if request.user.id != int(user_id):
+            messages.error(request, "У вас нет прав на изменение этого профиля.")
+            return redirect('profile', user_id=user_id)
 
-class MyProfileView(View):
-    @staticmethod
-    def get(request):
-        if request.user.is_anonymous:
-            return redirect('/login')
+        if request.POST.get('action') == 'delete_account':
+            request.user.delete()
+            logout(request)
+            messages.success(request, "Ваш аккаунт удалён.")
+            return redirect('home')
 
-        user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+        user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
-        content = {
-            'username': request.user.username,
-            'user_profile': user_profile,
-            'social_network': SocialNetwork.objects.filter(user_profile=user_profile),
-            'interest': Interest.objects.filter(user_profile=user_profile),
-            'is_owner': True
-        }
-        return render(request, 'profile.html', content)
+        new_username = request.POST.get('username', '').strip()
+        new_about = request.POST.get('about', '').strip()
+        new_email = request.POST.get('email', '').strip()
+        new_phone = request.POST.get('phone', '').strip()
 
-    @staticmethod
-    def post(request):
-        user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+        if new_username:
+            request.user.username = new_username
+            request.user.save()
 
-        username = request.POST.get('username')
-        about = request.POST.get('about')
-        email = request.POST.get('email')
-        phone = request.POST.get('phone')
-        user_profile.about = about
-        user_profile.email = email
-        user_profile.phone = phone
+        user_profile.about = new_about
+        user_profile.email = new_email
+        user_profile.phone = new_phone
         user_profile.save()
-        content = {
-            'username': request.user.username,
-            'user_profile': user_profile,
-            'social_network': SocialNetwork.objects.filter(user_profile=user_profile),
-            'interest': Interest.objects.filter(user_profile=user_profile),
-            'is_owner': True
-        }
-        return render(request, 'profile.html', content)
+
+        messages.success(request, "Профиль успешно сохранён.")
+        return redirect('profile', user_id=user_id)

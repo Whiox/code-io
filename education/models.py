@@ -12,7 +12,9 @@ class Topic(models.Model):
 class Courses(models.Model):
     course_id = models.AutoField(primary_key=True)
     title = models.TextField()
-    author = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='my_courses')
     topics = models.ManyToManyField(Topic, related_name='courses', blank=True)
 
 

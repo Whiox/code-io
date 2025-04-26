@@ -28,6 +28,14 @@
 
                 <button type="submit">Сохранить</button>
             </form>
+            <form method="POST" style="margin-top: 30px;">
+            {% csrf_token %}
+            <button type="submit" name="action" value="delete_account"
+                    onclick="return confirm('Вы точно хотите удалить аккаунт? Это действие необратимо.')"
+                    style="background: #e53935; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+              Удалить аккаунт
+            </button>
+          </form>
         </div>
     </div>
 {% endif %}
@@ -49,9 +57,20 @@
 
         <div class="section">
             <div class="section-title">Контактная информация:</div>
-            <p>Email: {{ user_profile.email }}</p>
-            <p>Телефон: {{ user_profile.phone }}</p>
+
+            {% if user_profile.email %}
+                <p>Email: {{ user_profile.email }}</p>
+            {% endif %}
+
+            {% if user_profile.phone %}
+                <p>Телефон: {{ user_profile.phone }}</p>
+            {% endif %}
+
+            {% if not user_profile.email and not user_profile.phone %}
+                <p>Не указаны</p>
+            {% endif %}
         </div>
+
 
         <div class="section">
             <div class="section-title">Социальные сети:</div>
@@ -63,36 +82,7 @@
                 {% endfor %}
             </div>
         </div>
-
-        <div class="section">
-            <div class="section-title">Интересы:</div>
-            <ul>
-                {% for int in interest %}
-                    <p>{{ int.label }}</p>
-                {% empty %}
-                    <p>Временно отсутствуют</p>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Последние достижения:</div>
-            <ul>
-                <li>Достижение 1</li>
-                <li>Достижение 2</li>
-                <li>Достижение 3</li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="popular-courses">
-        <h2>Популярные курсы</h2>
-        <ul>
-            <li>Курс 1</li>
-            <li>Курс 2</li>
-            <li>Курс 3</li>
-        </ul>
-    </div>
+    <div>
 </div>
 
 {% endblock %}
