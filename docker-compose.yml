@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:14
@@ -15,7 +17,10 @@ services:
       retries: 5
 
   migrate:
-    image: code_io-web:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: codeio-web:latest
     command: python manage.py migrate --noinput
     volumes:
       - .:/app
@@ -24,7 +29,10 @@ services:
     restart: "no"
 
   web:
-    image: code_io-web:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: codeio-web:latest
     command: gunicorn code_io.wsgi:application --bind 0.0.0.0:8000 --workers 3
     volumes:
       - .:/app
