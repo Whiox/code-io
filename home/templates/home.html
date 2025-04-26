@@ -16,9 +16,9 @@
     <li class="course-item">
         <div class="star-wrapper">
             {% if course.is_stared %}
-                <img src="{% static 'assets/star-fill.png' %}" alt="star" class="star" data-course-id="{{ course.id }}">
+                <img src="{% static 'assets/star-fill.png' %}" alt="star" class="star" data-course-id="{{ course.course_id }}">
             {% else %}
-                <img src="{% static 'assets/star-empty.svg' %}" alt="star" class="star" data-course-id="{{ course.id }}">
+                <img src="{% static 'assets/star-empty.svg' %}" alt="star" class="star" data-course-id="{{ course.course_id }}">
             {% endif %}
         </div>
         <h2>{{ course.title }}</h2>
