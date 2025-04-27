@@ -61,10 +61,15 @@ class AllCoursesView(View):
                 is_stared = Stars.objects.filter(user=request.user, course=course)
             else:
                 is_stared = False
+            try:
+                author = course.author.username if course.author else 'Неизвестный автор'
+            except:
+                pass
+
             course_info = {
                 'id': course.course_id,
                 'title': course.title,
-                'author': course.author.username if course.author else 'Неизвестный автор',
+                'author': author,
                 'topics': topic_names,
                 'is_stared': True if is_stared else False
             }
