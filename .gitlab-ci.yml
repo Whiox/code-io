@@ -1,16 +1,11 @@
 variables:
   GIT_DEPTH: 0
 
-.config:
-  tags:
-    - code_io
-
 stages:
   - docs
 
 docs-job:
   stage: docs
-  extends: .config
   script:
     - cd docs
     - make html
