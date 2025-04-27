@@ -10,5 +10,7 @@ docs-job:
     - pip install -r requirements.txt
     - cd docs
     - make html
-    - cd ..
-    - mv docs/build/html docs/html
+  artifacts:
+    paths:
+      - docs/build/
+    expire_in: 30 days
