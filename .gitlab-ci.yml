@@ -1,0 +1,11 @@
+variables:
+  GIT_DEPTH: 0
+
+stages:
+  - docs
+
+docs-job:
+  stage: docs
+  script:
+    - cd docs
+    - make html
