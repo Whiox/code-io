@@ -2,8 +2,19 @@ variables:
   GIT_DEPTH: 0
 
 stages:
-  - docs
   - pylint
+  - docs
+
+pylint-job:
+  stage: pylint
+  script:
+    - pip install -r requirements.txt
+    - pylint .
+  artifacts:
+    untracked: false
+    when: on_success
+    expire_in: 30 days
+
 
 docs-job:
   stage: docs
@@ -15,10 +26,3 @@ docs-job:
     paths:
       - docs/build/
     expire_in: 30 days
-
-
-pylint-job:
-  stage: pylint
-  script:
-    - pip install -r requirements.txt
-    - pylint .
