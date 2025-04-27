@@ -14,8 +14,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'code_io.settings')
 django.setup()
 
 project = 'Code-io'
-copyright = '2025, Команда 1'
-author = 'Команда 1'
+copyright = '2025, Команда 1, Группа s102'
+author = 'Команда 1, Группа s102'
 release = 'v1.0'
 
 extensions = ['sphinx.ext.autodoc']
