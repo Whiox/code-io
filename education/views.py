@@ -3,6 +3,9 @@ import markdown
 import re
 import shutil
 import time
+
+from django.db.models import Count
+
 from education.files import get_all_lessons, get_lesson_number
 from django.shortcuts import render
 from django.shortcuts import redirect
@@ -44,37 +47,27 @@ class AllCoursesView(View):
     @staticmethod
     def get(request):
         """
-        Отображает все доступные курсы.
-
-        :param request: HTTP Django request
-        :return: render: all_courses.html со списком курсов
+        Отображает все доступные курсы с количеством уроков и отметкой 'is_stared'.
         """
-        courses = Courses.objects.all()
-        content = {
-            'courses': []
-        }
-        for course in courses:
-            topics = course.topics.all()
-            topic_names = [topic.name for topic in topics]
-            if not topic_names:
-                topic_names = ['Свободная тема']
-            if request.user.is_authenticated:
-                is_stared = Stars.objects.filter(user=request.user, course=course)
-            else:
-                is_stared = False
-            try:
-                author = course.author.username if course.author else 'Неизвестный автор'
-            except:
-                pass
+        courses_qs = Courses.objects.annotate(
+            lessons_count=Count('lessons')  # подпишем количество уроков
+        ).select_related('author').prefetch_related('topics')
 
-            course_info = {
+        content = {'courses': []}
+        for course in courses_qs:
+            topics = [t.name for t in course.topics.all()] or ['Свободная тема']
+            is_stared = False
+            if request.user.is_authenticated:
+                is_stared = Stars.objects.filter(user=request.user, course=course).exists()
+
+            content['courses'].append({
                 'id': course.course_id,
                 'title': course.title,
-                'author': author,
-                'topics': topic_names,
-                'is_stared': True if is_stared else False
-            }
-            content['courses'].append(course_info)
+                'author': course.author.username if course.author else 'Неизвестный автор',
+                'topics': topics,
+                'is_stared': is_stared,
+                'lessons_count': course.lessons_count,
+            })
 
         return render(request, 'all_courses.html', content)
 
@@ -83,33 +76,35 @@ class StaredCoursesView(View):
     @staticmethod
     def get(request):
         """
-        Отображает курсы, на которые пользователь поставил звёздочку.
-
-        :param request: HTTP Django request
-        :return: render: stared_courses.html со списком курсов
+        Отображает курсы, на которые пользователь поставил звёздочку,
+        с прогрессом (количеством уроков).
         """
-
         if request.user.is_anonymous:
             return redirect('/login')
 
-        stared_courses_ids = Stars.objects.filter(user=request.user).values_list('course_id', flat=True)
+        stared_ids = Stars.objects.filter(
+            user=request.user
+        ).values_list('course_id', flat=True)
 
-        stared_courses = Courses.objects.filter(
-            course_id__in=stared_courses_ids
+        stared_qs = Courses.objects.filter(
+            course_id__in=stared_ids
+        ).annotate(
+            lessons_count=Count('lessons')
         ).select_related('author').prefetch_related('topics')
 
         content = {
-            'courses': [
-                {
-                    'id': course.course_id,
-                    'title': course.title,
-                    'author': course.author.username if course.author else 'Неизвестный автор',
-                    'topics': [topic.name for topic in course.topics.all()] or ['Свободная тема'],
-                    'is_stared': True
-                }
-                for course in stared_courses
-            ]
+            'courses': []
         }
+        for course in stared_qs:
+            topics = [t.name for t in course.topics.all()] or ['Свободная тема']
+            content['courses'].append({
+                'id': course.course_id,
+                'title': course.title,
+                'author': course.author.username if course.author else 'Неизвестный автор',
+                'topics': topics,
+                'is_stared': True,
+                'lessons_count': course.lessons_count,
+            })
 
         return render(request, 'stared_courses.html', content)
 

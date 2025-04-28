@@ -1,30 +1,60 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Понравившиеся курсы{% endblock %}
 
 {% block content %}
-
-{% load static %}
-
 <h1>Список избранных курсов</h1>
 <ul class="course-list">
     {% for course in courses %}
-    <li class="course-item">
+    <li class="course-item"
+        data-course-id="{{ course.id }}"
+        data-lessons-count="{{ course.lessons_count }}"
+    >
         <div class="star-wrapper">
             {% if course.is_stared %}
-                <img src="{% static 'assets/star-fill.png' %}" alt="star" class="star" data-course-id="{{ course.id }}">
+            <img src="{% static 'assets/star-fill.png' %}"
+                 alt="star"
+                 class="star"
+                 data-course-id="{{ course.id }}">
             {% else %}
-                <img src="{% static 'assets/star-empty.svg' %}" alt="star" class="star" data-course-id="{{ course.id }}">
+            <img src="{% static 'assets/star-empty.svg' %}"
+                 alt="star"
+                 class="star"
+                 data-course-id="{{ course.id }}">
             {% endif %}
         </div>
+
         <h2>{{ course.title }}</h2>
         <p>Автор: {{ course.author }}</p>
         <p>Темы: {{ course.topics|join:", " }}</p>
         <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
+
+        <!-- Прогресс -->
+        <div class="course-progress-wrapper">
+            <div class="course-progress-bar">
+                <div class="course-progress-fill"></div>
+            </div>
+            <span class="course-progress-text">0%</span>
+        </div>
     </li>
     {% empty %}
-        <li>Курсы не найдены.</li>
+    <li>Курсы не найдены.</li>
     {% endfor %}
 </ul>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.course-item').forEach(item => {
+        const cid   = item.dataset.courseId;
+        const total = parseInt(item.dataset.lessonsCount, 10) || 0;
+        const key   = `course-progress-${cid}`;
+        const done  = JSON.parse(localStorage.getItem(key) || '[]').length;
+        const pct   = total ? Math.round(done / total * 100) : 0;
+
+        item.querySelector('.course-progress-fill').style.width = pct + '%';
+        item.querySelector('.course-progress-text').textContent = pct + '%';
+    });
+});
+</script>
 {% endblock %}

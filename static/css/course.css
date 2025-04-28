@@ -84,6 +84,34 @@ body {
     transform: scale(1.1);
 }
 
+.course-progress-wrapper {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.course-progress-bar {
+    flex: 1;
+    height: 6px;
+    background-color: var(--course-item-border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-right: 8px;
+}
+
+.course-progress-fill {
+    height: 100%;
+    background-color: var(--heading-color);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.course-progress-text {
+    font-size: 0.85em;
+    min-width: 30px;
+    text-align: right;
+}
+
 /* Заголовки */
 h1, h2, h3 {
     color: var(--heading-color);
