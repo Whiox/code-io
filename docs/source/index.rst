@@ -15,3 +15,4 @@ Code-io documentation
    ./education.rst
    ./models.rst
    ./forms.rst
+   ./admin.rst
