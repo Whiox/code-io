@@ -1,7 +1,41 @@
+{# templates/course_editor.html #}
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Редактировать{% endblock %}
+{% block title %}Редактирование: {{ course.title }}{% endblock %}
 
 {% block content %}
+<h1>Редактирование курса «{{ course.title }}»</h1>
+
+<form method="get" action="">
+    <label for="lesson-select">Выберите урок:</label>
+    <select id="lesson-select" name="lesson"
+            onchange="this.form.submit()">
+        <option value="">— не выбрано —</option>
+        {% for fn in files %}
+            <option value="{{ fn }}"
+              {% if fn == selected %}selected{% endif %}>
+              {{ fn }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+{% if selected %}
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="lesson" value="{{ selected }}">
+    <div style="margin-top:1rem;">
+        <textarea name="content"
+                  style="width:100%; height:60vh; font-family:monospace;">
+{{ content|escape }}
+        </textarea>
+    </div>
+    <button type="submit" style="margin-top:0.5rem;"
+            class="btn">Сохранить урок</button>
+</form>
+{% else %}
+<p>Выберите файл урока, чтобы начать редактирование.</p>
+{% endif %}
 
 {% endblock %}
