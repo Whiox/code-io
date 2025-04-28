@@ -4,17 +4,6 @@
 {% block title %}{{ name }}{% endblock %}
 
 {% block content %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link
-        id="code-theme"
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
-    >
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-</head>
-<body>
     <div class="course-container" data-course-id="{{ course_id }}">
         <div class="sidebar" id="sidebar">
             <div class="course-progress">
@@ -31,8 +20,8 @@
                     <li data-lesson="{{ forloop.counter }}">
                         <label class="lesson-checkbox">
                             <input
-                                type="checkbox"
-                                class="completed-checkbox"
+                                    type="checkbox"
+                                    class="completed-checkbox"
                             >
                             <span class="checkmark"></span>
                             <span class="lesson-title">Урок {{ forloop.counter }}</span>
@@ -55,95 +44,132 @@
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Highlight code
-        hljs.highlightAll();
-        updateCodeTheme();
-        new MutationObserver(updateCodeTheme).observe(
-            document.documentElement,
-            { attributes: true, attributeFilter: ['data-theme'] }
-        );
+        document.addEventListener('DOMContentLoaded', () => {
+            // Highlight code
+            hljs.highlightAll();
+            updateCodeTheme();
+            new MutationObserver(updateCodeTheme).observe(
+                document.documentElement,
+                {attributes: true, attributeFilter: ['data-theme']}
+            );
 
-        // Unique storage key per course
-        const courseId = document
-            .querySelector('.course-container')
-            .dataset
-            .courseId;
-        const storageKey = `course-progress-${courseId}`;
-        const totalLessons = {{ lessons|length }};
+            document.querySelectorAll('div.codehilite').forEach(div => {
+                const pre = div.querySelector('pre');
+                if (!pre) return;
 
-        const progressBar = document.querySelector('.progress');
-        const progressText = document.querySelector('.progress-percent');
+                const button = document.createElement('button');
+                button.innerText = 'Копировать';
+                button.className = 'copy-button';
 
-        // Load saved progress
-        function loadProgress() {
-            const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            document.querySelectorAll('.lessons-list li').forEach(li => {
-                const cb = li.querySelector('.completed-checkbox');
-                cb.checked = saved.includes(li.dataset.lesson);
+                button.addEventListener('click', () => {
+                    const code = div.querySelector('code');
+                    if (code) {
+                        const codeText = code.innerText;
+
+                        navigator.clipboard.writeText(codeText)
+                            .then(() => {
+                                button.innerText = 'Скопировано!';
+                                setTimeout(() => {
+                                    button.innerText = 'Копировать';
+                                }, 1500);
+                            })
+                            .catch(err => {
+                                console.error('Ошибка копирования:', err);
+                            });
+                    }
+                });
+
+                div.style.position = 'relative';
+                div.appendChild(button);
             });
-            updateProgress();
-        }
 
-        // Update progress bar, text, save
-        function updateProgress() {
-            const done = document.querySelectorAll('.completed-checkbox:checked').length;
-            const percent = totalLessons
-                ? Math.round((done / totalLessons) * 100)
-                : 0;
-            progressBar.style.width = `${percent}%`;
-            progressText.textContent = `${percent}%`;
+            // Unique storage key per course
+            const courseId = document
+                .querySelector('.course-container')
+                .dataset
+                .courseId;
+            const storageKey = `course-progress-${courseId}`;
+            const totalLessons = {{ lessons|length }};
 
-            const completed = Array.from(
-                document.querySelectorAll('.completed-checkbox:checked')
-            ).map(cb => cb.closest('li').dataset.lesson);
-            localStorage.setItem(storageKey, JSON.stringify(completed));
-        }
+            const progressBar = document.querySelector('.progress');
+            const progressText = document.querySelector('.progress-percent');
 
-        // Checkbox change → update progress
-        document.querySelectorAll('.completed-checkbox').forEach(cb => {
-            cb.addEventListener('change', updateProgress);
+            // Load saved progress
+            function loadProgress() {
+                const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                document.querySelectorAll('.lessons-list li').forEach(li => {
+                    const cb = li.querySelector('.completed-checkbox');
+                    cb.checked = saved.includes(li.dataset.lesson);
+                });
+                updateProgress();
+            }
+
+            // Update progress bar, text, save
+            function updateProgress() {
+                const done = document.querySelectorAll('.completed-checkbox:checked').length;
+                const percent = totalLessons
+                    ? Math.round((done / totalLessons) * 100)
+                    : 0;
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${percent}%`;
+
+                const completed = Array.from(
+                    document.querySelectorAll('.completed-checkbox:checked')
+                ).map(cb => cb.closest('li').dataset.lesson);
+                localStorage.setItem(storageKey, JSON.stringify(completed));
+            }
+
+            // Checkbox change → update progress
+            document.querySelectorAll('.completed-checkbox').forEach(cb => {
+                cb.addEventListener('change', updateProgress);
+            });
+
+            // Title click → scroll
+            document.querySelectorAll('.lesson-title').forEach(title => {
+                title.addEventListener('click', e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const li = e.target.closest('li');
+                    const target = document.getElementById(`lesson-${li.dataset.lesson}`);
+                    if (target) {
+                        target.scrollIntoView({behavior: 'smooth'});
+                    }
+                });
+            });
+
+            loadProgress();
         });
 
-        // Title click → scroll
-        document.querySelectorAll('.lesson-title').forEach(title => {
-            title.addEventListener('click', e => {
-                e.preventDefault();
-                e.stopPropagation();
-                const li = e.target.closest('li');
-                const target = document.getElementById(`lesson-${li.dataset.lesson}`);
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        });
-
-        loadProgress();
-    });
-
-    function updateCodeTheme() {
-        const theme = document.documentElement.getAttribute('data-theme') || 'light';
-        const link = document.getElementById('code-theme');
-        link.href = theme === 'dark'
-            ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
-            : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
-        hljs.highlightAll();
-    }
-
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('content').classList.toggle('shifted');
-    }
-
-    document.addEventListener('click', e => {
-        const sb = document.getElementById('sidebar');
-        const btn = document.querySelector('.toggle-button');
-        if (!sb.contains(e.target) && !btn.contains(e.target)) {
-            sb.classList.remove('active');
-            document.getElementById('content').classList.remove('shifted');
+        function updateCodeTheme() {
+            const theme = document.documentElement.getAttribute('data-theme') || 'light';
+            const link = document.getElementById('code-theme');
+            link.href = theme === 'dark'
+                ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+                : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+            hljs.highlightAll();
         }
-    });
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('content').classList.toggle('shifted');
+        }
+
+        document.addEventListener('click', e => {
+            const sb = document.getElementById('sidebar');
+            const btn = document.querySelector('.toggle-button');
+            if (!sb.contains(e.target) && !btn.contains(e.target)) {
+                sb.classList.remove('active');
+                document.getElementById('content').classList.remove('shifted');
+            }
+        });
     </script>
+
+    <link
+            id="code-theme"
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+    >
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
     <style>
         :root {
@@ -200,7 +226,7 @@
             background: var(--sidebar-bg);
             transition: transform 0.3s ease;
             z-index: 1000;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
             padding: 1rem;
             overflow-y: auto;
         }
@@ -241,7 +267,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s;
         }
 
@@ -332,6 +358,26 @@
             margin-bottom: 2rem;
         }
 
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 5px 10px;
+            font-size: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .copy-button:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
         @media (max-width: 768px) {
             .content.shifted {
                 margin-left: 0;
@@ -342,5 +388,4 @@
             }
         }
     </style>
-</body>
 {% endblock %}
