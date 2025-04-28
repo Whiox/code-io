@@ -36,6 +36,7 @@ class ViewCourseView(View):
         lessons.sort(key=get_lesson_number)
 
         content = get_all_lessons(course, course_path, lessons, lessons_content)
+        content['course_id'] = course_id
         return render(request, 'course.html', content)
 
 

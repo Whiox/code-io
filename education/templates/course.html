@@ -7,14 +7,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="code-theme">
+    <link
+        id="code-theme"
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+    >
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
 <body>
-    <div class="course-container">
+    <div class="course-container" data-course-id="{{ course_id }}">
         <div class="sidebar" id="sidebar">
             <div class="course-progress">
-                <h3>Прогресс курса</h3>
+                <h3>
+                    Прогресс курса
+                    <span class="progress-percent">0%</span>
+                </h3>
                 <div class="progress-bar">
                     <div class="progress"></div>
                 </div>
@@ -23,7 +30,10 @@
                 {% for lesson in lessons %}
                     <li data-lesson="{{ forloop.counter }}">
                         <label class="lesson-checkbox">
-                            <input type="checkbox" class="completed-checkbox">
+                            <input
+                                type="checkbox"
+                                class="completed-checkbox"
+                            >
                             <span class="checkmark"></span>
                             <span class="lesson-title">Урок {{ forloop.counter }}</span>
                         </label>
@@ -45,84 +55,142 @@
     </div>
 
     <script>
-        // Инициализация подсветки кода
+    document.addEventListener('DOMContentLoaded', () => {
+        // Highlight code
         hljs.highlightAll();
+        updateCodeTheme();
+        new MutationObserver(updateCodeTheme).observe(
+            document.documentElement,
+            { attributes: true, attributeFilter: ['data-theme'] }
+        );
 
-        // Обработчик темы
-        function updateCodeTheme() {
-            const theme = document.documentElement.getAttribute('data-theme') || 'light';
-            const link = document.getElementById('code-theme');
-            link.href = theme === 'dark'
-                ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
-                : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
-            hljs.highlightAll();
-        }
+        // Unique storage key per course
+        const courseId = document
+            .querySelector('.course-container')
+            .dataset
+            .courseId;
+        const storageKey = `course-progress-${courseId}`;
+        const totalLessons = {{ lessons|length }};
 
-        // Система прогресса
-        const storageKey = 'course-progress-{{ course.id }}';
+        const progressBar = document.querySelector('.progress');
+        const progressText = document.querySelector('.progress-percent');
 
-        function updateProgress() {
-            const checkboxes = document.querySelectorAll('.completed-checkbox:checked');
-            const progress = (checkboxes.length / {{ lessons|length }}) * 100;
-            document.querySelector('.progress').style.width = `${progress}%`;
-
-            const completedLessons = Array.from(checkboxes).map(checkbox =>
-                checkbox.closest('li').dataset.lesson
-            );
-            localStorage.setItem(storageKey, JSON.stringify(completedLessons));
-        }
-
-        // Загрузка прогресса
+        // Load saved progress
         function loadProgress() {
-            const progress = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
             document.querySelectorAll('.lessons-list li').forEach(li => {
-                const checkbox = li.querySelector('.completed-checkbox');
-                checkbox.checked = progress.includes(li.dataset.lesson);
+                const cb = li.querySelector('.completed-checkbox');
+                cb.checked = saved.includes(li.dataset.lesson);
             });
             updateProgress();
         }
 
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', () => {
-            updateCodeTheme();
-            loadProgress();
+        // Update progress bar, text, save
+        function updateProgress() {
+            const done = document.querySelectorAll('.completed-checkbox:checked').length;
+            const percent = totalLessons
+                ? Math.round((done / totalLessons) * 100)
+                : 0;
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = `${percent}%`;
 
-            document.querySelectorAll('.completed-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', updateProgress);
-            });
-
-            // Наблюдатель за изменением темы
-            const observer = new MutationObserver(updateCodeTheme);
-            observer.observe(document.documentElement, {
-                attributes: true,
-                attributeFilter: ['data-theme']
-            });
-        });
-
-        // Функции управления меню
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('content');
-            sidebar.classList.toggle('active');
-            content.classList.toggle('shifted');
+            const completed = Array.from(
+                document.querySelectorAll('.completed-checkbox:checked')
+            ).map(cb => cb.closest('li').dataset.lesson);
+            localStorage.setItem(storageKey, JSON.stringify(completed));
         }
 
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const button = document.querySelector('.toggle-button');
-            if (!sidebar.contains(event.target) && !button.contains(event.target)) {
-                sidebar.classList.remove('active');
-                document.getElementById('content').classList.remove('shifted');
-            }
+        // Checkbox change → update progress
+        document.querySelectorAll('.completed-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateProgress);
         });
+
+        // Title click → scroll
+        document.querySelectorAll('.lesson-title').forEach(title => {
+            title.addEventListener('click', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                const li = e.target.closest('li');
+                const target = document.getElementById(`lesson-${li.dataset.lesson}`);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        loadProgress();
+    });
+
+    function updateCodeTheme() {
+        const theme = document.documentElement.getAttribute('data-theme') || 'light';
+        const link = document.getElementById('code-theme');
+        link.href = theme === 'dark'
+            ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+            : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+        hljs.highlightAll();
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('content').classList.toggle('shifted');
+    }
+
+    document.addEventListener('click', e => {
+        const sb = document.getElementById('sidebar');
+        const btn = document.querySelector('.toggle-button');
+        if (!sb.contains(e.target) && !btn.contains(e.target)) {
+            sb.classList.remove('active');
+            document.getElementById('content').classList.remove('shifted');
+        }
+    });
     </script>
 
     <style>
-        .course-container {
-            position: relative;
-            min-height: 100vh;
+        :root {
+            --form-section-bg: #ffffff;
+            --secondary-text: #666;
+            --accent-color: #ff8c42;
+            --primary-button-bg: #28a745;
+            --primary-button-hover: #218838;
+            --border-color: #e0e0e0;
+            --sidebar-bg: #ffffff;
+            --sidebar-text: #333;
+            --form-bg: #ffffff;
+            --form-border: #ddd;
+            --input-bg: #fff;
+            --input-border: #ddd;
+            --focus-border: #e67e22;
+            --checkbox-color: #e67e22;
+            --lesson-form-bg: #f9f9f9;
+            --lesson-form-border: #f0b27a;
+            --remove-btn: #e74c3c;
+            --remove-hover: #c0392b;
+            --toggle-bg: linear-gradient(135deg, #32CD32, #FFA500);
         }
 
+        [data-theme="dark"] {
+            --form-section-bg: #2a2a2a;
+            --secondary-text: #888;
+            --accent-color: #ff6b35;
+            --primary-button-bg: #1b752e;
+            --primary-button-hover: #155724;
+            --border-color: #404040;
+            --sidebar-bg: #333333;
+            --sidebar-text: #ffffff;
+            --form-bg: #333333;
+            --form-border: #555;
+            --input-bg: #444;
+            --input-border: #555;
+            --focus-border: #ff8c42;
+            --checkbox-color: #ff8c42;
+            --lesson-form-bg: #3a3a3a;
+            --lesson-form-border: #ff8c42;
+            --remove-btn: #d9534f;
+            --remove-hover: #c9302c;
+            --toggle-bg: #ff8c42;
+        }
+
+        /* Стили сайдбара */
         .sidebar {
             position: fixed;
             left: -300px;
@@ -138,13 +206,24 @@
         }
 
         .sidebar.active {
-            transform: translateX(300px);
+            transform: translateX(280px);
         }
 
         .content {
             transition: margin-left 0.3s ease;
             padding: 2rem;
             margin-left: 0;
+        }
+
+        .lessons-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            padding-left: 0.5rem;
+        }
+
+        .lessons-list li {
+            list-style: none;
         }
 
         .content.shifted {
@@ -170,7 +249,7 @@
             transform: translateY(-2px);
         }
 
-        /* Стили чекбоксов */
+        /* Чекбоксы уроков */
         .lesson-checkbox {
             display: flex;
             align-items: center;
@@ -222,22 +301,7 @@
             color: var(--text-color);
         }
 
-        /* Темы */
-        [data-theme="dark"] {
-            --sidebar-bg: #1a1a1a;
-            --hover-bg: #2a2a2a;
-            --accent-color: #FF6B35;
-            --text-color: #ffffff;
-        }
-
-        [data-theme="light"] {
-            --sidebar-bg: #ffffff;
-            --hover-bg: #f8f8f8;
-            --accent-color: #28a745;
-            --text-color: #333333;
-        }
-
-        /* Остальные стили */
+        /* Прочие стили */
         .hljs {
             padding: 1rem;
             border-radius: 8px;
@@ -278,4 +342,5 @@
             }
         }
     </style>
+</body>
 {% endblock %}
