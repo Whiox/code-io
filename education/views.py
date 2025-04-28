@@ -4,7 +4,10 @@ import re
 import shutil
 import time
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.utils.decorators import method_decorator
 
 from education.files import get_all_lessons, get_lesson_number
 from django.shortcuts import render
@@ -247,3 +250,72 @@ class AddStar(View):
             status = True
 
         return JsonResponse({"status": status})
+
+def author_or_staff(user, course):
+    return user.is_staff or course.author == user
+
+class CourseEditorView(View):
+    """
+    Показывает список файлов-уроков курса и позволяет править выбранный файл.
+    Править могут только автор курса или staff-пользователь.
+    """
+
+    @method_decorator(login_required)
+    def get(self, request, course_id):
+        course = get_object_or_404(Courses, course_id=course_id)
+        if not author_or_staff(request.user, course):
+            messages.error(request, "У вас нет прав на редактирование этого курса.")
+            return redirect('course', course_id=course_id)
+
+        course_dir = os.path.join(settings.BASE_DIR, 'courses', str(course_id))
+
+        try:
+            raw_files = [f for f in os.listdir(course_dir) if f.endswith('.md')]
+        except FileNotFoundError:
+            messages.error(request, "Каталог курса не найден.")
+            return redirect('course', course_id=course_id)
+
+        # Сортируем по номеру урока, который извлекаем из имени файла
+        def extract_lesson_number(fn: str) -> int:
+            m = re.search(r'(\d+)', fn)
+            return int(m.group(1)) if m else float('inf')
+
+        files = sorted(raw_files, key=extract_lesson_number)
+
+        sel = request.GET.get('lesson')
+        content = ''
+        if sel in files:
+            with open(os.path.join(course_dir, sel), encoding='utf-8') as fp:
+                content = fp.read()
+
+        return render(request, 'edit_course.html', {
+            'course': course,
+            'files': files,
+            'selected': sel,
+            'content': content,
+        })
+
+    @method_decorator(login_required)
+    def post(self, request, course_id):
+        course = get_object_or_404(Courses, course_id=course_id)
+        if not author_or_staff(request.user, course):
+            messages.error(request, "У вас нет прав на редактирование этого курса.")
+            return redirect('course', course_id=course_id)
+
+        lesson = request.POST.get('lesson')
+        new_content = request.POST.get('content', '')
+        course_dir = os.path.join(settings.BASE_DIR, 'courses', str(course_id))
+        file_path = os.path.join(course_dir, lesson or '')
+
+        if not lesson or not os.path.isfile(file_path):
+            messages.error(request, "Некорректный урок.")
+            return redirect('course_edit', course_id=course_id)
+
+        try:
+            with open(file_path, 'w', encoding='utf-8') as fp:
+                fp.write(new_content)
+            messages.success(request, f"Урок «{lesson}» сохранён.")
+        except Exception as e:
+            messages.error(request, f"Ошибка при сохранении: {e}")
+
+        return redirect(f"{request.path}?lesson={lesson}")

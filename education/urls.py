@@ -1,7 +1,5 @@
 from django.urls import path
-from education.views import (
-    ViewCourseView, AllCoursesView, StaredCoursesView, AddCourseView, MyCoursesView, DeleteCourseView, AddStar
-)
+from education.views import *
 
 urlpatterns = [
     path('all/', AllCoursesView.as_view(), name='all'),
@@ -11,4 +9,5 @@ urlpatterns = [
     path('my', MyCoursesView.as_view(), name='my_courses'),
     path('delete/<int:course_id>/', DeleteCourseView.as_view(), name='delete'),
     path('add-star/<int:course_id>/', AddStar.as_view(), name='add_star'),
+    path('course/<int:course_id>/edit/', CourseEditorView.as_view(), name='course_edit')
 ]
