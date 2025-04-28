@@ -1,3 +1,7 @@
+"""
+Views, необходимые для общей картины сайта
+"""
+
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
@@ -12,8 +16,17 @@ from education.models import Courses, Stars
 
 
 class HomeView(View):
+    """
+    Главная страница.
+    """
     @staticmethod
     def get(request):
+        """
+        Возвращает главную страницу с тремя самыми популярными курсами
+
+        :param request: HTTP Django request.
+        :return: render home.html
+        """
         if request.user.is_authenticated:
             subquery = Stars.objects.filter(
                 course=OuterRef('pk'),
@@ -34,8 +47,18 @@ class HomeView(View):
 
 
 class ProfileView(View):
+    """
+    Профиль пользователя
+    """
     @method_decorator(login_required)
     def get(self, request, user_id):
+        """
+        Возвращает профиль пользователя по id
+
+        :param user_id: id профиля
+        :param request: HTTP Django request.
+        :return: render profile.html
+        """
         profile_owner = get_object_or_404(User, id=user_id)
         user_profile, created = UserProfile.objects.get_or_create(user=profile_owner)
 
@@ -51,6 +74,13 @@ class ProfileView(View):
 
     @method_decorator(login_required)
     def post(self, request, user_id):
+        """
+        Обработка изменения профиля
+
+        :param request: HTTP Django request.
+        :param user_id: id профиля
+        :return: render profile.html
+        """
         if request.user.id != int(user_id):
             messages.error(request, "У вас нет прав на изменение этого профиля.")
             return redirect('profile', user_id=user_id)
