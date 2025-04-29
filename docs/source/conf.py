@@ -20,6 +20,8 @@ extensions = [
     'sphinxcontrib_django',
     ]
 
+django_settings = 'code_io.settings'
+
 html_theme = 'furo'
 
 autodoc_default_options = {
@@ -28,7 +30,9 @@ autodoc_default_options = {
     'private-members': True,
     'special-members': True,
     'inherited-members': False,
-    'exclude-members': '__module__,__annotations__,_meta,DoesNotExist,MultipleObjectsReturned',
+    'exclude-members': (
+        '__module__,__doc__,objects,*_id,DoesNotExist,MultipleObjectsReturned,_meta'
+    ),
 }
 
 language = 'ru'

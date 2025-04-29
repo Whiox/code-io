@@ -1,18 +1,26 @@
-.. Code-io documentation master file, created by
-   sphinx-quickstart on Sun Mar  9 14:42:44 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Code-io documentation
+Code-io Documentation
 =====================
+
+Добро пожаловать в документацию проекта **Code-io** — образовательной платформы, позволяющей создавать, публиковать и проходить курсы.
+
+Навигация по разделам:
+-----------------------
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :caption: Разделы:
 
-   ./home.rst
-   ./authentication.rst
-   ./education.rst
-   ./models.rst
-   ./forms.rst
-   ./admin.rst
+   home
+   authentication
+   education
+   models
+   forms
+   admin
+
+Документация охватывает:
+- описание моделей и их структуры,
+- интерфейсы форм,
+- административную панель,
+- представления (views) и общую архитектуру приложения.
+
+Для быстрого старта ознакомьтесь с разделами в списке выше.

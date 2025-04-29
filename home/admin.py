@@ -1,17 +1,3 @@
-"""
-admin.py
-
-Модуль админки Django для управления:
-- Пользователями и их профилями
-- Социальными сетями и интересами
-- Курсами, уроками и заданиями
-- Темами курсов
-- Звёздочками (оценками) курсов
-- Запросами на сброс пароля
-
-Здесь регистрируются все модели и определяются inline‐классы для удобного редактирования связанных сущностей.
-"""
-
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -24,11 +10,13 @@ from education.models import Topic, Courses, Lessons, Task, Stars
 User = get_user_model()
 
 
-# --- Инлайны для профиля ---
 class SocialNetworkInline(admin.TabularInline):
     """
-    Inline-класс для отображения и редактирования
-    объектов SocialNetwork в интерфейсе профиля пользователя.
+    Inline-класс для редактирования социальных сетей пользователя.
+
+    :ivar model: модель SocialNetwork
+    :vartype model: django.db.models.Model
+    :ivar int extra: количество дополнительных пустых форм для создания записей
     """
     model = SocialNetwork
     extra = 0
@@ -36,8 +24,11 @@ class SocialNetworkInline(admin.TabularInline):
 
 class InterestInline(admin.TabularInline):
     """
-    Inline-класс для отображения и редактирования
-    объектов Interest (интересов) в интерфейсе профиля пользователя.
+    Inline-класс для редактирования интересов пользователя.
+
+    :ivar model: модель Interest
+    :vartype model: django.db.models.Model
+    :ivar int extra: количество дополнительных пустых форм для создания записей
     """
     model = Interest
     extra = 0
@@ -45,20 +36,30 @@ class InterestInline(admin.TabularInline):
 
 class UserProfileInline(admin.StackedInline):
     """
-    Inline-класс для редактирования основных полей UserProfile
-    прямо на странице редактирования пользователя в админке.
+    Inline-класс для редактирования профиля пользователя на странице User.
+
+    :ivar model: модель UserProfile
+    :vartype model: django.db.models.Model
+    :ivar int extra: количество дополнительных пустых форм
+    :ivar bool can_delete: возможность удаления профиля из админки User
     """
     model = UserProfile
     extra = 0
     can_delete = False
 
 
-# --- Пользователь ---
 class UserAdmin(BaseUserAdmin):
     """
-    Расширение стандартной админки для модели User.
-    Добавляет inline-редактирование профиля и настраивает
-    отображаемые и ищущиеся поля.
+    Админка для кастомной модели User.
+
+    Добавляет возможность редактирования связанных профилей и настраивает
+    поля для отображения, поиска и сортировки.
+
+    :ivar list inlines: список Inline-классов для отображения на странице User
+    :vartype inlines: list
+    :ivar tuple list_display: поля, отображаемые в списке пользователей
+    :ivar tuple search_fields: поля для поиска пользователей в админке
+    :ivar tuple ordering: поля для сортировки списка пользователей
     """
     inlines = [UserProfileInline]
     list_display = ('email', 'username', 'is_staff', 'is_active')
@@ -66,8 +67,6 @@ class UserAdmin(BaseUserAdmin):
     ordering = ('email',)
 
 
-# Если `User` ещё не был зарегистрирован — регистрируем сразу,
-# если же уже есть — перерегистрируем, перехватив исключение.
 try:
     admin.site.unregister(User)
 except NotRegistered:
@@ -76,47 +75,58 @@ except NotRegistered:
 admin.site.register(User, UserAdmin)
 
 
-# --- Профиль пользователя ---
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     """
     Админка для модели UserProfile.
-    Отображает пользователя, контактную информацию и описание,
-    а также inline-редактирование социальных сетей и интересов.
+
+    Отображает основную информацию профиля и предоставляет
+    inline-редактирование социальных сетей и интересов.
+
+    :ivar tuple list_display: поля, отображаемые в списке профилей
+    :ivar list inlines: Inline-классы для редактирования связанных моделей
+    :ivar tuple search_fields: поля для поиска профилей
     """
     list_display = ('user', 'about', 'email', 'phone')
     inlines = [SocialNetworkInline, InterestInline]
     search_fields = ('user__username', 'email', 'phone')
 
 
-# --- Соцсети ---
 @admin.register(SocialNetwork)
 class SocialNetworkAdmin(admin.ModelAdmin):
     """
     Админка для модели SocialNetwork.
-    Позволяет управлять записями социальных сетей,
-    привязанных к профилю пользователя.
+
+    Позволяет управлять связями социальных сетей с профилем пользователя.
+
+    :ivar tuple list_display: поля, отображаемые в списке соцсетей
+    :ivar tuple search_fields: поля для поиска записей социальных сетей
     """
     list_display = ('user_profile', 'label', 'linc')
     search_fields = ('label', 'linc')
 
 
-# --- Интересы ---
 @admin.register(Interest)
 class InterestAdmin(admin.ModelAdmin):
     """
     Админка для модели Interest.
+
     Позволяет управлять списком интересов пользователя.
+
+    :ivar tuple list_display: поля, отображаемые в списке интересов
+    :ivar tuple search_fields: поля для поиска интересов по имени профиля пользователя
     """
     list_display = ('user_profile',)
     search_fields = ('user_profile__user__username',)
 
 
-# --- Курсы и вложенные уроки/задания ---
 class LessonsInline(admin.TabularInline):
     """
-    Inline-класс для отображения уроков (Lessons)
-    на странице редактирования курса.
+    Inline-класс для отображения уроков в админке курсов.
+
+    :ivar model: модель Lessons
+    :vartype model: django.db.models.Model
+    :ivar int extra: количество дополнительных пустых форм для создания уроков
     """
     model = Lessons
     extra = 0
@@ -126,8 +136,12 @@ class LessonsInline(admin.TabularInline):
 class CoursesAdmin(admin.ModelAdmin):
     """
     Админка для модели Courses.
-    Отображает название и автора курса,
-    а также позволяет редактировать уроки inline.
+
+    Позволяет управлять курсами и их уроками через inline.
+
+    :ivar tuple list_display: поля, отображаемые в списке курсов
+    :ivar tuple search_fields: поля для поиска курсов
+    :ivar list inlines: Inline-класс для редактирования уроков курса
     """
     list_display = ('title', 'author')
     search_fields = ('title', 'author__username')
@@ -136,8 +150,11 @@ class CoursesAdmin(admin.ModelAdmin):
 
 class TaskInline(admin.TabularInline):
     """
-    Inline-класс для отображения задач (Task)
-    на странице редактирования урока.
+    Inline-класс для отображения заданий в админке уроков.
+
+    :ivar model: модель Task
+    :vartype model: django.db.models.Model
+    :ivar int extra: количество дополнительных пустых форм для создания заданий
     """
     model = Task
     extra = 0
@@ -147,8 +164,12 @@ class TaskInline(admin.TabularInline):
 class LessonsAdmin(admin.ModelAdmin):
     """
     Админка для модели Lessons.
-    Отображает название урока и связанный курс,
-    а также позволяет редактировать задачи inline.
+
+    Позволяет управлять уроками и их заданиями через inline.
+
+    :ivar tuple list_display: поля, отображаемые в списке уроков
+    :ivar tuple search_fields: поля для поиска уроков
+    :ivar list inlines: Inline-класс для редактирования заданий урока
     """
     list_display = ('title', 'course')
     search_fields = ('title', 'course__title')
@@ -159,40 +180,53 @@ class LessonsAdmin(admin.ModelAdmin):
 class TaskAdmin(admin.ModelAdmin):
     """
     Админка для модели Task.
-    Отображает задачи, связанные с уроком.
+
+    Позволяет управлять заданиями уроков.
+
+    :ivar tuple list_display: поля, отображаемые в списке заданий
+    :ivar tuple search_fields: поля для поиска заданий по названию урока
     """
     list_display = ('lesson',)
     search_fields = ('lesson__title',)
 
 
-# --- Топики ---
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
     """
     Админка для модели Topic.
+
     Позволяет управлять темами курсов.
+
+    :ivar tuple list_display: поля, отображаемые в списке тем
+    :ivar tuple search_fields: поля для поиска тем по названию
     """
     list_display = ('name',)
     search_fields = ('name',)
 
 
-# --- Оценки ---
 @admin.register(Stars)
 class StarsAdmin(admin.ModelAdmin):
     """
     Админка для модели Stars.
-    Отображает оценки пользователей для курсов.
+
+    Позволяет управлять оценками пользователей для курсов.
+
+    :ivar tuple list_display: поля, отображаемые в списке оценок
+    :ivar tuple search_fields: поля для поиска оценок по курсу и пользователю
     """
     list_display = ('course', 'user', 'data')
     search_fields = ('course__title', 'user__username')
 
 
-# --- Запросы на сброс пароля ---
 @admin.register(ResetRequest)
 class ResetRequestAdmin(admin.ModelAdmin):
     """
     Админка для модели ResetRequest.
-    Отображает запросы на сброс пароля с метаданными о браузере и устройстве.
+
+    Отображает запросы на сброс пароля вместе с метаданными об окружении отправителя.
+
+    :ivar tuple list_display: поля, отображаемые в списке запросов
+    :ivar tuple search_fields: поля для поиска запросов по пользователю, IP и устройству
     """
     list_display = ('user', 'ip', 'device', 'browser', 'os')
     search_fields = ('user__email', 'ip', 'device', 'browser', 'os')
