@@ -1,0 +1,3 @@
+Chain of Responsibility — обработка MD-файла по цепочке:
+ReadFileHandler → MetadataHandler → MarkdownHandler → TaskExtractionHandler → BuildResultHandler
+Находится в education.chain.py
