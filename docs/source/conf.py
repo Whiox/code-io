@@ -12,7 +12,15 @@ copyright = '2025, Команда 1, Группа s102'
 author = 'Команда 1, Группа s102'
 release = 'v1.0'
 
-extensions = ['sphinx.ext.autodoc']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.intersphinx',
+    'sphinxcontrib_django',
+    ]
+
+html_theme = 'furo'
 
 autodoc_default_options = {
     'members': True,
@@ -20,6 +28,7 @@ autodoc_default_options = {
     'private-members': True,
     'special-members': True,
     'inherited-members': False,
+    'exclude-members': '__module__,__annotations__,_meta,DoesNotExist,MultipleObjectsReturned',
 }
 
 language = 'ru'
