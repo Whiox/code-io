@@ -29,3 +29,12 @@ views
     :members:
     :undoc-members:
     :show-inheritance:
+
+***************************
+Паттерн проектирования цепь
+***************************
+.. automodule:: education.chain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
