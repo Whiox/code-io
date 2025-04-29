@@ -7,7 +7,6 @@ models
 .. automodule:: education.models
     :members:
     :undoc-members:
-    :show-inheritance:
 
 *****
 views
@@ -15,7 +14,6 @@ views
 .. automodule:: education.forms
     :members:
     :undoc-members:
-    :show-inheritance:
 
 ***********
 доп. методы
@@ -23,12 +21,10 @@ views
 .. automodule:: education.methods
     :members:
     :undoc-members:
-    :show-inheritance:
 
 .. automodule:: education.files
     :members:
     :undoc-members:
-    :show-inheritance:
 
 ***************************
 Паттерн проектирования цепь
@@ -36,5 +32,3 @@ views
 .. automodule:: education.chain
     :members:
     :undoc-members:
-    :show-inheritance:
-

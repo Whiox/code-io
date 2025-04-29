@@ -7,12 +7,10 @@ models
 .. automodule:: home.models
     :members:
     :undoc-members:
-    :show-inheritance:
 
 *****
 views
 *****
-.. automodule:: home.forms
+.. automodule:: home.views
     :members:
     :undoc-members:
-    :show-inheritance:

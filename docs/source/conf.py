@@ -1,12 +1,6 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# For the full list of built-in configuration values, see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-
 import sys
 import os
+
 sys.path.insert(0, os.path.abspath('../../'))
 
 import django
@@ -19,6 +13,14 @@ author = 'Команда 1, Группа s102'
 release = 'v1.0'
 
 extensions = ['sphinx.ext.autodoc']
+
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+    'private-members': True,
+    'special-members': True,
+    'inherited-members': False,
+}
 
 language = 'ru'
 

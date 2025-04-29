@@ -7,7 +7,6 @@ models
 .. automodule:: authentication.models
     :members:
     :undoc-members:
-    :show-inheritance:
 
 *****
 views
@@ -15,7 +14,6 @@ views
 .. automodule:: authentication.forms
     :members:
     :undoc-members:
-    :show-inheritance:
 
 ***********
 доп. методы
@@ -23,4 +21,3 @@ views
 .. automodule:: authentication.methods
     :members:
     :undoc-members:
-    :show-inheritance:

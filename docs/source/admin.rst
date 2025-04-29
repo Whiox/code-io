@@ -7,4 +7,3 @@ forms
 .. automodule:: home.admin
     :members:
     :undoc-members:
-    :show-inheritance:
