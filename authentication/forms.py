@@ -1,16 +1,15 @@
-"""Формы аунтефикации"""
+"""Формы аутентификации."""
 
 from django import forms
 
 
 class RegisterForm(forms.Form):
-    """
-    Форма для регистрации
+    """Форма для регистрации нового пользователя.
 
-    :param username: Имя пользователя
-    :param email: Электронная почта пользователя
-    :param password: Пароль
-    :param repeat_password: Повтор пароля
+    :ivar forms.CharField username: Имя пользователя
+    :ivar forms.EmailField email: Электронная почта пользователя
+    :ivar forms.CharField password: Пароль
+    :ivar forms.CharField repeat_password: Повтор пароля
     """
     username = forms.CharField(
         label='', max_length=255,
@@ -38,16 +37,15 @@ class RegisterForm(forms.Form):
         widget=forms.TextInput(attrs={
             'class': 'auth-form-control',
             'placeholder': 'Повторите пароль'
-            })
-        )
+        })
+    )
 
 
 class LoginForm(forms.Form):
-    """
-    Форма для входа в аккаунт
+    """Форма для входа в аккаунт.
 
-    :param email: Электронная почта
-    :param password: Пароль
+    :ivar forms.EmailField email: Электронная почта
+    :ivar forms.CharField password: Пароль
     """
     email = forms.EmailField(
         label='', max_length=255,
@@ -61,15 +59,14 @@ class LoginForm(forms.Form):
         widget=forms.TextInput(attrs={
             'class': 'auth-form-control',
             'placeholder': 'Пароль'
-            })
-        )
+        })
+    )
 
 
 class ResetPasswordForm(forms.Form):
-    """
-    Форма для входа в аккаунт
+    """Форма запроса на сброс пароля.
 
-    :param email: Электронная почта
+    :ivar forms.EmailField email: Электронная почта
     """
     email = forms.EmailField(
         label='',
@@ -81,11 +78,10 @@ class ResetPasswordForm(forms.Form):
 
 
 class ChangePasswordForm(forms.Form):
-    """
-    Форма для сброса пароля
+    """Форма смены пароля.
 
-    :param old_password: Старый пароль
-    :param new_password: Новый пароль
+    :ivar forms.CharField old_password: Старый пароль
+    :ivar forms.CharField new_password: Новый пароль
     """
     old_password = forms.CharField(
         label='', max_length=255,
@@ -99,5 +95,5 @@ class ChangePasswordForm(forms.Form):
         widget=forms.TextInput(attrs={
             'class': 'auth-form-control',
             'placeholder': 'Новый пароль'
-            })
-        )
+        })
+    )
