@@ -311,7 +311,7 @@ class CourseEditorView(View):
             return redirect('course_edit', course_id=course_id)
 
         try:
-            with open(file_path, 'w', encoding='utf-8') as fp:
+            with open(file_path, 'wb', encoding='utf-8') as fp:
                 fp.write(new_content)
             messages.success(request, f"Урок «{lesson}» сохранён.")
         except Exception as e:

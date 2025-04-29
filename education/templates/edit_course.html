@@ -1,41 +1,168 @@
-{# templates/course_editor.html #}
 {% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Редактирование: {{ course.title }}{% endblock %}
 
 {% block content %}
-<h1>Редактирование курса «{{ course.title }}»</h1>
+<div class="editor-container">
+  <h1 class="editor-title">Редактирование курса «{{ course.title }}»</h1>
 
-<form method="get" action="">
-    <label for="lesson-select">Выберите урок:</label>
-    <select id="lesson-select" name="lesson"
-            onchange="this.form.submit()">
-        <option value="">— не выбрано —</option>
-        {% for fn in files %}
-            <option value="{{ fn }}"
-              {% if fn == selected %}selected{% endif %}>
-              {{ fn }}
-            </option>
-        {% endfor %}
+  <form method="get" class="editor-form">
+    <label for="lesson-select" class="form-label">Выберите урок:</label>
+    <select id="lesson-select" name="lesson" class="styled-select" onchange="this.form.submit()">
+      <option value="">— не выбрано —</option>
+      {% for fn in files %}
+        <option value="{{ fn }}" {% if fn == selected %}selected{% endif %}>{{ fn }}</option>
+      {% endfor %}
     </select>
-</form>
+  </form>
 
-{% if selected %}
-<form method="post">
+  {% if selected %}
+  <form method="post" class="editor-form editor-form--save">
     {% csrf_token %}
     <input type="hidden" name="lesson" value="{{ selected }}">
-    <div style="margin-top:1rem;">
-        <textarea name="content"
-                  style="width:100%; height:60vh; font-family:monospace;">
-{{ content|escape }}
-        </textarea>
-    </div>
-    <button type="submit" style="margin-top:0.5rem;"
-            class="btn">Сохранить урок</button>
-</form>
-{% else %}
-<p>Выберите файл урока, чтобы начать редактирование.</p>
-{% endif %}
 
+    <div class="codemirror-wrapper">
+      <textarea id="code-editor" name="content">{{ content|escape }}</textarea>
+    </div>
+
+    <button type="submit" class="btn btn--primary">Сохранить урок</button>
+  </form>
+  {% else %}
+    <p class="editor-note">Выберите файл урока, чтобы начать редактирование.</p>
+  {% endif %}
+</div>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/continuelist.min.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const textarea = document.getElementById('code-editor');
+    const editor = CodeMirror.fromTextArea(textarea, {
+      mode: 'markdown',
+      lineNumbers: true,
+      lineWrapping: true,
+      theme: document.documentElement.getAttribute('data-theme') === 'dark'
+               ? 'dracula' : 'default',
+      extraKeys: { 'Enter': 'newlineAndIndentContinueMarkdownList' },
+    });
+
+    form.addEventListener("submit", () => {
+        editor.save();
+        let t = document.getElementById("editor");
+        t.value = t.value.replace(/[ \t]+$/gm, "");
+        t.value = t.value.replace(/(\r?\n){3,}/g, "\n\n");
+    });
+
+  });
+</script>
+
+
+
+<style>
+:root {
+  --accent-color: #4dc621;
+  --primary-button-bg: #28a745;
+  --primary-button-hover: #218838;
+  --border-color: #e0e0e0;
+  --input-bg: #fff;
+  --input-border: #ddd;
+  --focus-border: #e67e22;
+}
+
+[data-theme="dark"] {
+  --accent-color: #ff8c42;
+  --primary-button-bg: #ff6a00;
+  --primary-button-hover: #d15701;
+  --border-color: #555555;
+  --input-bg: #444;
+  --input-border: #ddd;
+  --focus-border: #e67e22;
+}
+
+.editor-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+.editor-title {
+  margin-bottom: 1.5rem;
+  color: var(--accent-color);
+}
+
+.editor-form {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+.editor-form--save {
+  flex-direction: column;
+  align-items: stretch;
+}
+.form-label {
+  font-weight: bold;
+  min-width: 120px;
+  color: var(--accent-color);
+}
+
+.styled-select {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.styled-select:focus {
+  outline: none;
+  border-color: var(--focus-border);
+}
+
+.codemirror-wrapper {
+  height: 60vh;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.codemirror-wrapper .CodeMirror {
+  height: 100%;
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+.btn--primary {
+  align-self: flex-end;
+  padding: 0.6rem 1.2rem;
+  background: var(--primary-button-bg);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  font-size: 1rem;
+}
+.btn--primary:hover {
+  background: var(--primary-button-hover);
+  transform: translateY(-1px);
+}
+
+.editor-note {
+  font-style: italic;
+  color: #666;
+}
+</style>
 {% endblock %}
