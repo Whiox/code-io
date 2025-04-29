@@ -31,7 +31,7 @@ autodoc_default_options = {
     'special-members': True,
     'inherited-members': False,
     'exclude-members': (
-        '__module__,__doc__,objects,*_id,DoesNotExist,MultipleObjectsReturned,_meta'
+        '__module__,__doc__,objects,*_id,DoesNotExist,MultipleObjectsReturned,_meta,__annotations__'
     ),
 }
 
