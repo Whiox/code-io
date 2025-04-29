@@ -1,5 +1,12 @@
+"""education urls"""
+
 from django.urls import path
-from education.views import *
+from education.views import (
+    AllCoursesView, StaredCoursesView, ViewCourseView,
+    AddCourseView, CourseEditorView,
+    MyCoursesView, DeleteCourseView,
+    AddStar
+)
 
 urlpatterns = [
     path('all/', AllCoursesView.as_view(), name='all'),

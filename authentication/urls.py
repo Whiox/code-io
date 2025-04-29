@@ -1,4 +1,4 @@
-"""Пути, связанные с аунтефикацией"""
+"""authentication urls"""
 
 from django.urls import path
 from authentication.views import (
