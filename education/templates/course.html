@@ -45,7 +45,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Highlight code
             hljs.highlightAll();
             updateCodeTheme();
             new MutationObserver(updateCodeTheme).observe(
@@ -83,7 +82,6 @@
                 div.appendChild(button);
             });
 
-            // Unique storage key per course
             const courseId = document
                 .querySelector('.course-container')
                 .dataset
@@ -94,7 +92,6 @@
             const progressBar = document.querySelector('.progress');
             const progressText = document.querySelector('.progress-percent');
 
-            // Load saved progress
             function loadProgress() {
                 const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
                 document.querySelectorAll('.lessons-list li').forEach(li => {
@@ -104,7 +101,6 @@
                 updateProgress();
             }
 
-            // Update progress bar, text, save
             function updateProgress() {
                 const done = document.querySelectorAll('.completed-checkbox:checked').length;
                 const percent = totalLessons
@@ -119,12 +115,10 @@
                 localStorage.setItem(storageKey, JSON.stringify(completed));
             }
 
-            // Checkbox change → update progress
             document.querySelectorAll('.completed-checkbox').forEach(cb => {
                 cb.addEventListener('change', updateProgress);
             });
 
-            // Title click → scroll
             document.querySelectorAll('.lesson-title').forEach(title => {
                 title.addEventListener('click', e => {
                     e.preventDefault();
@@ -216,7 +210,6 @@
             --toggle-bg: #ff8c42;
         }
 
-        /* Стили сайдбара */
         .sidebar {
             position: fixed;
             left: -300px;
@@ -327,7 +320,6 @@
             color: var(--text-color);
         }
 
-        /* Прочие стили */
         .hljs {
             padding: 1rem;
             border-radius: 8px;

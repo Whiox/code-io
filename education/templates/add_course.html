@@ -221,7 +221,7 @@
 }
 
 .lesson-form {
-    background-color: var(--lesson-bg); /* Фон для уроков */
+    background-color: var(--lesson-bg);
     padding: 1.5rem;
     border-radius: 8px;
     margin-bottom: 1rem;
@@ -269,7 +269,6 @@
 </style>
 
 <script>
-// Обновление имени файла
 function attachFileInputs() {
     document.querySelectorAll('input[type="file"]').forEach(input => {
         input.addEventListener('change', function() {
@@ -280,7 +279,6 @@ function attachFileInputs() {
 }
 attachFileInputs();
 
-// Управление уроками
 let lessonFormCount = document.querySelectorAll('.lesson-form').length;
 const addButton = document.getElementById('add-lesson');
 const formsetContainer = document.getElementById('lesson-formset');
