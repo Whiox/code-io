@@ -1,3 +1,5 @@
+"""education views"""
+
 import os
 import re
 import shutil
@@ -19,18 +21,28 @@ from education.forms import AddCourseForm, AddLessonForm, TopicChoiceForm
 
 
 def author_or_staff(user, course):
+    """
+    Проверяет, является ли пользователь автором курса или имеет права staff.
+
+    :param user: Пользователь Django
+    :param course: Экземпляр модели Courses
+    :return: True, если пользователь — staff или автор курса, иначе False
+    :rtype: bool
+    """
     return user.is_staff or course.author == user
 
 
 class ViewCourseView(View):
+    """Просмотр содержимого курса."""
+
     @staticmethod
     def get(request, course_id):
         """
-        Отображает курс по его id.
+        Отображает страницу курса с перечнем и содержимым уроков.
 
-        :param request: HTTP Django request
-        :param course_id: Уникальный идентификатор курса
-        :return: render: course.html с содержимым уроков
+        :param request: HTTP-запрос Django
+        :param int course_id: Идентификатор курса
+        :return: render в 'course.html' с контекстом уроков или 'error.html'
         """
         course = get_object_or_404(Courses, course_id=course_id)
         course_path = os.path.join(settings.MEDIA_ROOT, str(course_id))
@@ -44,22 +56,29 @@ class ViewCourseView(View):
 
 
 class AllCoursesView(View):
+    """Просмотр всех курсов с количеством уроков и отметками звезд."""
+
     @staticmethod
     def get(request):
         """
-        Отображает все доступные курсы с количеством уроков и отметкой 'is_stared'.
+        Формирует список всех курсов.
+
+        Отмечает, какие курсы пользователь уже «застарил».
+
+        :param request: HTTP-запрос Django
+        :return: render в 'all_courses.html' с контекстом курсов
         """
         courses_qs = Courses.objects.annotate(
-            lessons_count=Count('lessons')  # подпишем количество уроков
+            lessons_count=Count('lessons')
         ).select_related('author').prefetch_related('topics')
 
         content = {'courses': []}
         for course in courses_qs:
             topics = [t.name for t in course.topics.all()] or ['Свободная тема']
-            is_stared = False
-            if request.user.is_authenticated:
-                is_stared = Stars.objects.filter(user=request.user, course=course).exists()
-
+            is_stared = (
+                request.user.is_authenticated and
+                Stars.objects.filter(user=request.user, course=course).exists()
+            )
             content['courses'].append({
                 'id': course.course_id,
                 'title': course.title,
@@ -73,11 +92,15 @@ class AllCoursesView(View):
 
 
 class StaredCoursesView(View):
+    """Просмотр курсов, отмеченных звездой текущим пользователем."""
+
     @staticmethod
     def get(request):
         """
-        Отображает курсы, на которые пользователь поставил звёздочку,
-        с прогрессом (количеством уроков).
+        Отображает страницу со списком «застаренных» курсов.
+
+        :param request: HTTP-запрос Django
+        :return: redirect на '/login' если не авторизован, иначе render в 'stared_courses.html'
         """
         if request.user.is_anonymous:
             return redirect('/login')
@@ -85,16 +108,13 @@ class StaredCoursesView(View):
         stared_ids = Stars.objects.filter(
             user=request.user
         ).values_list('course_id', flat=True)
-
         stared_qs = Courses.objects.filter(
             course_id__in=stared_ids
         ).annotate(
             lessons_count=Count('lessons')
         ).select_related('author').prefetch_related('topics')
 
-        content = {
-            'courses': []
-        }
+        content = {'courses': []}
         for course in stared_qs:
             topics = [t.name for t in course.topics.all()] or ['Свободная тема']
             content['courses'].append({
@@ -110,49 +130,57 @@ class StaredCoursesView(View):
 
 
 class MyCoursesView(View):
+    """Просмотр курсов текущего пользователя."""
+
     @staticmethod
     def get(request):
         """
-        Отображает курсы, созданные текущим пользователем.
+        Отображает список курсов, созданных текущим пользователем.
 
-        :param request: HTTP Django request
-        :return: render: my_courses.html со списком курсов пользователя
+        :param request: HTTP-запрос Django
+        :return: redirect на 'login' если не авторизован, иначе render в 'my_courses.html'
         """
         if not request.user.is_authenticated:
             return redirect('login')
+
         courses = Courses.objects.filter(author=request.user)
-        content = {
-            'courses': []
-        }
+        content = {'courses': []}
         for course in courses:
-            course_info = {
+            content['courses'].append({
                 'id': course.course_id,
                 'title': course.title,
-            }
-            content['courses'].append(course_info)
+            })
         return render(request, 'my_courses.html', content)
 
 
 class AddCourseView(View):
+    """Добавление нового курса вместе с уроками и темами."""
+
     @staticmethod
     def get(request):
+        """
+        Показывает форму создания курса.
+
+        :param request: HTTP-запрос Django
+        :return: render в 'add_course.html' с формами course_form, lesson_formset, topic_form
+        """
         LessonFormSet = formset_factory(AddLessonForm, extra=1)
         course_form = AddCourseForm()
         lesson_formset = LessonFormSet()
         topic_form = TopicChoiceForm()
-
-        content = {
+        return render(request, 'add_course.html', {
             'course_form': course_form,
             'lesson_formset': lesson_formset,
             'topic_form': topic_form,
-        }
-
-        return render(request, 'add_course.html', content)
+        })
 
     @staticmethod
     def post(request):
         """
-        Сохранение файла
+        Обрабатывает отправку формы и сохраняет курс, уроки и файлы.
+
+        :param request: HTTP-запрос Django с POST/FILES
+        :return: redirect на 'my_courses' при успехе, иначе render с формами и ошибками
         """
         LessonFormSet = formset_factory(AddLessonForm, extra=1)
         course_form = AddCourseForm(request.POST)
@@ -166,7 +194,6 @@ class AddCourseView(View):
             )
             course.topics.set(topic_form.cleaned_data['topics'])
 
-            # создаём уроки в БД
             lesson_ids = []
             for lf in lesson_formset:
                 desc = lf.cleaned_data.get('lesson_description')
@@ -174,7 +201,6 @@ class AddCourseView(View):
                     lesson = Lessons.objects.create(course=course, title=desc)
                     lesson_ids.append(lesson.lesson_id)
 
-            # сохраняем файлы
             folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
             os.makedirs(folder, exist_ok=True)
             os.makedirs(os.path.join(folder, 'tasks'), exist_ok=True)
@@ -198,15 +224,16 @@ class AddCourseView(View):
 
 
 class DeleteCourseView(View):
+    """Удаление курса с подтверждением."""
+
     @staticmethod
     def get(request, course_id):
         """
-        Возвращает шаблон для подтверждения удаления курса.
-        Проверяет, является ли пользователь автором курса.
+        Показывает страницу подтверждения удаления курса.
 
-        :param request: HTTP Django request
-        :param course_id: ID курса для удаления
-        :return: render: confirm_delete.html или error.html
+        :param request: HTTP-запрос Django
+        :param int course_id: Идентификатор удаляемого курса
+        :return: render в 'confirm_delete.html' или 'error.html'
         """
         course = get_object_or_404(Courses, pk=course_id)
         if request.user != course.author:
@@ -216,18 +243,16 @@ class DeleteCourseView(View):
     @staticmethod
     def post(request, course_id):
         """
-        Обрабатывает POST запрос для удаления курса.
-        Удаляет курс из базы данных и его папку из файловой системы.
+        Выполняет удаление курса и его файлов.
 
-        :param request: HTTP Django request
-        :param course_id: ID курса для удаления
-        :return: redirect: my_courses
+        :param request: HTTP-запрос Django
+        :param int course_id: Идентификатор удаляемого курса
+        :return: redirect на 'my_courses'
         """
         course = get_object_or_404(Courses, pk=course_id)
         if request.user != course.author:
             return render(request, 'error.html', {'error': 'Вы не автор курса.'})
 
-        # Удаляем курс и его папку
         course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
         course.delete()
         if os.path.exists(course_folder):
@@ -237,18 +262,25 @@ class DeleteCourseView(View):
 
 
 class AddStar(View):
-    """Логика для постановки звезды на курс"""
+    """Добавление или удаление «звезды» курса через AJAX."""
 
     @staticmethod
     def post(request, course_id):
+        """
+        Переключает состояние «звезды» для курса.
+
+        :param request: HTTP-запрос Django (AJAX)
+        :param int course_id: Идентификатор курса
+        :return: JsonResponse со статусом в ключе "status"
+        :rtype: JsonResponse
+        """
         if request.user.is_anonymous:
             return JsonResponse({"status": False})
 
         course = Courses.objects.get(course_id=course_id)
-        is_stared = Stars.objects.filter(user=request.user, course=course).first()
-
-        if is_stared:
-            is_stared.delete()
+        existing = Stars.objects.filter(user=request.user, course=course).first()
+        if existing:
+            existing.delete()
             status = False
         else:
             Stars.objects.create(user=request.user, course=course, data=time.time())
@@ -258,13 +290,19 @@ class AddStar(View):
 
 
 class CourseEditorView(View):
-    """
-    Показывает список файлов-уроков курса и позволяет править выбранный файл.
-    Править могут только автор курса или staff-пользователь.
-    """
+    """Редактирование содержимого уроков курса."""
 
     @method_decorator(login_required)
     def get(self, request, course_id):
+        """
+        Отображает форму редактора для markdown-файла урока.
+
+        Доступен только автору курса или staff.
+
+        :param request: HTTP-запрос Django
+        :param int course_id: Идентификатор курса
+        :return: render в 'edit_course.html' с контекстом файлов и содержимого
+        """
         course = get_object_or_404(Courses, course_id=course_id)
         if not author_or_staff(request.user, course):
             messages.error(request, "Нет прав на редактирование.")
@@ -283,7 +321,6 @@ class CourseEditorView(View):
         sel = request.GET.get('lesson')
         raw_content = ''
         if sel in files:
-            # читаем через цепочку только raw, без конвертации
             path = os.path.join(course_dir, sel)
             with open(path, encoding='utf-8') as fp:
                 raw_content = fp.read()
@@ -297,6 +334,13 @@ class CourseEditorView(View):
 
     @method_decorator(login_required)
     def post(self, request, course_id):
+        """
+        Сохраняет изменения в markdown-файле урока.
+
+        :param request: HTTP-запрос Django
+        :param int course_id: Идентификator курса
+        :return: redirect обратно на редактор с параметром lesson
+        """
         course = get_object_or_404(Courses, course_id=course_id)
         if not author_or_staff(request.user, course):
             messages.error(request, "Нет прав на редактирование.")

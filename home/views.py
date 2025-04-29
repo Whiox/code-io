@@ -1,5 +1,5 @@
 """
-Views, необходимые для общей картины сайта
+Views, необходимые для общей картины сайта.
 """
 
 from django.contrib import messages
@@ -16,16 +16,18 @@ from education.models import Courses, Stars
 
 
 class HomeView(View):
+    """Главная страница сайта.
+
+    :cvar get: Отображает три самых популярных курса (с учётом отмеченных звёздочкой).
     """
-    Главная страница.
-    """
+
     @staticmethod
     def get(request):
         """
-        Возвращает главную страницу с тремя самыми популярными курсами
+        Возвращает главную страницу с тремя самыми популярными курсами.
 
-        :param request: HTTP Django request.
-        :return: render home.html
+        :param request: HTTP Django request
+        :return: render в 'home.html' с контекстом popular_courses
         """
         if request.user.is_authenticated:
             subquery = Stars.objects.filter(
@@ -43,21 +45,24 @@ class HomeView(View):
 
         return render(request, 'home.html', {
             'popular_courses': popular_courses
-    })
+        })
 
 
 class ProfileView(View):
+    """Страница профиля пользователя.
+
+    :cvar get: Отображает профиль пользователя по given user_id.
+    :cvar post: Обрабатывает сохранение изменений профиля или удаление аккаунта.
     """
-    Профиль пользователя
-    """
+
     @method_decorator(login_required)
     def get(self, request, user_id):
         """
-        Возвращает профиль пользователя по id
+        Возвращает страницу профиля пользователя.
 
-        :param user_id: id профиля
-        :param request: HTTP Django request.
-        :return: render profile.html
+        :param request: HTTP Django request
+        :param int user_id: Идентификатор пользователя
+        :return: render в 'profile.html' с данными профиля и связями
         """
         profile_owner = get_object_or_404(User, id=user_id)
         user_profile, created = UserProfile.objects.get_or_create(user=profile_owner)
@@ -69,17 +74,16 @@ class ProfileView(View):
             'interest': Interest.objects.filter(user_profile=user_profile),
             'is_owner': profile_owner == request.user,
         }
-
         return render(request, 'profile.html', content)
 
     @method_decorator(login_required)
     def post(self, request, user_id):
         """
-        Обработка изменения профиля
+        Обрабатывает изменения профиля или удаляет аккаунт пользователя.
 
-        :param request: HTTP Django request.
-        :param user_id: id профиля
-        :return: render profile.html
+        :param request: HTTP Django request
+        :param int user_id: Идентификатор профиля
+        :return: redirect на 'profile' при сохранении или 'home' после удаления
         """
         if request.user.id != int(user_id):
             messages.error(request, "У вас нет прав на изменение этого профиля.")
@@ -92,7 +96,6 @@ class ProfileView(View):
             return redirect('home')
 
         user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-
         new_username = request.POST.get('username', '').strip()
         new_about = request.POST.get('about', '').strip()
         new_email = request.POST.get('email', '').strip()
