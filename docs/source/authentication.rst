@@ -11,6 +11,13 @@ models
 *****
 views
 *****
+.. automodule:: authentication.views
+    :members:
+    :undoc-members:
+
+*****
+forms
+*****
 .. automodule:: authentication.forms
     :members:
     :undoc-members:
