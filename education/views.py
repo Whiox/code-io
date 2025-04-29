@@ -1,5 +1,4 @@
 import os
-import markdown
 import re
 import shutil
 import time
@@ -8,17 +7,19 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.utils.decorators import method_decorator
+from django.shortcuts import render, redirect, get_object_or_404
+from django.forms import formset_factory
+from django.views import View
+from django.http import JsonResponse
+from django.conf import settings
 
 from education.files import get_all_lessons, get_lesson_number
-from django.shortcuts import render
-from django.shortcuts import redirect
-from django.shortcuts import get_object_or_404
-from django.forms import formset_factory
-from education.forms import AddCourseForm, AddLessonForm,TopicChoiceForm
 from education.models import Courses, Lessons, Stars
-from django.views import View
-from django.conf import settings
-from django.http import JsonResponse
+from education.forms import AddCourseForm, AddLessonForm, TopicChoiceForm
+
+
+def author_or_staff(user, course):
+    return user.is_staff or course.author == user
 
 
 class ViewCourseView(View):
@@ -31,17 +32,13 @@ class ViewCourseView(View):
         :param course_id: Уникальный идентификатор курса
         :return: render: course.html с содержимым уроков
         """
-        course = Courses.objects.filter(course_id=course_id).first()
-        course_path = os.path.join('courses', course_id)
+        course = get_object_or_404(Courses, course_id=course_id)
+        course_path = os.path.join(settings.MEDIA_ROOT, str(course_id))
         if not os.path.exists(course_path):
             return render(request, 'error.html', {'error': 'Курс не найден.'})
 
-        lessons = os.listdir(course_path)
-        lessons_content = []
-
-        lessons.sort(key=get_lesson_number)
-
-        content = get_all_lessons(course, course_path, lessons, lessons_content)
+        lessons = sorted(os.listdir(course_path), key=get_lesson_number)
+        content = get_all_lessons(course, course_path, lessons, [])
         content['course_id'] = course_id
         return render(request, 'course.html', content)
 
@@ -154,48 +151,55 @@ class AddCourseView(View):
 
     @staticmethod
     def post(request):
+        """
+        Сохранение файла
+        """
         LessonFormSet = formset_factory(AddLessonForm, extra=1)
         course_form = AddCourseForm(request.POST)
         lesson_formset = LessonFormSet(request.POST, request.FILES)
         topic_form = TopicChoiceForm(request.POST)
 
         if course_form.is_valid() and lesson_formset.is_valid() and topic_form.is_valid():
-            course = Courses.objects.create(title=course_form.cleaned_data['course_name'], author=request.user)
-            selected_topics = topic_form.cleaned_data['topics']
-            course.topics.set(selected_topics)
-            lesson_ids = []
+            course = Courses.objects.create(
+                title=course_form.cleaned_data['course_name'],
+                author=request.user
+            )
+            course.topics.set(topic_form.cleaned_data['topics'])
 
-            for lesson_form in lesson_formset:
-                if lesson_form.cleaned_data and lesson_form.cleaned_data.get('lesson_description'):
-                    lesson_title = lesson_form.cleaned_data['lesson_description']
-                    lesson = Lessons.objects.create(course=course, title=lesson_title)
+            # создаём уроки в БД
+            lesson_ids = []
+            for lf in lesson_formset:
+                desc = lf.cleaned_data.get('lesson_description')
+                if desc:
+                    lesson = Lessons.objects.create(course=course, title=desc)
                     lesson_ids.append(lesson.lesson_id)
 
-            course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
-            os.makedirs(course_folder, exist_ok=True)
-            os.makedirs(course_folder + "/tasks", exist_ok=True)
-            for lesson_form, lesson_id in zip(lesson_formset, lesson_ids):
-                lesson_file = lesson_form.cleaned_data.get('lesson_file')
-                if lesson_file:
-                    new_file_name = f"lesson_{lesson_id}{os.path.splitext(lesson_file.name)[1]}"
-                    file_path = os.path.join(course_folder, new_file_name)
-                    with open(file_path, 'wb+') as destination:
-                        for chunk in lesson_file.chunks():
-                            destination.write(chunk)
+            # сохраняем файлы
+            folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
+            os.makedirs(folder, exist_ok=True)
+            os.makedirs(os.path.join(folder, 'tasks'), exist_ok=True)
+            for lf, lid in zip(lesson_formset, lesson_ids):
+                uploaded = lf.cleaned_data.get('lesson_file')
+                if uploaded:
+                    ext = os.path.splitext(uploaded.name)[1]
+                    name = f"lesson_{lid}{ext}"
+                    path = os.path.join(folder, name)
+                    with open(path, 'wb+') as dst:
+                        for chunk in uploaded.chunks():
+                            dst.write(chunk)
 
             return redirect('my_courses')
 
-        content = {
+        return render(request, 'add_course.html', {
             'course_form': course_form,
             'lesson_formset': lesson_formset,
             'topic_form': topic_form,
-        }
-
-        return render(request, 'add_course.html', content)
+        })
 
 
 class DeleteCourseView(View):
-    def get(self, request, course_id):
+    @staticmethod
+    def get(request, course_id):
         """
         Возвращает шаблон для подтверждения удаления курса.
         Проверяет, является ли пользователь автором курса.
@@ -209,7 +213,8 @@ class DeleteCourseView(View):
             return render(request, 'error.html', {'error': 'Вы не автор курса.'})
         return render(request, 'confirm_delete.html', {'course': course})
 
-    def post(self, request, course_id):
+    @staticmethod
+    def post(request, course_id):
         """
         Обрабатывает POST запрос для удаления курса.
         Удаляет курс из базы данных и его папку из файловой системы.
@@ -251,8 +256,6 @@ class AddStar(View):
 
         return JsonResponse({"status": status})
 
-def author_or_staff(user, course):
-    return user.is_staff or course.author == user
 
 class CourseEditorView(View):
     """
@@ -264,49 +267,45 @@ class CourseEditorView(View):
     def get(self, request, course_id):
         course = get_object_or_404(Courses, course_id=course_id)
         if not author_or_staff(request.user, course):
-            messages.error(request, "У вас нет прав на редактирование этого курса.")
+            messages.error(request, "Нет прав на редактирование.")
             return redirect('course', course_id=course_id)
 
-        course_dir = os.path.join(settings.BASE_DIR, 'courses', str(course_id))
-
+        course_dir = os.path.join(settings.MEDIA_ROOT, str(course_id))
         try:
-            raw_files = [f for f in os.listdir(course_dir) if f.endswith('.md')]
+            files = sorted(
+                [f for f in os.listdir(course_dir) if f.endswith('.md')],
+                key=lambda fn: int(re.search(r'(\d+)', fn).group(1))
+            )
         except FileNotFoundError:
-            messages.error(request, "Каталог курса не найден.")
+            messages.error(request, "Каталог не найден.")
             return redirect('course', course_id=course_id)
-
-        # Сортируем по номеру урока, который извлекаем из имени файла
-        def extract_lesson_number(fn: str) -> int:
-            m = re.search(r'(\d+)', fn)
-            return int(m.group(1)) if m else float('inf')
-
-        files = sorted(raw_files, key=extract_lesson_number)
 
         sel = request.GET.get('lesson')
-        content = ''
+        raw_content = ''
         if sel in files:
-            with open(os.path.join(course_dir, sel), encoding='utf-8') as fp:
-                content = fp.read()
+            # читаем через цепочку только raw, без конвертации
+            path = os.path.join(course_dir, sel)
+            with open(path, encoding='utf-8') as fp:
+                raw_content = fp.read()
 
         return render(request, 'edit_course.html', {
             'course': course,
             'files': files,
             'selected': sel,
-            'content': content,
+            'content': raw_content,
         })
 
     @method_decorator(login_required)
     def post(self, request, course_id):
         course = get_object_or_404(Courses, course_id=course_id)
         if not author_or_staff(request.user, course):
-            messages.error(request, "У вас нет прав на редактирование этого курса.")
+            messages.error(request, "Нет прав на редактирование.")
             return redirect('course', course_id=course_id)
 
         lesson = request.POST.get('lesson')
         new_content = request.POST.get('content', '')
-        course_dir = os.path.join(settings.BASE_DIR, 'courses', str(course_id))
+        course_dir = os.path.join(settings.MEDIA_ROOT, str(course_id))
         file_path = os.path.join(course_dir, lesson or '')
-
         if not lesson or not os.path.isfile(file_path):
             messages.error(request, "Некорректный урок.")
             return redirect('course_edit', course_id=course_id)
