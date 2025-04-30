@@ -12,11 +12,11 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms import formset_factory
 from django.views import View
-from django.http import JsonResponse
+from django.http import JsonResponse, QueryDict
 from django.conf import settings
 
 from education.files import get_all_lessons, get_lesson_number
-from education.models import Courses, Lessons, Stars
+from education.models import Courses, Lessons, Stars, Report
 from education.forms import AddCourseForm, AddLessonForm, TopicChoiceForm
 
 
@@ -362,3 +362,97 @@ class CourseEditorView(View):
             messages.error(request, f"Ошибка при сохранении: {e}")
 
         return redirect(f"{request.path}?lesson={lesson}")
+
+
+class ReportCourseView(View):
+    """Обработка жалоб на курс.
+
+    :cvar get: Показать страницу создания или просмотра жалобы.
+    :cvar post: Создать новую жалобу.
+    :cvar put: Обновить существующую жалобу.
+    :cvar delete: Удалить жалобу.
+    """
+
+    @method_decorator(login_required)
+    def get(self, request, course_id):
+        """
+        Отображает страницу подачи или просмотра жалобы на курс.
+
+        :param request: HTTP-запрос Django
+        :param int course_id: Идентификатор курса
+        :return: render 'report_course.html' с контекстом:
+                 - course: объект Courses
+                 - report (опционально): QuerySet с жалобой пользователя
+        :rtype: HttpResponse
+        """
+        course = get_object_or_404(Courses, course_id=course_id)
+        context = {'course': course}
+
+        report = Report.objects.filter(course=course, author=request.user)
+        if report.exists():
+            context['report'] = report
+
+        return render(request, 'report_course.html', context)
+
+    @method_decorator(login_required)
+    def post(self, request, course_id):
+        """
+        Создает новую жалобу на курс, если её еще не было.
+
+        :param request: HTTP-запрос Django
+        :param int course_id: Идентификатор курса
+        :return: JsonResponse со статусом 'ok' и id новой жалобы,
+                 или 'error' и описанием ошибки
+        :rtype: JsonResponse
+        """
+        course = get_object_or_404(Courses, course_id=course_id)
+
+        if Report.objects.filter(course=course, author=request.user).exists():
+            return JsonResponse({'status': 'error', 'error': 'report already exists'})
+
+        reason = request.POST.get('reason')
+        if not reason:
+            return JsonResponse({'status': 'error', 'error': 'no reason field'})
+
+        report = Report.objects.create(course=course, author=request.user, reason=reason)
+        return JsonResponse({'status': 'ok', 'ok': report.id})
+
+    @method_decorator(login_required)
+    def put(self, request, course_id):
+        """
+        Обновляет причину существующей жалобы на курс.
+
+        :param request: HTTP-запрос Django
+        :param int course_id: Идентификатор курса
+        :return: JsonResponse со статусом 'ok' и id обновленной жалобы,
+                 или 'error' и описанием ошибки
+        :rtype: JsonResponse
+        """
+        course = get_object_or_404(Courses, course_id=course_id)
+
+        data = QueryDict(request.body.decode('utf-8'))
+        reason = data.get('reason')
+        if not reason:
+            return JsonResponse({'status': 'error', 'error': 'no reason field'})
+
+        report = Report.objects.filter(course=course, author=request.user).first()
+        if not report:
+            return JsonResponse({'status': 'error', 'error': 'report does not exist'})
+
+        report.reason = reason
+        report.save()
+        return JsonResponse({'status': 'ok', 'ok': report.id})
+
+    @method_decorator(login_required)
+    def delete(self, request, course_id):
+        """
+        Удаляет жалобу пользователя на курс.
+
+        :param request: HTTP-запрос Django
+        :param int course_id: Идентификатор курса
+        :return: JsonResponse со статусом 'ok' после удаления
+        :rtype: JsonResponse
+        """
+        course = get_object_or_404(Courses, course_id=course_id)
+        Report.objects.filter(course=course, author=request.user).delete()
+        return JsonResponse({'status': 'ok', 'ok': 'report deleted'})

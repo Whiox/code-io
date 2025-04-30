@@ -65,3 +65,23 @@ class Stars(models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     data = models.IntegerField(default=0)
+
+
+class Report(models.Model):
+    """Модель жалобы на курс
+
+    :ivar models.ForeignKey course: Курс, на который была подана жалоба
+    :ivar models.ForeignKey user: Пользователь, подавший жалобу
+    """
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reports'
+    )
+    course = models.ForeignKey(
+        Courses,
+        on_delete=models.CASCADE,
+        related_name='reports'
+    )
+    reason = models.TextField()
+
