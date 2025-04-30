@@ -6,13 +6,26 @@
 #### Каждый пользователь может создать курс
 #### Каждый пользователь может прочитать любой курс
 
-### Для запуска через Docker:
+### Запуск
+
+### Стандартный
+
+```shell
+python manage.py migrate
+python manage.py runserver
+```
+
+### Для запуска через Docker (PortgreSQL, nginx, gunicorn):
 ```bash
 docker-compose up --build
 ```
 
 
-### Для сборки документации вручную:
+### Документация
+
+#### Выгружается в gitlab artifact после каждого коммита
+
+#### Для сборки документации вручную:
 ```bash
 cd docs
 ./make.bat html
