@@ -45,6 +45,8 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const textarea = document.getElementById('code-editor');
+    const form = document.querySelector('form.editor-form--save');
+
     const editor = CodeMirror.fromTextArea(textarea, {
       mode: 'markdown',
       lineNumbers: true,
@@ -54,12 +56,13 @@
       extraKeys: { 'Enter': 'newlineAndIndentContinueMarkdownList' },
     });
 
-    form.addEventListener("submit", () => {
+    form.addEventListener('submit', (e) => {
         editor.save();
-        let t = document.getElementById("editor");
+
+        let t = document.getElementById("code-editor");
         t.value = t.value.replace(/[ \t]+$/gm, "");
         t.value = t.value.replace(/(\r?\n){3,}/g, "\n\n");
-    });
+      });
 
   });
 </script>
