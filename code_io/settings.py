@@ -145,6 +145,8 @@ STATICFILES_DIRS = [
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
+LOGIN_URL = '/login/'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/courses/'  # URL для доступа к загруженным файлам
 MEDIA_ROOT = os.path.join(BASE_DIR, 'courses/')
