@@ -63,6 +63,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     :ivar bool is_active: Активен ли пользователь
     :ivar bool wait_for_activate: Ожидает ли пользователь активации
     :ivar bool is_staff: Персонал (доступ в админку)
+    :ivar bool is_staff: Персонал (доступ в панель модератора)
     :ivar UserManager objects: Менеджер модели
     """
 
@@ -72,6 +73,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     wait_for_activate = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_moderator = models.BooleanField(default=False)
 
     objects = UserManager()
 

@@ -26,6 +26,12 @@
             <button class="drop-button">▼</button>
             <div class="dropdown-menu">
                 <a href="{% url 'profile' user_id=request.user.id %}" class="dropdown-item">Профиль</a>
+                {% if request.user.is_staff %}
+                    <a href="{% url 'admin:index' %}" class="dropdown-item">Панель администратора</a>
+                {% endif %}
+                {% if request.user.is_staff or request.user.moderator %}
+                    <a href="{% url 'moderator' %}" class="dropdown-item">Панель модератора</a>
+                {% endif %}
                 <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>
                 <a href="{% url 'change_password' %}" class="dropdown-item">Смена пароля</a>
             </div>

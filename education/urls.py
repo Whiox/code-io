@@ -5,7 +5,7 @@ from education.views import (
     AllCoursesView, StaredCoursesView, ViewCourseView,
     AddCourseView, CourseEditorView,
     MyCoursesView, DeleteCourseView,
-    AddStar
+    AddStar, ReportCourseView
 )
 
 urlpatterns = [
@@ -16,5 +16,6 @@ urlpatterns = [
     path('my', MyCoursesView.as_view(), name='my_courses'),
     path('delete/<int:course_id>/', DeleteCourseView.as_view(), name='delete'),
     path('add-star/<int:course_id>/', AddStar.as_view(), name='add_star'),
-    path('course/<int:course_id>/edit/', CourseEditorView.as_view(), name='course_edit')
+    path('course/<int:course_id>/edit/', CourseEditorView.as_view(), name='course_edit'),
+    path('<int:course_id>/report/', ReportCourseView.as_view(), name='course_report'),
 ]
