@@ -1,18 +1,27 @@
 """
 Views, необходимые для общей картины сайта.
 """
+import os
+import shutil
 
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
 from django.db.models.aggregates import Count
+from django.http import JsonResponse, QueryDict
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
+
+from code_io import settings
 from home.models import UserProfile, SocialNetwork, Interest
 from authentication.models import User
-from education.models import Courses, Stars
+from education.models import Courses, Stars, Report
+
+
+def user_is_staff_or_moderator(user: User) -> bool:
+    return True if user.is_staff or user.is_moderator else False
 
 
 class HomeView(View):
@@ -112,3 +121,138 @@ class ProfileView(View):
 
         messages.success(request, "Профиль успешно сохранён.")
         return redirect('profile', user_id=user_id)
+
+
+class ModeratorPanelView(View):
+    """Панель модератора для просмотра пользователей, жалоб и курсов.
+
+    :cvar get: Отображает страницу с таблицами users, reports, courses.
+    """
+
+    @method_decorator(login_required)
+    def get(self, request):
+        """
+        Формирует контекст для панели модерации и рендерит шаблон.
+
+        :param request: HTTP-запрос Django
+        :return: render 'moderator_page.html' с контекстом:
+                 - users: QuerySet всех пользователей
+                 - reports: QuerySet всех жалоб
+                 - courses: QuerySet всех курсов
+        """
+        if not user_is_staff_or_moderator(request.user):
+            return redirect('home')
+
+        context = {
+            'users': User.objects.all(),
+            'reports': Report.objects.all(),
+            'courses': Courses.objects.all(),
+        }
+        return render(request, 'moderator_page.html', context)
+
+
+class AddModerator(View):
+    """Назначение и снятие статуса модератора для пользователя.
+
+    :cvar post: Сделать пользователя модератором.
+    :cvar delete: Убрать у пользователя статус модератора.
+    """
+
+    @method_decorator(login_required)
+    def post(self, request):
+        """
+        Назначает пользователю роль модератора.
+
+        Ожидает в body: user_id.
+
+        :param request: HTTP-запрос Django
+        :return: JsonResponse {'status':'ok','ok':user.id} или {'status':'error',...}
+        """
+        if not request.user.is_staff:
+            return JsonResponse({'status': 'error', 'error': 'you must be staff'})
+
+        user_id = request.POST.get('user_id')
+        user = get_object_or_404(User, id=user_id)
+
+        user.is_moderator = True
+        user.save()
+        return JsonResponse({'status': 'ok', 'ok': user.id})
+
+    @method_decorator(login_required)
+    def delete(self, request):
+        """
+        Убирает у пользователя роль модератора.
+
+        Ожидает в body: user_id.
+
+        :param request: HTTP-запрос Django
+        :return: JsonResponse {'status':'ok','ok':user.id} или {'status':'error',...}
+        """
+        if not request.user.is_staff:
+            return JsonResponse({'status': 'error', 'error': 'you must be staff'})
+
+        data = QueryDict(request.body.decode('utf-8'))
+        user_id = data.get('user_id')
+        user = get_object_or_404(User, id=user_id)
+
+        user.is_moderator = False
+        user.save()
+        return JsonResponse({'status': 'ok', 'ok': user.id})
+
+
+class DeleteUser(View):
+    """Удаление пользователя модератором или staff."""
+
+    @method_decorator(login_required)
+    def delete(self, request):
+        """
+        Удаляет указанного пользователя.
+
+        Только staff или модератор может удалять обычных пользователей;
+        только staff может удалять модераторов и других staff.
+
+        Ожидает в body: user_id.
+
+        :param request: HTTP-запрос Django
+        :return: JsonResponse {'status':'ok'} или {'status':'error',...}
+        """
+        if not user_is_staff_or_moderator(request.user):
+            return JsonResponse({'status': 'error', 'error': 'you must be staff or moderator'})
+
+        data = QueryDict(request.body.decode('utf-8'))
+        user_id = data.get('user_id')
+        user = get_object_or_404(User, id=user_id)
+
+        if (user.is_moderator or user.is_staff) and not request.user.is_staff:
+            return JsonResponse({'status': 'error', 'error': 'only staff can delete moderator or staff'})
+
+        user.delete()
+        return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
+
+
+class DeleteCourse(View):
+    """Удаление курса модератором или staff-пользователем."""
+
+    @method_decorator(login_required)
+    def delete(self, request):
+        """
+        Удаляет курс и папку с его уроками на диске.
+
+        Ожидает в body: course_id.
+
+        :param request: HTTP-запрос Django
+        :return: JsonResponse {'status':'ok'} или {'status':'error',...}
+        """
+        if not user_is_staff_or_moderator(request.user):
+            return JsonResponse({'status': 'error', 'error': 'you must be staff or moderator'})
+
+        data = QueryDict(request.body.decode('utf-8'))
+        course_id = data.get('course_id')
+        course = get_object_or_404(Courses, course_id=course_id)
+
+        course_folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
+        if os.path.exists(course_folder):
+            shutil.rmtree(course_folder)
+
+        course.delete()
+        return JsonResponse({'status': 'ok', 'ok': 'success deleting'})

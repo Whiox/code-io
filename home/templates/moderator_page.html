@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Панель модератора{% endblock %}
+
+{% block content %}
+<div class="moderator-container">
+  <h1 class="moderator-title">Панель модерации</h1>
+
+  <section class="moderator-section">
+    <h2>Пользователи</h2>
+    <table class="moderator-table">
+      <thead>
+        <tr>
+          <th>ID</th><th>Email</th><th>Роль</th><th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr data-user-id="{{ u.id }}">
+          <td>{{ u.id }}</td>
+          <td>{{ u.email }}</td>
+          <td>
+            {% if u.is_staff %}Staff
+            {% elif u.is_moderator %}Moderator
+            {% else %}User
+            {% endif %}
+          </td>
+          <td>
+            {% if not u.is_moderator and not u.is_staff %}
+              <button class="btn btn--secondary btn-promote">Сделать модератором</button>
+            {% elif u.is_moderator %}
+              <button class="btn btn--danger btn-demote">Убрать модератора</button>
+            {% endif %}
+            {% if not u.is_staff and not u.is_moderator or request.user.is_staff %}
+              <button class="btn btn--danger btn-delete-user">Удалить</button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="moderator-section">
+    <h2>Курсы</h2>
+    <table class="moderator-table">
+      <thead>
+        <tr>
+          <th>ID</th><th>Название</th><th>Автор</th><th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in courses %}
+        <tr data-course-id="{{ c.course_id }}">
+          <td>{{ c.course_id }}</td>
+          <td>{{ c.title }}</td>
+          <td>{{ c.author.email }}</td>
+          <td>
+            <button class="btn btn--danger btn-delete-course">Удалить</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="moderator-section">
+    <h2>Жалобы</h2>
+    <table class="moderator-table">
+      <thead>
+        <tr>
+          <th>ID</th><th>Курс</th><th>Автор</th><th>Причина</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reports %}
+        <tr>
+          <td>{{ r.id }}</td>
+          <td>{{ r.course.title }}</td>
+          <td>{{ r.author.email }}</td>
+          <td>{{ r.reason }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+</div>
+
+<script>
+  function getCookie(name) {
+    let val = null;
+    document.cookie.split(';').forEach(c => {
+      c = c.trim();
+      if (c.startsWith(name + '=')) {
+        val = decodeURIComponent(c.slice(name.length + 1));
+      }
+    });
+    return val;
+  }
+  const csrftoken = getCookie('csrftoken');
+  
+  function sendAction(path, method, data, callback) {
+    fetch(path, {
+      method,
+      headers: {
+        'X-CSRFToken': csrftoken,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams(data)
+    })
+    .then(r => r.json())
+    .then(callback)
+    .catch(() => alert('Сетевая ошибка.'));
+  }
+
+  document.querySelectorAll('.moderator-table tbody tr').forEach(row => {
+    const uid = row.dataset.userId;
+    if (!uid) return;
+
+    row.querySelector('.btn-promote')?.addEventListener('click', () => {
+      sendAction('{% url "add_moderator" %}', 'POST', { user_id: uid }, data => {
+        if (data.status === 'ok') location.reload();
+        else alert(data.error);
+      });
+    });
+
+    row.querySelector('.btn-demote')?.addEventListener('click', () => {
+      sendAction('{% url "add_moderator" %}', 'DELETE', { user_id: uid }, data => {
+        if (data.status === 'ok') location.reload();
+        else alert(data.error);
+      });
+    });
+
+    row.querySelector('.btn-delete-user')?.addEventListener('click', () => {
+      if (!confirm('Удалить пользователя?')) return;
+      sendAction('{% url "delete_user" %}', 'DELETE', { user_id: uid }, data => {
+        if (data.status === 'ok') location.reload();
+        else alert(data.error);
+      });
+    });
+  });
+
+  document.querySelectorAll('.btn-delete-course').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tr = btn.closest('tr');
+      const cid = tr.dataset.courseId;
+      if (!confirm('Удалить курс?')) return;
+      sendAction('{% url "delete_course" %}', 'DELETE', { course_id: cid }, data => {
+      if (data.status === 'ok') location.reload();
+      else alert(data.error);
+    });
+    });
+  });
+</script>
+
+<style>
+.moderator-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+.moderator-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--color-accent);
+}
+.moderator-section {
+  margin-bottom: 2rem;
+}
+.moderator-section h2 {
+  margin-bottom: .75rem;
+  color: var(--color-accent);
+}
+.moderator-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.moderator-table th,
+.moderator-table td {
+  border: 1px solid var(--border);
+  padding: .5rem;
+  text-align: left;
+}
+.moderator-table th {
+  background: var(--bg-input);
+}
+.btn {
+  padding: .4rem .8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: .9rem;
+  transition: background .2s;
+  margin-right: .25rem;
+}
+.btn--secondary { background: var(--bg-btn-sec); color: #fff; }
+.btn--secondary:hover { background: var(--bg-btn-sec-h); }
+.btn--danger    { background: var(--bg-btn-del); color: #fff; }
+.btn--danger:hover    { background: var(--bg-btn-del-h); }
+</style>
+{% endblock %}
