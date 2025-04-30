@@ -4,224 +4,398 @@
 {% block title %}Панель модератора{% endblock %}
 
 {% block content %}
+    <div class="moderator-app">
+        <meta name="csrf-token" content="{{ csrf_token }}">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-wrapper">
+                    <img src="{% static 'assets/favicon.ico' %}" alt="Site Logo" class="sidebar-logo"
+                         style="width: 40px; height: 40px">
+                    <h1 class="sidebar-title">Code-io</h1>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <button data-target="users" class="sidebar-link active">
+                            <svg class="nav-icon" viewBox="0 0 24 24">
+                                <path d="M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
+                            </svg>
+                            Пользователи
+                        </button>
+                    </li>
+                    <li>
+                        <button data-target="courses" class="sidebar-link">
+                            <svg class="nav-icon" viewBox="0 0 24 24">
+                                <path d="M4 6h16v2H4V6zm0 6h16v2H4v-2zm0 6h16v2H4v-2z"/>
+                            </svg>
+                            Курсы
+                        </button>
+                    </li>
+                    <li>
+                        <button data-target="reports" class="sidebar-link">
+                            <svg class="nav-icon" viewBox="0 0 24 24">
+                                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
+                            </svg>
+                            Жалобы
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-    <div class="moderator-container"><h1 class="moderator-title">Панель модерации</h1>
-        <section class="moderator-section"><h2>Пользователи</h2>
-            <table class="moderator-table">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Email</th>
-                    <th>Роль</th>
-                    <th>Действия</th>
-                </tr>
-                </thead>
-                <tbody> {% for u in users %}
-                    <tr data-user-id="{{ u.id }}">
-                        <td>{{ u.id }}</td>
-                        <td><a href="{% url 'profile' u.id %}" class="profile-link">{{ u.email }}</a></td>
-                        <td> {% if u.is_staff %}Staff {% elif u.is_moderator %}Moderator {% else %}
-                            User {% endif %} </td>
-                        <td> {% if not u.is_moderator and not u.is_staff %}
-                            <button class="btn btn--secondary btn-promote">Сделать модератором
-                            </button> {% elif u.is_moderator %}
-                            <button class="btn btn--danger btn-demote">Убрать модератора</button> {% endif %}
-                            {% if not u.is_staff and not u.is_moderator or request.user.is_staff %}
-                                <button class="btn btn--danger btn-delete-user">Удалить</button> {% endif %} </td>
-                    </tr> {% endfor %} </tbody>
-            </table>
-        </section>
-        <section class="moderator-section"><h2>Курсы</h2>
-            <table class="moderator-table">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Название</th>
-                    <th>Автор</th>
-                    <th>Действия</th>
-                </tr>
-                </thead>
-                <tbody> {% for c in courses %}
-                    <tr data-course-id="{{ c.course_id }}">
-                        <td>{{ c.course_id }}</td>
-                        <td><a href="{% url 'course' c.course_id %}" class="course-link">{{ c.title }}</a></td>
-                        <td><a href="{% url 'profile' c.author.id %}" class="profile-link">{{ c.author.email }}</a></td>
-                        <td>
-                            <button class="btn btn--danger btn-delete-course">Удалить</button>
-                        </td>
-                    </tr> {% endfor %} </tbody>
-            </table>
-        </section>
-        <section class="moderator-section"><h2>Жалобы</h2>
-            <table class="moderator-table">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Курс</th>
-                    <th>Автор</th>
-                    <th>Причина</th>
-                    <th>Действия</th>
-                </tr>
-                </thead>
-                <tbody> {% for r in reports %}
-                    <tr data-report-id="{{ r.id }}" data-course-id="{{ r.course.course_id }}">
-                        <td>{{ r.id }}</td>
-                        <td><a href="{% url 'course' r.course.course_id %}"
-                               class="course-link">{{ r.course.title }}</a></td>
-                        <td><a href="{% url 'profile' r.author.id %}" class="profile-link">{{ r.author.email }}</a></td>
-                        <td>{{ r.reason }}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn--danger btn-delete-report">Удалить жалобу</button>
-                                <button class="btn btn--danger btn-delete-course-in-report">Удалить курс</button>
-                            </div>
-                        </td>
-                    </tr> {% endfor %} </tbody>
-            </table>
-        </section>
+        <main class="content">
+            <section id="users" class="section active">
+                <div class="section-header">
+                    <h2>Управление пользователями</h2>
+                </div>
+                <div class="table-container">
+                    <table class="moderator-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Роль</th>
+                            <th>Действия</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for u in users %}
+                            <tr data-user-id="{{ u.id }}">
+                                <td>{{ u.id }}</td>
+                                <td><a href="{% url 'profile' u.id %}">{{ u.email }}</a></td>
+                                <td class="user-role">{% if u.is_staff %}Staff{% elif u.is_moderator %}Moderator{% else %}
+                                    User{% endif %}</td>
+                                <td class="actions">
+                                    {% if not u.is_moderator and not u.is_staff %}
+                                        <button class="btn btn--primary btn-promote">Назначить</button>
+                                    {% elif u.is_moderator %}
+                                        <button class="btn btn--danger btn-demote">Снять</button>
+                                    {% endif %}
+                                    {% if not u.is_staff and not u.is_moderator or request.user.is_staff %}
+                                        <button class="btn btn--danger btn-delete-user">Удалить</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="courses" class="section">
+                <div class="section-header">
+                    <h2>Управление курсами</h2>
+                </div>
+                <div class="table-container">
+                    <table class="moderator-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Автор</th>
+                            <th>Действия</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for c in courses %}
+                            <tr data-course-id="{{ c.course_id }}">
+                                <td>{{ c.course_id }}</td>
+                                <td><a href="{% url 'course' c.course_id %}">{{ c.title }}</a></td>
+                                <td><a href="{% url 'profile' c.author.id %}">{{ c.author.email }}</a></td>
+                                <td class="actions">
+                                    <button class="btn btn--danger btn-delete-course">Удалить</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="reports" class="section">
+                <div class="section-header">
+                    <h2>Управление жалобами</h2>
+                </div>
+                <div class="table-container">
+                    <table class="moderator-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Курс</th>
+                            <th>Автор</th>
+                            <th>Причина</th>
+                            <th>Действия</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for r in reports %}
+                            <tr data-report-id="{{ r.id }}" data-course-id="{{ r.course.course_id }}">
+                                <td>{{ r.id }}</td>
+                                <td><a href="{% url 'course' r.course.course_id %}">{{ r.course.title }}</a></td>
+                                <td><a href="{% url 'profile' r.author.id %}">{{ r.author.email }}</a></td>
+                                <td>{{ r.reason }}</td>
+                                <td class="actions">
+                                    <button class="btn btn--danger btn-delete-report">Удалить жалобу</button>
+                                    <button class="btn btn--danger btn-delete-course-in-report">Удалить курс</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     </div>
-    <script> function getCookie(name) {
-        let val = null;
-        document.cookie.split(';').forEach(c => {
-            c = c.trim();
-            if (c.startsWith(name + '=')) {
-                val = decodeURIComponent(c.slice(name.length + 1));
-            }
+
+    <script>
+        document.querySelectorAll('.sidebar-link').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelector('.sidebar-link.active').classList.remove('active');
+                this.classList.add('active');
+                document.querySelector('.section.active').classList.remove('active');
+                document.getElementById(this.dataset.target).classList.add('active');
+            });
         });
-        return val;
-    }
 
-    const csrftoken = getCookie('csrftoken');
-
-    function sendAction(path, method, data, callback) {
-        fetch(path, {
-            method,
-            headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
-            body: new URLSearchParams(data)
-        }).then(r => r.json()).then(callback).catch(() => alert('Сетевая ошибка.'));
-    }
-
-    document.querySelectorAll('.moderator-table tbody tr').forEach(row => {
-        const uid = row.dataset.userId;
-        if (uid) {
-            row.querySelector('.btn-promote')?.addEventListener('click', () => {
-                sendAction('{% url "add_moderator" %}', 'POST', {user_id: uid}, data => {
-                    if (data.status === 'ok') location.reload(); else alert(data.error);
-                });
-            });
-            row.querySelector('.btn-demote')?.addEventListener('click', () => {
-                sendAction('{% url "add_moderator" %}', 'DELETE', {user_id: uid}, data => {
-                    if (data.status === 'ok') location.reload(); else alert(data.error);
-                });
-            });
-            row.querySelector('.btn-delete-user')?.addEventListener('click', () => {
-                if (!confirm('Удалить пользователя?')) return;
-                sendAction('{% url "delete_user" %}', 'DELETE', {user_id: uid}, data => {
-                    if (data.status === 'ok') location.reload(); else alert(data.error);
-                });
-            });
+        function getCookie(name) {
+            const matches = document.cookie.match(new RegExp(
+                '(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'
+            ));
+            return matches ? decodeURIComponent(matches[1]) : undefined;
         }
-        const cid = row.dataset.courseId;
-        if (cid) {
-            row.querySelector('.btn-delete-course')?.addEventListener('click', () => {
-                if (!confirm('Удалить курс?')) return;
-                sendAction('{% url "delete_course" %}', 'DELETE', {course_id: cid}, data => {
-                    if (data.status === 'ok') location.reload(); else alert(data.error);
-                });
-            });
+
+        const csrftoken = getCookie('csrftoken');
+
+        async function ajax(url, method, data) {
+            const opts = {method, headers: {'X-CSRFToken': csrftoken}};
+            if (data) {
+                opts.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                opts.body = new URLSearchParams(data);
+            }
+            const res = await fetch(url, opts);
+            if (!res.ok) throw new Error(res.statusText);
+            return res.json();
         }
-        const rid = row.dataset.reportId;
-        if (rid) {
-            row.querySelector('.btn-delete-report')?.addEventListener('click', () => {
-                if (!confirm('Удалить жалобу?')) return;
-                sendAction('{% url "delete_report" %}', 'DELETE', {report_id: rid}, data => {
-                    if (data.status === 'ok') location.reload(); else alert(data.error);
-                });
+
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const row = btn.closest('tr');
+                try {
+                    if (btn.classList.contains('btn-promote')) {
+                        const userId = row.dataset.userId;
+                        const data = await ajax('{% url "add_moderator" %}', 'POST', {user_id: userId});
+                        if (data.status === 'ok') {
+                            btn.textContent = 'Снять';
+                            btn.classList.replace('btn--primary', 'btn--danger');
+                            btn.classList.replace('btn-promote', 'btn-demote');
+                            row.querySelector('.user-role').textContent = 'Moderator';
+                        }
+                        return;
+                    }
+
+                    if (btn.classList.contains('btn-demote')) {
+                        const userId = row.dataset.userId;
+                        const data = await ajax('{% url "add_moderator" %}', 'DELETE', {user_id: userId});
+                        if (data.status === 'ok') {
+                            btn.textContent = 'Назначить';
+                            btn.classList.replace('btn--danger', 'btn--primary');
+                            btn.classList.replace('btn-demote', 'btn-promote');
+                            row.querySelector('.user-role').textContent = 'User';
+                        }
+                        return;
+                    }
+
+                    if (btn.classList.contains('btn-delete-user')) {
+                        const userId = row.dataset.userId;
+                        const data = await ajax('{% url "delete_user" %}', 'DELETE', {user_id: userId});
+                        if (data.status === 'ok') row.remove();
+                        return;
+                    }
+
+                    if (btn.classList.contains('btn-delete-course')) {
+                        const courseId = row.dataset.courseId;
+                        const data = await ajax('{% url "delete_course" %}', 'DELETE', {course_id: courseId});
+                        if (data.status === 'ok') row.remove();
+                        return;
+                    }
+
+                    if (btn.classList.contains('btn-delete-report')) {
+                        const reportId = row.dataset.reportId;
+                        const data = await ajax('{% url "delete_report" %}', 'DELETE', {report_id: reportId});
+                        if (data.status === 'ok') row.remove();
+                        return;
+                    }
+
+                    if (btn.classList.contains('btn-delete-course-in-report')) {
+                        const courseId = row.dataset.courseId;
+                        const data = await ajax('{% url "delete_course" %}', 'DELETE', {course_id: courseId});
+                        if (data.status === 'ok') row.remove();
+                        return;
+                    }
+
+                } catch (e) {
+                    console.error(e);
+                    alert('Ошибка при запросе');
+                }
             });
-            row.querySelector('.btn-delete-course-in-report')?.addEventListener('click', () => {
-                if (!confirm('Удалить курс?')) return;
-                sendAction('{% url "delete_course" %}', 'DELETE', {course_id: row.dataset.courseId}, data => {
-                    if (data.status === 'ok') location.reload(); else alert(data.error);
-                });
-            });
+        });
+    </script>
+
+
+    <style>
+        :root {
+            --primary-button-bg: #28a745;
+            --primary-button-hover: #218838;
+            --danger: #dc3545;
+            --background: #ffffff;
+            --surface: #f8f9fa;
+            --text-primary: #1A1A1A;
+            --border: #e0e0e0;
         }
-    }); </script>
-    <style> .moderator-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 1rem;
-    }
 
-    .moderator-title {
-        text-align: center;
-        margin-bottom: 1.5rem;
-        color: var(--color-accent);
-    }
+        [data-theme="dark"] {
+            --primary-button-bg: #ff6a00;
+            --primary-button-hover: #d15701;
+            --danger: #EB5757;
+            --background: #1A1A1A;
+            --surface: #2D2D2D;
+            --text-primary: #FFFFFF;
+            --border: #404040;
+        }
 
-    .moderator-section {
-        margin-bottom: 2rem;
-    }
+        .moderator-app {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+            background: var(--background);
+        }
 
-    .moderator-section h2 {
-        margin-bottom: .75rem;
-        color: var(--color-accent);
-    }
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
 
-    .moderator-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-    .moderator-table th, .moderator-table td {
-        border: 1px solid var(--border);
-        padding: .5rem;
-        text-align: left;
-    }
+        .sidebar-title {
+            font-size: 1.25rem;
+            color: var(--primary-button-bg);
+        }
 
-    .moderator-table th {
-        background: var(--bg-input);
-    }
+        .sidebar-nav ul {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            list-style: none;
+            padding: 0;
+        }
 
-    .profile-link, .course-link {
-        color: var(--color-accent);
-        text-decoration: none;
-    }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
 
-    .profile-link:hover, .course-link:hover {
-        text-decoration: underline;
-    }
+        .sidebar-link.active {
+            background: rgba(47, 128, 237, 0.1);
+            color: var(--primary-button-bg);
+        }
 
-    .btn {
-        padding: .4rem .8rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: .9rem;
-        transition: background .2s;
-        margin: .25rem;
-    }
+        .content {
+            padding: 2rem;
+            background: var(--background);
+        }
 
-    .btn--secondary {
-        background: var(--bg-btn-sec);
-        color: #fff;
-    }
+        .section {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            display: none;
+        }
 
-    .btn--secondary:hover {
-        background: var(--bg-btn-sec-h);
-    }
+        .section.active {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
 
-    .btn--danger {
-        background: var(--bg-btn-del);
-        color: #fff;
-    }
+        .table-container {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
 
-    .btn--danger:hover {
-        background: var(--bg-btn-del-h);
-    }
+        .moderator-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+        }
 
-    .action-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    } </style>
+        .moderator-table th,
+        .moderator-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 2px;
+        }
+
+        .btn--primary {
+            background: var(--primary-button-bg);
+            color: white;
+        }
+
+        .btn--primary:hover {
+            background: var(--primary-button-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn--danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn--danger:hover {
+            filter: brightness(0.9);
+        }
+
+        @media (max-width: 768px) {
+            .moderator-app {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+        }
+
+    </style>
 {% endblock %}
