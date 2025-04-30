@@ -256,3 +256,27 @@ class DeleteCourse(View):
 
         course.delete()
         return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
+
+
+class DeleteReport(View):
+    """Удаление жалобы модератором или staff-пользователем."""
+
+    @method_decorator(login_required)
+    def delete(self, request):
+        """
+        Удаляет жалобу.
+
+        Ожидает в body: report_id.
+
+        :param request: HTTP-запрос Django
+        :return: JsonResponse {'status':'ok'} или {'status':'error',...}
+        """
+        if not user_is_staff_or_moderator(request.user):
+            return JsonResponse({'status': 'error', 'error': 'you must be staff or moderator'})
+
+        data = QueryDict(request.body.decode('utf-8'))
+        report_id = data.get('report_id')
+        report = get_object_or_404(Report, id=report_id)
+
+        report.delete()
+        return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
