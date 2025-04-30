@@ -7,6 +7,16 @@
 <div class="editor-container">
   <h1 class="editor-title">Редактирование курса «{{ course.title }}»</h1>
 
+    {% if messages %}
+      <div class="message-container">
+        {% for message in messages %}
+          <div class="message message--{{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
   <form method="get" class="editor-form">
     <label for="lesson-select" class="form-label">Выберите урок:</label>
     <select id="lesson-select" name="lesson" class="styled-select" onchange="this.form.submit()">
@@ -88,6 +98,35 @@
   --input-bg: #444;
   --input-border: #ddd;
   --focus-border: #e67e22;
+}
+
+.message-container {
+  margin-bottom: 1rem;
+}
+
+.message {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.message--success {
+  background-color: #28a745;
+}
+
+.message--error {
+  background-color: #dc3545;
+}
+
+.message--warning {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.message--info {
+  background-color: #17a2b8;
 }
 
 .editor-container {
