@@ -29,6 +29,9 @@
                     </li>
                 {% endfor %}
             </ul>
+            <div class="report-course-button">
+                <a href="{% url 'course_report' course_id %}" class="btn-report">Пожаловаться на курс</a>
+            </div>
         </div>
 
         <button class="toggle-button" onclick="toggleSidebar()">☰ Меню уроков</button>
@@ -226,6 +229,34 @@
 
         .sidebar.active {
             transform: translateX(280px);
+        }
+
+        .report-course-button {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .btn-report {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn-report:hover {
+            background: #c82333;
+        }
+
+        [data-theme="dark"] .btn-report {
+            background: #e74c3c;
+        }
+
+        [data-theme="dark"] .btn-report:hover {
+            background: #c0392b;
         }
 
         .content {
