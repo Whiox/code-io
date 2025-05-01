@@ -20,7 +20,7 @@ test-job:
   stage: test
   script:
     - pip install -r requirements.txt
-    - coverage run --source='.' manage.py test
+    - coverage run --rcfile=.coveragerc --source='.' manage.py test
     - coverage html -d tests/coverage/
   artifacts:
     paths:

@@ -1,0 +1,8 @@
+[run]
+source = .
+omit =
+    */migrations/*
+    manage.py
+
+[report]
+show_missing = True
