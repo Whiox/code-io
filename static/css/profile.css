@@ -35,7 +35,6 @@
     --close-color: #ffffff;
 }
 
-/* Базовые стили */
 body {
     font-family: Arial, sans-serif;
     background-color: var(--body-bg);
@@ -104,7 +103,6 @@ body {
     text-decoration: underline;
 }
 
-/* Модальное окно */
 .modal {
     display: none;
     position: fixed;
@@ -173,7 +171,6 @@ body {
     color: var(--focus-border);
 }
 
-/* Анимации */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

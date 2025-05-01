@@ -1,4 +1,3 @@
-/* Общие переменные */
 :root {
     --header-bg: #1b752e;
     --menu-link-hover: #1c682d;
@@ -19,7 +18,6 @@
     --logo-color: white;
 }
 
-/* Общие стили хедера */
 .header {
     position: fixed;
     top: 0;
@@ -73,7 +71,6 @@
     background-color: var(--menu-link-hover);
 }
 
-/* Общие стили для пользовательской области */
 .user-area {
     display: flex;
     align-items: center;
@@ -105,7 +102,6 @@
     transform: scale(1.1);
 }
 
-/* Стили выпадающего меню */
 .dropdown {
     position: relative;
     display: inline-block;

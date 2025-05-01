@@ -1,4 +1,3 @@
-/* Общие переменные */
 :root {
     --auth-form-bg: #ccc;
     --auth-label-color: #000000;
@@ -16,7 +15,6 @@
     --input-focus-border: #ff4d00;
 }
 
-/* Общие стили для формы */
 .auth-form {
     display: flex;
     justify-content: flex-start;
@@ -60,7 +58,6 @@
     line-height: 1.4;
 }
 
-/* Общие стили для кнопок и сообщений (остаются одинаковыми для обеих тем) */
 .auth-form-inline {
     display: flex;
     justify-content: center;
