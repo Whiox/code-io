@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 
 {% block title %} Сброс пароля {% endblock %}
@@ -7,8 +6,11 @@
 
 <form method="POST" action="/reset/" class="auth-form">
     {% csrf_token %}
-
-    <label class="auth-label">Сброс пароля</label>
+    
+    <div class="auth-header">
+        <h1 class="auth-title">Восстановление пароля</h1>
+        <p class="auth-subtitle">Введите email, указанный при регистрации</p>
+    </div>
 
     {% if messages %}
         {% for message in messages %}
@@ -18,13 +20,18 @@
         {% endfor %}
     {% endif %}
 
-    <div>
-        {{ ResetPasswordForm.email }}
+    <div class="auth-fields">
+        <div class="input-group">
+            {{ ResetPasswordForm.email }}
+        </div>
     </div>
 
-    <div class="auth-form-inline">
-        <input type="submit" class="submit-button" value="Отправить email">
-        <a href="{% url 'login' %}" class="linc-button">Вернутся к входу</a>
+    <div class="password-actions">
+        <button type="submit" class="btn submit-button">
+            Отправить инструкции
+        </button>
+        <a href="{% url 'login' %}" class="auth-link">Вернуться к входу</a>
     </div>
 </form>
+
 {% endblock %}
