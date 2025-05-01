@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 
 {% block title %} Смена пароля {% endblock %}
@@ -7,8 +6,11 @@
 
 <form method="POST" action="/change/" class="auth-form">
     {% csrf_token %}
-
-    <label class="auth-label">Смена пароля</label>
+    
+    <div class="auth-header">
+        <h1 class="auth-title">Обновление пароля</h1>
+        <p class="auth-subtitle">Для безопасности вашего аккаунта</p>
+    </div>
 
     {% if messages %}
         {% for message in messages %}
@@ -18,14 +20,21 @@
         {% endfor %}
     {% endif %}
 
-    <div>
-        {{ ChangePasswordForm.old_password }}
-        {{ ChangePasswordForm.new_password }}
+    <div class="auth-fields">
+        <div class="input-group">
+            {{ ChangePasswordForm.old_password }}
+        </div>
+        <div class="input-group">
+            {{ ChangePasswordForm.new_password }}
+        </div>
     </div>
 
-    <div class="auth-form-inline">
-        <input type="submit" class="submit-button" value="Сменить пароль">
-        <a href="{% url 'reset_password' %}" class="linc-button">Забыли пароль?</a>
+    <div class="password-actions">
+        <button type="submit" class="btn submit-button">
+            Обновить пароль
+        </button>
+        <a href="{% url 'reset_password' %}" class="auth-link">Забыли пароль?</a>
     </div>
 </form>
+
 {% endblock %}

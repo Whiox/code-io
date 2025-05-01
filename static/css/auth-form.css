@@ -155,6 +155,29 @@
     margin-top: 1rem;
 }
 
+.password-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.password-actions .auth-link {
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 480px) {
+    .password-actions {
+        margin-top: 1.5rem;
+    }
+
+    .password-actions .auth-link {
+        order: -1;
+        margin-bottom: 1rem;
+    }
+}
+
 @media (max-width: 480px) {
     .auth-subtitle {
         flex-direction: column;

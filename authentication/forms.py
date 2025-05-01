@@ -84,16 +84,16 @@ class ChangePasswordForm(forms.Form):
     :ivar forms.CharField new_password: Новый пароль
     """
     old_password = forms.CharField(
-        label='', max_length=255,
-        widget=forms.TextInput(attrs={
+        widget=forms.PasswordInput(attrs={
             'class': 'auth-form-control',
-            'placeholder': 'Старый пароль'
+            'placeholder': 'Введите пароль',
+            'autocomplete': 'new-password'
         })
     )
     new_password = forms.CharField(
-        label='', max_length=255,
-        widget=forms.TextInput(attrs={
+        widget=forms.PasswordInput(attrs={
             'class': 'auth-form-control',
-            'placeholder': 'Новый пароль'
+            'placeholder': 'Введите пароль',
+            'autocomplete': 'new-password'
         })
     )
