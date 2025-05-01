@@ -55,10 +55,10 @@ class LoginForm(forms.Form):
         })
     )
     password = forms.CharField(
-        label='', max_length=255,
-        widget=forms.TextInput(attrs={
+        widget=forms.PasswordInput(attrs={
             'class': 'auth-form-control',
-            'placeholder': 'Пароль'
+            'placeholder': 'Введите пароль',
+            'autocomplete': 'new-password'
         })
     )
 

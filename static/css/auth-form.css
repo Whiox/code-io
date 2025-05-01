@@ -121,6 +121,25 @@
     color: #721c24;
 }
 
+.auth-subtitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.password-actions {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.password-actions .auth-link {
+    font-size: 0.9em;
+}
+
 @keyframes slideIn {
     from {
         opacity: 0;
@@ -129,6 +148,20 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+.btn.submit-button {
+    margin-top: 1rem;
+}
+
+@media (max-width: 480px) {
+    .auth-subtitle {
+        flex-direction: column;
+    }
+
+    .auth-subtitle span {
+        display: none;
     }
 }
 

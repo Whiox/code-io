@@ -121,7 +121,6 @@ class LoginView(View):
                 else:
                     login(request, user)
                     messages.success(request, "Вы успешно вошли!")
-                    return redirect('/')
             else:
                 messages.error(request, "Такого пользователя не существует.")
         else:

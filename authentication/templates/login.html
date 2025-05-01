@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 
 {% block title %} Вход в аккаунт {% endblock %}
@@ -7,8 +6,15 @@
 
 <form method="POST" action="/login/" class="auth-form">
     {% csrf_token %}
-
-    <label class="auth-label">Вход в аккаунт</label>
+    
+    <div class="auth-header">
+        <h1 class="auth-title">Вход в аккаунт</h1>
+        <p class="auth-subtitle">
+            <a href="{% url 'register' %}" class="auth-link">Нет аккаунта?</a>
+            <span style="margin: 0 8px">•</span>
+            <a href="{% url 'reset_password' %}" class="auth-link">Забыли пароль?</a>
+        </p>
+    </div>
 
     {% if messages %}
         {% for message in messages %}
@@ -18,15 +24,18 @@
         {% endfor %}
     {% endif %}
 
-    <div>
-        {{ LoginForm.email }}
-        {{ LoginForm.password }}
+    <div class="auth-fields">
+        <div class="input-group">
+            {{ LoginForm.email }}
+        </div>
+        <div class="input-group">
+            {{ LoginForm.password }}
+        </div>
     </div>
 
-    <div class="auth-form-inline">
-        <input type="submit" class="submit-button" value="Войти">
-        <a href="{% url 'reset_password' %}" class="linc-button">Забыли пароль?</a>
-        <a href="{% url 'register' %}" class="linc-button">Нет аккаунта?</a>
-    </div>
+    <button type="submit" class="btn submit-button">
+        Войти
+    </button>
 </form>
+
 {% endblock %}
