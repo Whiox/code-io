@@ -53,10 +53,10 @@
                     <table class="moderator-table">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Email</th>
-                            <th>Роль</th>
-                            <th>Действия</th>
+                            <th scope="col">ID</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Роль</th>
+                            <th scope="col">Действия</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -70,10 +70,10 @@
                                     {% if not u.is_moderator and not u.is_staff %}
                                         <button class="btn btn--primary btn-promote">Назначить</button>
                                     {% elif u.is_moderator %}
-                                        <button class="btn btn--danger btn-demote">Снять</button>
+                                        <button class="btn btn-demote">Снять</button>
                                     {% endif %}
                                     {% if not u.is_staff and not u.is_moderator or request.user.is_staff %}
-                                        <button class="btn btn--danger btn-delete-user">Удалить</button>
+                                        <button class="btn btn--danger">Удалить</button>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -91,10 +91,10 @@
                     <table class="moderator-table">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Название</th>
-                            <th>Автор</th>
-                            <th>Действия</th>
+                            <th scope="col">ID</th>
+                            <th scope="col">Название</th>
+                            <th scope="col">Автор</th>
+                            <th scope="col">Действия</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -121,11 +121,11 @@
                     <table class="moderator-table">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Курс</th>
-                            <th>Автор</th>
-                            <th>Причина</th>
-                            <th>Действия</th>
+                            <th scope="col">ID</th>
+                            <th scope="col">Курс</th>
+                            <th scope="col">Автор</th>
+                            <th scope="col">Причина</th>
+                            <th scope="col">Действия</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -133,7 +133,7 @@
                             <tr data-report-id="{{ r.id }}" data-course-id="{{ r.course.course_id }}">
                                 <td>{{ r.id }}</td>
                                 <td><a href="{% url 'course' r.course.course_id %}">{{ r.course.title }}</a></td>
-                                <td><a href="{% url 'profile' r.author.id %}">{{ r.author.email }}</a></td>
+                                <td><a class="table-linc" href="{% url 'profile' r.author.id %}">{{ r.author.email }}</a></td>
                                 <td>{{ r.reason }}</td>
                                 <td class="actions">
                                     <button class="btn btn--danger btn-delete-report">Удалить жалобу</button>
@@ -247,8 +247,10 @@
         :root {
             --primary-button-bg: #28a745;
             --primary-button-hover: #218838;
+            --demote-button-bg: #28a745;
+            --demote-button-hover: #218838;
             --danger: #dc3545;
-            --background: #ffffff;
+            --background: #f4f3f3;
             --surface: #f8f9fa;
             --text-primary: #1A1A1A;
             --border: #e0e0e0;
@@ -256,7 +258,9 @@
 
         [data-theme="dark"] {
             --primary-button-bg: #ff6a00;
-            --primary-button-hover: #d15701;
+            --primary-button-hover: #cc5500;
+            --demote-button-bg: #ff6a00;
+            --demote-button-hover: #cc5500;
             --danger: #EB5757;
             --background: #1A1A1A;
             --surface: #2D2D2D;
@@ -269,6 +273,7 @@
             grid-template-columns: 260px 1fr;
             min-height: 100vh;
             background: var(--background);
+            border-radius: 20px;
         }
 
         .sidebar {
@@ -311,9 +316,37 @@
             transition: all 0.2s ease;
         }
 
+        .sidebar-nav button.sidebar-link {
+            width: 100%;
+            box-sizing: border-box;
+            justify-content: start;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .sidebar-link .nav-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+        }
+
+        .sidebar {
+            min-width: 260px;
+            width: 260px;
+        }
+
         .sidebar-link.active {
             background: rgba(47, 128, 237, 0.1);
             color: var(--primary-button-bg);
+        }
+
+        .sidebar-link {
+            padding: 12px 20px !important;
+        }
+
+        .sidebar-nav {
+            width: 100%;
+            overflow: hidden;
         }
 
         .content {
@@ -348,9 +381,63 @@
 
         .moderator-table th,
         .moderator-table td {
+            text-align: left;
+            vertical-align: middle;
             padding: 1rem;
             border-bottom: 1px solid var(--border);
-            color: var(--text-primary);
+        }
+
+        .moderator-table th {
+            font-weight: 500;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .moderator-table td {
+            background: var(--surface);
+        }
+
+        .moderator-table td:first-child {
+            font-family: monospace;
+            font-weight: 600;
+            width: 80px;
+        }
+
+        .moderator-table .actions {
+            width: 220px;
+            white-space: nowrap;
+        }
+
+        .moderator-table a {
+            color: var(--primary-button-bg);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .moderator-table a:hover {
+            text-decoration: underline;
+            opacity: 0.9;
+        }
+
+        .moderator-table a:visited {
+            color: var(--primary-button-hover);
+        }
+
+        .actions a {
+            color: inherit !important;
+        }
+
+        .moderator-table .actions .btn {
+            min-width: 120px;
+            margin: 4px 2px;
+        }
+
+        .btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn svg {
+            fill: currentColor;
+            vertical-align: middle;
         }
 
         .btn {
@@ -372,9 +459,18 @@
             transform: translateY(-1px);
         }
 
+        .btn-demote {
+            background: var(--demote-button-bg) !important;
+            color: white !important;
+        }
+
+        .btn-demote:hover {
+            background: var(--demote-button-hover) !important;
+        }
+
         .btn--danger {
-            background: var(--danger);
-            color: white;
+            background: var(--danger) !important;
+            color: white !important;
         }
 
         .btn--danger:hover {
