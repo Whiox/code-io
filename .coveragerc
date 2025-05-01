@@ -3,6 +3,8 @@ source = .
 omit =
     */migrations/*
     manage.py
+    asgi.py
+    wsgi.py
 
 [report]
 show_missing = True

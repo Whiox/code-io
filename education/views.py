@@ -164,6 +164,9 @@ class AddCourseView(View):
         :param request: HTTP-запрос Django
         :return: render в 'add_course.html' с формами course_form, lesson_formset, topic_form
         """
+        if request.user.is_anonymous:
+            return redirect('/login')
+
         LessonFormSet = formset_factory(AddLessonForm, extra=1)
         course_form = AddCourseForm()
         lesson_formset = LessonFormSet()
@@ -182,6 +185,9 @@ class AddCourseView(View):
         :param request: HTTP-запрос Django с POST/FILES
         :return: redirect на 'my_courses' при успехе, иначе render с формами и ошибками
         """
+        if request.user.is_anonymous:
+            return redirect('/login')
+
         LessonFormSet = formset_factory(AddLessonForm, extra=1)
         course_form = AddCourseForm(request.POST)
         lesson_formset = LessonFormSet(request.POST, request.FILES)
