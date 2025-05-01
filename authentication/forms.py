@@ -26,17 +26,17 @@ class RegisterForm(forms.Form):
         })
     )
     password = forms.CharField(
-        label='', max_length=255,
-        widget=forms.TextInput(attrs={
+        widget=forms.PasswordInput(attrs={
             'class': 'auth-form-control',
-            'placeholder': 'Введите пароль'
+            'placeholder': 'Введите пароль',
+            'autocomplete': 'new-password'
         })
     )
     repeat_password = forms.CharField(
-        label='', max_length=255,
-        widget=forms.TextInput(attrs={
+        widget=forms.PasswordInput(attrs={
             'class': 'auth-form-control',
-            'placeholder': 'Повторите пароль'
+            'placeholder': 'Повторите пароль',
+            'autocomplete': 'new-password'
         })
     )
 

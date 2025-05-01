@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 
 {% block title %} Регистрация {% endblock %}
@@ -8,8 +7,10 @@
 <form method="POST" action="/register/" class="auth-form">
     {% csrf_token %}
 
-    <label class="auth-label">Регистрация</label>
-    <label class="auth-label">Убедитесь, что вводите существующий Email</label>
+    <div class="auth-header">
+        <h1 class="auth-title">Создайте аккаунт</h1>
+        <p class="auth-subtitle">Уже зарегистрированы? <a href="{% url 'login' %}" class="auth-link">Войти</a></p>
+    </div>
 
     {% if messages %}
         {% for message in messages %}
@@ -19,17 +20,24 @@
         {% endfor %}
     {% endif %}
 
-    <div>
-        {{ RegisterForm.username }}
-        {{ RegisterForm.email }}
-        {{ RegisterForm.password }}
-        {{ RegisterForm.repeat_password }}
+    <div class="auth-fields">
+        <div class="input-group">
+            {{ RegisterForm.username }}
+        </div>
+        <div class="input-group">
+            {{ RegisterForm.email }}
+        </div>
+        <div class="input-group">
+            {{ RegisterForm.password }}
+        </div>
+        <div class="input-group">
+            {{ RegisterForm.repeat_password }}
+        </div>
     </div>
 
-    <div class="auth-form-inline">
-        <input type="submit" class="submit-button" value="Создать аккаунт">
-        <a href="{% url 'login' %}" class="linc-button">Уже зарегистрированы?</a>
-    </div>
+    <button type="submit" class="btn submit-button">
+        Создать аккаунт
+    </button>
 </form>
 
 {% endblock %}
