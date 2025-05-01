@@ -281,3 +281,52 @@ class HomeViewsTests(TestCase):
 
         self.user.refresh_from_db()
         self.assertEqual(self.user.username, 'testuser')
+
+class AuthenticationEndpointsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user_data = {
+            'username': 'tester',
+            'password': 'secret123',
+            'email': 't@test.com',
+        }
+        User.objects.create_user(**self.user_data)
+
+    def test_login_endpoint(self):
+        url = reverse('login')
+        resp = self.client.post(url, {
+            'username': self.user_data['username'],
+            'password': self.user_data['password'],
+        })
+        self.assertEqual(resp.status_code, 200)
+
+    def test_register_endpoint(self):
+        url = reverse('register')
+        resp = self.client.post(url, {
+            'username': 'newuser',
+            'password1': 'newpass123',
+            'password2': 'newpass123',
+            'email': 'new@u.com',
+        })
+        self.assertIn(resp.status_code, (200, 302))
+
+class EducationEndpointsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='edu',
+            email='edu@test.com',
+            password='edu123'
+        )
+        self.client.login(username='edu', password='edu123')
+
+    def test_course_list_endpoint(self):
+        url = reverse('all')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_course_detail_endpoint(self):
+        course = Courses.objects.create(title='Test', author=self.user)
+        url = reverse('course', args=[course.course_id])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
