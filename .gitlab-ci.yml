@@ -24,8 +24,8 @@ test-job:
     - coverage run --source='.' manage.py test
     - coverage html
   artifacts:
-    untracked: false
-    when: on_success
+    paths:
+      - tests/coverage/
     expire_in: 30 days
 
 docs-job:
