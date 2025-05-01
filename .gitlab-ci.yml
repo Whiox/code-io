@@ -3,6 +3,7 @@ variables:
 
 stages:
   - pylint
+  - test
   - docs
 
 pylint-job:
@@ -15,6 +16,16 @@ pylint-job:
     when: on_success
     expire_in: 30 days
 
+test-job:
+  stage: test
+  script:
+    - pip install -r requirements.txt
+    - coverage run --rcfile=.coveragerc --source='.' manage.py test
+    - coverage html -d tests/coverage/
+  artifacts:
+    paths:
+      - tests/coverage/
+    expire_in: 30 days
 
 docs-job:
   stage: docs
