@@ -16,13 +16,12 @@ pylint-job:
     when: on_success
     expire_in: 30 days
 
-
 test-job:
   stage: test
   script:
     - pip install -r requirements.txt
     - coverage run --source='.' manage.py test
-    - coverage html
+    - coverage html -d tests/coverage/
   artifacts:
     paths:
       - tests/coverage/
