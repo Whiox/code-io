@@ -332,11 +332,16 @@ class CourseEditorView(View):
             with open(path, encoding='utf-8') as fp:
                 raw_content = fp.read()
 
+        all_topics = list(Topic.objects.values('id', 'name'))
+        course_topics = list(course.topics.all().values('id', 'name'))
+
         return render(request, 'edit_course.html', {
             'course': course,
             'files': files,
             'selected': sel,
             'content': raw_content,
+            'all_topics': all_topics,
+            'course_topics': course_topics
         })
 
     @method_decorator(login_required)
@@ -352,6 +357,20 @@ class CourseEditorView(View):
         if not author_or_staff(request.user, course):
             messages.error(request, "Нет прав на редактирование.")
             return redirect('course', course_id=course_id)
+
+        if 'update_topics' in request.POST:
+            try:
+                topic_ids = list(set(map(int, request.POST.getlist('topics', []))))
+                print(topic_ids)
+                existing_ids = Topic.objects.filter(id__in=topic_ids).values_list('id', flat=True)
+                print(existing_ids)
+                course.topics.set(existing_ids)
+                existing_ids = Topic.objects.filter(id__in=topic_ids).values_list('id', flat=True)
+                print(existing_ids)
+                messages.success(request, 'Тематики курса успешно обновлены')
+            except Exception as e:
+                messages.error(request, f'Ошибка обновления тем: {str(e)}')
+            return redirect('course_edit', course_id=course_id)
 
         lesson = request.POST.get('lesson')
         new_content = request.POST.get('content', '')

@@ -26,7 +26,12 @@ class Courses(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='my_courses')
-    topics = models.ManyToManyField(Topic, related_name='courses', blank=True)
+    topics = models.ManyToManyField(
+        Topic,
+        related_name='courses',
+        blank=True,
+        verbose_name='Темы курса'
+    )
 
 
 class Lessons(models.Model):

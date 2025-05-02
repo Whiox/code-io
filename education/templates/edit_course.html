@@ -7,15 +7,50 @@
 <div class="editor-container">
   <h1 class="editor-title">Редактирование курса «{{ course.title }}»</h1>
 
-    {% if messages %}
-      <div class="message-container">
-        {% for message in messages %}
-          <div class="message message--{{ message.tags }}">
-            {{ message }}
-          </div>
-        {% endfor %}
+  {% if messages %}
+    <div class="message-container">
+      {% for message in messages %}
+        <div class="message message--{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" class="editor-form editor-form--topics">
+    {% csrf_token %}
+    <input type="hidden" name="update_topics" value="1">
+
+    <div class="form-section">
+      <h2 class="section-title">Тематики курса</h2>
+      <div class="topics-controls">
+        <input type="text" id="new-topic-name" placeholder="Новая тема" class="topic-input">
+        <button type="button" id="add-topic-btn" class="btn-inline">Добавить тему</button>
       </div>
-    {% endif %}
+      <div class="topics-wrapper">
+        <select id="topics-select" class="form-input">
+          <option value="" disabled selected>— выберите тему —</option>
+          {% for topic in all_topics %}
+            <option value="{{ topic.id }}">{{ topic.name }}</option>
+          {% endfor %}
+        </select>
+        <div id="selected-topics" class="selected-topics">
+          {% for topic in course_topics %}
+            <div class="selected-topic" data-id="{{ topic.id }}">
+              {{ topic.name }}
+              <button type="button" class="remove-topic-btn">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+              <input type="hidden" name="topics" value="{{ topic.id }}">
+            </div>
+          {% endfor %}
+        </div>
+        <div class="topics-actions">
+          <button type="submit" class="btn-inline">Сохранить тематики</button>
+        </div>
+      </div>
+    </div>
+  </form>
 
   <form method="get" class="editor-form">
     <label for="lesson-select" class="form-label">Выберите урок:</label>
@@ -35,7 +70,6 @@
     <div class="codemirror-wrapper">
       <textarea id="code-editor" name="content">{{ content|escape }}</textarea>
     </div>
-
     <button type="submit" class="btn btn--primary">Сохранить урок</button>
   </form>
   {% else %}
@@ -43,90 +77,41 @@
   {% endif %}
 </div>
 
+{{ all_topics|json_script:"topics-data" }}
+{{ course_topics|json_script:"selected-topics-data" }}
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
-
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/continuelist.min.js"></script>
-  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const textarea = document.getElementById('code-editor');
-    const form = document.querySelector('form.editor-form--save');
-
-    const editor = CodeMirror.fromTextArea(textarea, {
-      mode: 'markdown',
-      lineNumbers: true,
-      lineWrapping: true,
-      theme: document.documentElement.getAttribute('data-theme') === 'dark'
-               ? 'dracula' : 'default',
-      extraKeys: { 'Enter': 'newlineAndIndentContinueMarkdownList' },
-    });
-
-    form.addEventListener('submit', (e) => {
-        editor.save();
-
-        let t = document.getElementById("code-editor");
-        t.value = t.value.replace(/[ \t]+$/gm, "");
-        t.value = t.value.replace(/(\r?\n){3,}/g, "\n\n");
-      });
-
-  });
-</script>
-
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/continuelist.min.js"></script>
 
 <style>
 :root {
-  --accent-color: #4dc621;
+  --accent-color: #28a745;
+  --hover-bg: #4dc621;
   --primary-button-bg: #28a745;
   --primary-button-hover: #218838;
   --border-color: #e0e0e0;
   --input-bg: #fff;
   --input-border: #ddd;
   --focus-border: #e67e22;
+  --sidebar-bg: #f9f9f9;
+  --text-color: #333;
 }
 
 [data-theme="dark"] {
-  --accent-color: #ff8c42;
+  --accent-color: #FF6B35;
+  --hover-bg: #ff6f00;
   --primary-button-bg: #ff6a00;
   --primary-button-hover: #d15701;
   --border-color: #555555;
   --input-bg: #444;
   --input-border: #ddd;
   --focus-border: #e67e22;
-}
-
-.message-container {
-  margin-bottom: 1rem;
-}
-
-.message {
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-  color: #fff;
-}
-
-.message--success {
-  background-color: #28a745;
-}
-
-.message--error {
-  background-color: #dc3545;
-}
-
-.message--warning {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.message--info {
-  background-color: #17a2b8;
+  --sidebar-bg: #2e2e2e;
+  --text-color: #fff;
 }
 
 .editor-container {
@@ -137,74 +122,222 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
 }
-.editor-title {
-  margin-bottom: 1.5rem;
-  color: var(--accent-color);
+
+.form-section {
+  margin-bottom: 2rem;
+  background: var(--sidebar-bg);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
 }
 
-.editor-form {
+.topics-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.topic-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--input-bg);
+  color: var(--text-color);
+}
+
+.selected-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.selected-topic {
+  background: var(--accent-color);
+  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.remove-topic-btn {
+  all: unset;
+  cursor: pointer;
+  padding-left: 8px;
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
-  gap: 1rem;
-}
-.editor-form--save {
-  flex-direction: column;
-  align-items: stretch;
-}
-.form-label {
-  font-weight: bold;
-  min-width: 120px;
-  color: var(--accent-color);
 }
 
-.styled-select {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border: 1px solid var(--input-border);
-  border-radius: 6px;
+.remove-topic-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: rgba(255,255,255,0.8);
+  transition: fill 0.2s;
+}
+
+.remove-topic-btn:hover svg {
+  fill: rgba(255,255,255,1);
+}
+
+.topics-actions {
+  text-align: right;
+  margin-top: 1rem;
+}
+
+#topics-select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
   background: var(--input-bg);
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-.styled-select:focus {
-  outline: none;
-  border-color: var(--focus-border);
+  color: var(--text-color);
 }
 
-.codemirror-wrapper {
-  height: 60vh;
-  border: 1px solid var(--input-border);
-  border-radius: 6px;
-  overflow: hidden;
-  margin-bottom: 1rem;
-}
-.codemirror-wrapper .CodeMirror {
-  height: 100%;
-  font-family: monospace;
-  font-size: 0.95rem;
-}
-
-.btn--primary {
-  align-self: flex-end;
-  padding: 0.6rem 1.2rem;
-  background: var(--primary-button-bg);
+.btn-inline {
+  background: var(--accent-color);
   color: #fff;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-  font-size: 1rem;
-}
-.btn--primary:hover {
-  background: var(--primary-button-hover);
-  transform: translateY(-1px);
 }
 
-.editor-note {
-  font-style: italic;
-  color: #666;
+.btn-inline:hover {
+  background: var(--primary-button-hover);
 }
+
+.message-container { margin-bottom: 1rem; }
+.message { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 0.5rem; }
+.message--success { background-color: #28a745; color: #fff; }
+.message--error { background-color: #dc3545; color: #fff; }
+.editor-title { color: var(--accent-color); }
+.styled-select { padding: 0.5rem; border: 1px solid var(--border-color); }
+.codemirror-wrapper { height: 70vh; border: 1px solid var(--border-color); position: relative; }
+.CodeMirror { height: 100%; font-family: monospace; font-size: 1rem; position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+.btn--primary { background: var(--primary-button-bg); padding: 0.6rem 1.2rem; margin-top: 1rem; }
 </style>
+
+<script>
+(function(){
+  const csrftoken = document.cookie.match(/csrftoken=([\w-]+)/)?.[1];
+  if(!csrftoken) return;
+
+  const topics = JSON.parse(document.getElementById('topics-data').textContent);
+  const selectedTopics = JSON.parse(document.getElementById('selected-topics-data').textContent);
+
+  const elements = {
+    topicsSelect: document.getElementById('topics-select'),
+    selectedContainer: document.getElementById('selected-topics'),
+    addTopicBtn: document.getElementById('add-topic-btn')
+  };
+
+  if(!elements.topicsSelect || !elements.selectedContainer || !elements.addTopicBtn) return;
+
+  function updateTopicSelect() {
+    const selectedIds = Array.from(elements.selectedContainer.querySelectorAll('input'))
+      .map(i => parseInt(i.value))
+      .filter((v, i, arr) => arr.indexOf(v) === i);
+
+    elements.topicsSelect.innerHTML = '<option value="" disabled selected>— выберите тему —</option>';
+    topics.forEach(t => {
+      if(!selectedIds.includes(t.id)) {
+        const option = document.createElement('option');
+        option.value = t.id;
+        option.textContent = t.name;
+        elements.topicsSelect.appendChild(option);
+      }
+    });
+  }
+
+  function handleRemoveTopic(event) {
+    const removeBtn = event.target.closest('.remove-topic-btn');
+    if(!removeBtn) return;
+
+    const topicDiv = removeBtn.closest('.selected-topic');
+    if(topicDiv) {
+      const input = topicDiv.querySelector('input[name="topics"]');
+      if(input) input.remove();
+      topicDiv.remove();
+      updateTopicSelect();
+    }
+  }
+
+  function createTopicElement(topic) {
+    const div = document.createElement('div');
+    div.className = 'selected-topic';
+    div.dataset.id = topic.id;
+    div.innerHTML = `
+      ${topic.name}
+      <button type="button" class="remove-topic-btn">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+      <input type="hidden" name="topics" value="${topic.id}">
+    `;
+    return div;
+  }
+
+  elements.selectedContainer.innerHTML = '';
+  selectedTopics.forEach(t => elements.selectedContainer.appendChild(createTopicElement(t)));
+  updateTopicSelect();
+
+  elements.selectedContainer.addEventListener('click', handleRemoveTopic);
+
+  elements.addTopicBtn.addEventListener('click', async () => {
+    const input = document.getElementById('new-topic-name');
+    const name = input.value.trim();
+    if(!name) return;
+
+    try {
+      const res = await fetch('{% url "create_topic" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({name})
+      });
+      const data = await res.json();
+      if(data.status === 'ok') {
+        const newTopic = {id: data.ok, name: name};
+        topics.push(newTopic);
+        elements.selectedContainer.appendChild(createTopicElement(newTopic));
+        updateTopicSelect();
+        input.value = '';
+      }
+    } catch(e) { console.error('Error:', e); }
+  });
+
+  elements.topicsSelect.addEventListener('change', function() {
+    if(this.value) {
+      const topic = topics.find(t => t.id == this.value);
+      if(topic) {
+        elements.selectedContainer.appendChild(createTopicElement(topic));
+        updateTopicSelect();
+        this.value = '';
+      }
+    }
+  });
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const editorElement = document.getElementById('code-editor');
+  if(editorElement) {
+    const editor = CodeMirror.fromTextArea(editorElement, {
+      mode: 'markdown',
+      lineNumbers: true,
+      lineWrapping: true,
+      theme: document.documentElement.dataset.theme === 'dark' ? 'dracula' : 'default',
+      extraKeys: {'Enter': 'newlineAndIndentContinueMarkdownList'},
+      viewportMargin: Infinity
+    });
+
+    document.querySelector('form.editor-form--save')?.addEventListener('submit', () => {
+      editor.save();
+    });
+  }
+});
+</script>
 {% endblock %}

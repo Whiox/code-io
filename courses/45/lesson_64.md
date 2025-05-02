@@ -87,4 +87,3 @@ pytest tests\trafficlights_images.py -v
 ```bash
 mypy main.py
 ```
-
