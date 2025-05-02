@@ -17,7 +17,7 @@ from django.views import View
 from code_io import settings
 from home.models import UserProfile, SocialNetwork, Interest
 from authentication.models import User
-from education.models import Courses, Stars, Report
+from education.models import Courses, Stars, Report, Topic
 
 
 def user_is_staff_or_moderator(user: User) -> bool:
@@ -43,12 +43,12 @@ class HomeView(View):
                 course=OuterRef('pk'),
                 user=request.user
             )
-            popular_courses = Courses.objects.annotate(
+            popular_courses = Courses.objects.prefetch_related('topics').annotate(
                 stars_count=Count('stars'),
                 is_stared=Exists(subquery)
             ).order_by('-stars_count')[:3]
         else:
-            popular_courses = Courses.objects.annotate(
+            popular_courses = Courses.objects.prefetch_related('topics').annotate(
                 stars_count=Count('stars')
             ).order_by('-stars_count')[:3]
 
