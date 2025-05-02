@@ -361,12 +361,8 @@ class CourseEditorView(View):
         if 'update_topics' in request.POST:
             try:
                 topic_ids = list(set(map(int, request.POST.getlist('topics', []))))
-                print(topic_ids)
                 existing_ids = Topic.objects.filter(id__in=topic_ids).values_list('id', flat=True)
-                print(existing_ids)
                 course.topics.set(existing_ids)
-                existing_ids = Topic.objects.filter(id__in=topic_ids).values_list('id', flat=True)
-                print(existing_ids)
                 messages.success(request, 'Тематики курса успешно обновлены')
             except Exception as e:
                 messages.error(request, f'Ошибка обновления тем: {str(e)}')
