@@ -12,7 +12,7 @@ from education.views import (
 urlpatterns = [
     path('all/', AllCoursesView.as_view(), name='all'),
     path('stared/', StaredCoursesView.as_view(), name='stared'),
-    path('<str:course_id>/', ViewCourseView.as_view(), name='course'),
+    path('<int:course_id>/', ViewCourseView.as_view(), name='course'),
     path('add', AddCourseView.as_view(), name='add_course'),
     path('my', MyCoursesView.as_view(), name='my_courses'),
     path('delete/<int:course_id>/', DeleteCourseView.as_view(), name='delete'),
