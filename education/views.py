@@ -14,9 +14,10 @@ from django.forms import formset_factory
 from django.views import View
 from django.http import JsonResponse, QueryDict
 from django.conf import settings
+from docutils.nodes import topic
 
 from education.files import get_all_lessons, get_lesson_number
-from education.models import Courses, Lessons, Stars, Report
+from education.models import Courses, Lessons, Stars, Report, Topic
 from education.forms import AddCourseForm, AddLessonForm, TopicChoiceForm
 
 
@@ -331,11 +332,16 @@ class CourseEditorView(View):
             with open(path, encoding='utf-8') as fp:
                 raw_content = fp.read()
 
+        all_topics = list(Topic.objects.values('id', 'name'))
+        course_topics = list(course.topics.all().values('id', 'name'))
+
         return render(request, 'edit_course.html', {
             'course': course,
             'files': files,
             'selected': sel,
             'content': raw_content,
+            'all_topics': all_topics,
+            'course_topics': course_topics
         })
 
     @method_decorator(login_required)
@@ -351,6 +357,16 @@ class CourseEditorView(View):
         if not author_or_staff(request.user, course):
             messages.error(request, "Нет прав на редактирование.")
             return redirect('course', course_id=course_id)
+
+        if 'update_topics' in request.POST:
+            try:
+                topic_ids = list(set(map(int, request.POST.getlist('topics', []))))
+                existing_ids = Topic.objects.filter(id__in=topic_ids).values_list('id', flat=True)
+                course.topics.set(existing_ids)
+                messages.success(request, 'Тематики курса успешно обновлены')
+            except Exception as e:
+                messages.error(request, f'Ошибка обновления тем: {str(e)}')
+            return redirect('course_edit', course_id=course_id)
 
         lesson = request.POST.get('lesson')
         new_content = request.POST.get('content', '')
@@ -462,3 +478,35 @@ class ReportCourseView(View):
         course = get_object_or_404(Courses, course_id=course_id)
         Report.objects.filter(course=course, author=request.user).delete()
         return JsonResponse({'status': 'ok', 'ok': 'report deleted'})
+
+
+class CreateTopicView(View):
+    @method_decorator(login_required)
+    def post(self, request):
+        name = request.POST.get('name')
+
+        if not name:
+            return JsonResponse({'status': 'error', 'error': 'no name field'})
+
+        if Topic.objects.filter(name=name).exists():
+            return JsonResponse({'status': 'error', 'error': 'topic with this name already exist'})
+
+        topic = Topic.objects.create(name=name)
+
+        return JsonResponse({'status': 'ok', 'ok': topic.id})
+
+
+class GetTopicsView(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        qs = Topic.objects.order_by('name').values('id', 'name')
+
+        return JsonResponse({'status': 'ok', 'topics': list(qs)})
+
+
+class GetTopicView(View):
+    @method_decorator(login_required)
+    def get(self, request, topic_id):
+        topic = Topic.objects.filter(id=topic_id).first()
+
+        return JsonResponse({'status': 'ok', 'topic': topic})
