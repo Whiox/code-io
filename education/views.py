@@ -14,9 +14,10 @@ from django.forms import formset_factory
 from django.views import View
 from django.http import JsonResponse, QueryDict
 from django.conf import settings
+from docutils.nodes import topic
 
 from education.files import get_all_lessons, get_lesson_number
-from education.models import Courses, Lessons, Stars, Report
+from education.models import Courses, Lessons, Stars, Report, Topic
 from education.forms import AddCourseForm, AddLessonForm, TopicChoiceForm
 
 
@@ -462,3 +463,35 @@ class ReportCourseView(View):
         course = get_object_or_404(Courses, course_id=course_id)
         Report.objects.filter(course=course, author=request.user).delete()
         return JsonResponse({'status': 'ok', 'ok': 'report deleted'})
+
+
+class CreateTopicView(View):
+    @method_decorator(login_required)
+    def post(self, request):
+        name = request.POST.get('name')
+
+        if not name:
+            return JsonResponse({'status': 'error', 'error': 'no name field'})
+
+        if Topic.objects.filter(name=name).exists():
+            return JsonResponse({'status': 'error', 'error': 'topic with this name already exist'})
+
+        topic = Topic.objects.create(name=name)
+
+        return JsonResponse({'status': 'ok', 'ok': topic.id})
+
+
+class GetTopicsView(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        qs = Topic.objects.order_by('name').values('id', 'name')
+
+        return JsonResponse({'status': 'ok', 'topics': list(qs)})
+
+
+class GetTopicView(View):
+    @method_decorator(login_required)
+    def get(self, request, topic_id):
+        topic = Topic.objects.filter(id=topic_id).first()
+
+        return JsonResponse({'status': 'ok', 'topic': topic})
