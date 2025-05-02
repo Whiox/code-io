@@ -12,7 +12,7 @@ class UserProfile(models.Model):
     :ivar models.TextField phone: Номер телефона пользователя (по умолчанию "Не указано")
     """
     profile_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='profile')
     about = models.TextField(default='Не указано')
     email = models.TextField(default='Не указано')
     phone = models.TextField(default='Не указано')

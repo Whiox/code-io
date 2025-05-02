@@ -14,10 +14,9 @@ from django.forms import formset_factory
 from django.views import View
 from django.http import JsonResponse, QueryDict
 from django.conf import settings
-from docutils.nodes import topic
 
 from education.files import get_all_lessons, get_lesson_number
-from education.models import Courses, Lessons, Stars, Report, Topic
+from education.models import Courses, Lessons, Stars, ReportCourse, Topic
 from education.forms import AddCourseForm, AddLessonForm, TopicChoiceForm
 
 
@@ -410,7 +409,7 @@ class ReportCourseView(View):
         course = get_object_or_404(Courses, course_id=course_id)
         context = {'course': course}
 
-        report = Report.objects.filter(course=course, author=request.user)
+        report = ReportCourse.objects.filter(course=course, author=request.user)
         if report.exists():
             context['report'] = report
 
@@ -429,14 +428,14 @@ class ReportCourseView(View):
         """
         course = get_object_or_404(Courses, course_id=course_id)
 
-        if Report.objects.filter(course=course, author=request.user).exists():
+        if ReportCourse.objects.filter(course=course, author=request.user).exists():
             return JsonResponse({'status': 'error', 'error': 'report already exists'})
 
         reason = request.POST.get('reason')
         if not reason:
             return JsonResponse({'status': 'error', 'error': 'no reason field'})
 
-        report = Report.objects.create(course=course, author=request.user, reason=reason)
+        report = ReportCourse.objects.create(course=course, author=request.user, reason=reason)
         return JsonResponse({'status': 'ok', 'ok': report.id})
 
     @method_decorator(login_required)
@@ -457,7 +456,7 @@ class ReportCourseView(View):
         if not reason:
             return JsonResponse({'status': 'error', 'error': 'no reason field'})
 
-        report = Report.objects.filter(course=course, author=request.user).first()
+        report = ReportCourse.objects.filter(course=course, author=request.user).first()
         if not report:
             return JsonResponse({'status': 'error', 'error': 'report does not exist'})
 
@@ -476,7 +475,7 @@ class ReportCourseView(View):
         :rtype: JsonResponse
         """
         course = get_object_or_404(Courses, course_id=course_id)
-        Report.objects.filter(course=course, author=request.user).delete()
+        ReportCourse.objects.filter(course=course, author=request.user).delete()
         return JsonResponse({'status': 'ok', 'ok': 'report deleted'})
 
 
@@ -491,7 +490,7 @@ class CreateTopicView(View):
         if Topic.objects.filter(name=name).exists():
             return JsonResponse({'status': 'error', 'error': 'topic with this name already exist'})
 
-        topic = Topic.objects.create(name=name)
+        topic = Topic.objects.create(name=name, author=request.user)
 
         return JsonResponse({'status': 'ok', 'ok': topic.id})
 

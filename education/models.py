@@ -3,11 +3,15 @@ from authentication.models import User
 
 
 class Topic(models.Model):
-    """Модель для представления темы курса.
+    """Модель темы курса.
 
-    :ivar models.CharField name: Название темы (макс. 100 символов)
+    :ivar models.CharField name: Название темы (максимум 100 символов)
+    :ivar models.ForeignKey author: Автор темы (пользователь, опционально)
+    :ivar models.DateTimeField created_at: Дата создания (автоматически)
     """
     name = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return self.name
@@ -24,7 +28,8 @@ class Courses(models.Model):
     course_id = models.AutoField(primary_key=True)
     title = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE,
+        User, on_delete=models.SET_NULL,
+        null=True, blank=True,
         related_name='my_courses')
     topics = models.ManyToManyField(
         Topic,
@@ -72,11 +77,12 @@ class Stars(models.Model):
     data = models.IntegerField(default=0)
 
 
-class Report(models.Model):
-    """Модель жалобы на курс
+class ReportCourse(models.Model):
+    """Модель жалобы на курс.
 
-    :ivar models.ForeignKey course: Курс, на который была подана жалоба
-    :ivar models.ForeignKey user: Пользователь, подавший жалобу
+    :ivar models.ForeignKey author: Автор жалобы (пользователь)
+    :ivar models.ForeignKey course: Курс, на который подана жалоба
+    :ivar models.TextField reason: Текстовое описание причины жалобы
     """
     author = models.ForeignKey(
         User,
@@ -90,3 +96,32 @@ class Report(models.Model):
     )
     reason = models.TextField()
 
+
+class ReportTopic(models.Model):
+    """Модель жалобы на тему курса.
+
+    :ivar models.ForeignKey course: Курс, к которому относится тема
+    :ivar models.ForeignKey author: Автор жалобы (пользователь)
+    :ivar models.CharField reason: Причина жалобы (варианты выбора)
+    :ivar models.DateTimeField created_at: Дата создания жалобы (автоматически)
+    """
+    REASON_CHOICES = [
+        ('spam', 'Спам'),
+        ('illegal', 'Незаконно'),
+        ('Unacceptable', 'Недопустимо')
+    ]
+
+    course = models.ForeignKey(Courses, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    reason = models.CharField(
+        max_length=50,
+        choices=REASON_CHOICES,
+        verbose_name='Причина жалобы'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+
+    def __str__(self):
+        return f"Жалоба на курс {self.course_id} ({self.reason})"

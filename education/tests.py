@@ -7,7 +7,7 @@ from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 
 from authentication.models import User
-from education.models import Courses, Stars, Report
+from education.models import Courses, Stars, ReportCourse
 
 
 class AllCourseViewTest(TestCase):

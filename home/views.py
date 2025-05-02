@@ -17,7 +17,7 @@ from django.views import View
 from code_io import settings
 from home.models import UserProfile, SocialNetwork, Interest
 from authentication.models import User
-from education.models import Courses, Stars, Report, Topic
+from education.models import Courses, Stars, ReportCourse, Topic, ReportTopic
 
 
 def user_is_staff_or_moderator(user: User) -> bool:
@@ -145,9 +145,12 @@ class ModeratorPanelView(View):
 
         context = {
             'users': User.objects.all(),
-            'reports': Report.objects.all(),
-            'courses': Courses.objects.all(),
+            'courses': Courses.objects.all().select_related('author'),
+            'topics': Topic.objects.filter(author__isnull=False).select_related('author'),
+            'course_reports': ReportCourse.objects.all().select_related('author', 'course'),
+            'topic_reports': ReportTopic.objects.all().select_related('author', 'course')
         }
+
         return render(request, 'moderator_page.html', context)
 
 
@@ -258,8 +261,8 @@ class DeleteCourse(View):
         return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
 
 
-class DeleteReport(View):
-    """Удаление жалобы модератором или staff-пользователем."""
+class DeleteCourseReport(View):
+    """Удаление жалобы на курсы модератором или staff-пользователем."""
 
     @method_decorator(login_required)
     def delete(self, request):
@@ -276,7 +279,55 @@ class DeleteReport(View):
 
         data = QueryDict(request.body.decode('utf-8'))
         report_id = data.get('report_id')
-        report = get_object_or_404(Report, id=report_id)
+        report = get_object_or_404(ReportCourse, id=report_id)
+
+        report.delete()
+        return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
+
+
+class DeleteTopic(View):
+    """Удаление топика модератором или staff-пользователем."""
+
+    @method_decorator(login_required)
+    def delete(self, request):
+        """
+        Удаляет топик.
+
+        Ожидает в body: topic_id.
+
+        :param request: HTTP-запрос Django
+        :return: JsonResponse {'status':'ok'} или {'status':'error',...}
+        """
+        if not user_is_staff_or_moderator(request.user):
+            return JsonResponse({'status': 'error', 'error': 'you must be staff or moderator'})
+
+        data = QueryDict(request.body.decode('utf-8'))
+        topic_id = data.get('topic_id')
+        topic = get_object_or_404(Topic, id=topic_id)
+
+        topic.delete()
+        return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
+
+
+class DeleteTopicReport(View):
+    """Удаление жалобы на темы модератором или staff-пользователем."""
+
+    @method_decorator(login_required)
+    def delete(self, request):
+        """
+        Удаляет жалобу.
+
+        Ожидает в body: report_id.
+
+        :param request: HTTP-запрос Django
+        :return: JsonResponse {'status':'ok'} или {'status':'error',...}
+        """
+        if not user_is_staff_or_moderator(request.user):
+            return JsonResponse({'status': 'error', 'error': 'you must be staff or moderator'})
+
+        data = QueryDict(request.body.decode('utf-8'))
+        report_id = data.get('report_id')
+        report = get_object_or_404(ReportTopic, id=report_id)
 
         report.delete()
         return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
