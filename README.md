@@ -21,6 +21,15 @@ python manage.py runserver
 docker-compose up --build
 ```
 
+### Тестирование
+
+Выгружается в gitlab artifact после каждого коммита
+
+Для тестирования вручную:
+```bash
+coverage run --source='.' manage.py test
+coverage html
+```
 
 ### Документация
 
