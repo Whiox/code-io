@@ -68,29 +68,37 @@ def analyze_file(filepath):
     elif ext == '.html':
         embedded = parse_html_content(content)
 
-        cleaned_html = re.sub(r'(<style[^>]*>.*?</style>|<script[^>]*>.*?</script>)', '',
-                              content, flags=re.DOTALL | re.IGNORECASE)
+        cleaned_html = re.sub(
+            r'(?s)(<style[^>]*>.*?</style>|<script[^>]*>.*?</script>)',
+            '',
+            content
+        )
 
         html_metrics = count_metrics(cleaned_html, 'html')
         metrics['html'] = html_metrics
 
         for css in embedded['css']:
-            css_metrics = count_metrics(css, 'css')
-            metrics['css']['lines'] += css_metrics['lines']
-            metrics['css']['chars'] += css_metrics['chars']
+            if css:
+                css_metrics = count_metrics(css, 'css')
+                metrics['css']['lines'] += css_metrics['lines']
+                metrics['css']['chars'] += css_metrics['chars']
 
         for js in embedded['js']:
-            js_metrics = count_metrics(js, 'js')
-            metrics['js']['lines'] += js_metrics['lines']
-            metrics['js']['chars'] += js_metrics['chars']
+            if js:
+                js_metrics = count_metrics(js, 'js')
+                metrics['js']['lines'] += js_metrics['lines']
+                metrics['js']['chars'] += js_metrics['chars']
+
     elif ext == '.css':
         file_type = 'css'
         res = count_metrics(content, 'css')
         metrics['css'] = res
+
     elif ext == '.js':
         file_type = 'js'
         res = count_metrics(content, 'js')
         metrics['js'] = res
+
     else:
         return None
 
