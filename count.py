@@ -7,14 +7,17 @@ from collections import defaultdict
 def parse_html_content(content):
     """Извлекает встроенные CSS и JS из HTML"""
     css_blocks = re.findall(r'<style[^>]*>(.*?)</style>', content, re.DOTALL | re.IGNORECASE)
-    js_blocks = re.findall(r'<script[^>]*>(.*?)</script>', content, re.DOTALL | re.IGNORECASE)
 
-    js_blocks = [block for block in js_blocks if
-                 not re.search(r'type=(["\'])(?!text/javascript|application/javascript)', block[0])]
+    js_blocks = []
+    for match in re.finditer(r'<script\b(?:\s+[^>]*)?>(.*?)</script>', content, re.DOTALL | re.IGNORECASE):
+        script_tag, script_content = match.group(0), match.group(1)
+        if re.search(r'type\s*=\s*["\'](?!text/javascript|application/javascript)', script_tag, re.IGNORECASE):
+            continue
+        js_blocks.append(script_content.strip())
 
     return {
         'css': [css.strip() for css in css_blocks],
-        'js': [js.strip() for js in js_blocks]
+        'js': js_blocks
     }
 
 
