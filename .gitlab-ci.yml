@@ -5,6 +5,7 @@ stages:
   - pylint
   - test
   - docs
+  - statistic
 
 pylint-job:
   stage: pylint
@@ -37,3 +38,9 @@ docs-job:
     paths:
       - docs/build/
     expire_in: 30 days
+
+
+statistic-job:
+  stage: statistic
+  script:
+    - python count
