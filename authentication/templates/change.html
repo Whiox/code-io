@@ -4,37 +4,37 @@
 
 {% block content %}
 
-<form method="POST" action="/change/" class="auth-form">
-    {% csrf_token %}
-    
-    <div class="auth-header">
-        <h1 class="auth-title">Обновление пароля</h1>
-        <p class="auth-subtitle">Для безопасности вашего аккаунта</p>
-    </div>
+    <form method="POST" action="/change/" class="auth-form">
+        {% csrf_token %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
-                {{ message }}
+        <div class="auth-header">
+            <h1 class="auth-title">Обновление пароля</h1>
+            <p class="auth-subtitle">Для безопасности вашего аккаунта</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="auth-fields">
+            <div class="input-group">
+                {{ ChangePasswordForm.old_password }}
             </div>
-        {% endfor %}
-    {% endif %}
-
-    <div class="auth-fields">
-        <div class="input-group">
-            {{ ChangePasswordForm.old_password }}
+            <div class="input-group">
+                {{ ChangePasswordForm.new_password }}
+            </div>
         </div>
-        <div class="input-group">
-            {{ ChangePasswordForm.new_password }}
+
+        <div class="password-actions">
+            <button type="submit" class="btn submit-button">
+                Обновить пароль
+            </button>
+            <a href="{% url 'reset_password' %}" class="auth-link">Забыли пароль?</a>
         </div>
-    </div>
+    </form>
 
-    <div class="password-actions">
-        <button type="submit" class="btn submit-button">
-            Обновить пароль
-        </button>
-        <a href="{% url 'reset_password' %}" class="auth-link">Забыли пароль?</a>
-    </div>
-</form>
-
-{% endblock %}
+{% endblock content %}
