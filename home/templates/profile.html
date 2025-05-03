@@ -1,88 +1,87 @@
-
 {% extends 'base.html' %}
 
 {% block title %}Все курсы{% endblock %}
 
 {% block content %}
 
-{% load static %}
+    {% load static %}
 
-{% if is_owner %}
-    <div class="modal" id="edit-profile-modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Редактирование профиля</h2>
-            <form method="POST" id="edit-profile-form">
-                {% csrf_token %}
-                <label for="username">Имя:</label>
-                <input type="text" id="username" name="username" value="{{ username }}">
+    {% if is_owner %}
+        <div class="modal" id="edit-profile-modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Редактирование профиля</h2>
+                <form method="POST" id="edit-profile-form">
+                    {% csrf_token %}
+                    <label for="username">Имя:</label>
+                    <input type="text" id="username" name="username" value="{{ username }}">
 
-                <label for="about">О себе:</label>
-                <textarea id="about" name="about">{{ user_profile.about }}</textarea>
+                    <label for="about">О себе:</label>
+                    <textarea id="about" name="about">{{ user_profile.about }}</textarea>
 
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" value="{{ user_profile.email }}">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="{{ user_profile.email }}">
 
-                <label for="phone">Телефон:</label>
-                <input type="text" id="phone" name="phone" value="{{ user_profile.phone }}">
+                    <label for="phone">Телефон:</label>
+                    <input type="text" id="phone" name="phone" value="{{ user_profile.phone }}">
 
-                <button type="submit">Сохранить</button>
-            </form>
-            <form method="POST" style="margin-top: 30px;">
-            {% csrf_token %}
-            <button type="submit" name="action" value="delete_account"
-                    onclick="return confirm('Вы точно хотите удалить аккаунт? Это действие необратимо.')"
-                    style="background: #e53935; color: white; border: none; padding: 10px 20px; cursor: pointer;">
-              Удалить аккаунт
-            </button>
-          </form>
-        </div>
-    </div>
-{% endif %}
-
-<div class="profile-container">
-    <div class="profile-info">
-        <div class="profile-header">
-            <img src="{% static 'assets/profile-default.png' %}" alt="Аватар пользователя" class="avatar">
-            <h1>{{ username }}</h1>
-            {% if is_owner %}
-                <img src="{% static 'assets/edit.svg' %}" alt="Изменить" class="edit" id="edit-profile">
-            {% endif %}
-        </div>
-
-        <div class="section">
-            <div class="section-title">О себе:</div>
-            <p>{{ user_profile.about }}</p>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Контактная информация:</div>
-
-            {% if user_profile.email %}
-                <p>Email: {{ user_profile.email }}</p>
-            {% endif %}
-
-            {% if user_profile.phone %}
-                <p>Телефон: {{ user_profile.phone }}</p>
-            {% endif %}
-
-            {% if not user_profile.email and not user_profile.phone %}
-                <p>Не указаны</p>
-            {% endif %}
-        </div>
-
-
-        <div class="section">
-            <div class="section-title">Социальные сети:</div>
-            <div class="social-links">
-                {% for sn in social_network %}
-                    <a href="{{ sn.linc }}">{{ sn.label }}</a>
-                {% empty %}
-                    <p>Не указаны</p>
-                {% endfor %}
+                    <button type="submit">Сохранить</button>
+                </form>
+                <form method="POST" style="margin-top: 30px;">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="delete_account"
+                            onclick="return confirm('Вы точно хотите удалить аккаунт? Это действие необратимо.')"
+                            style="background: #e53935; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+                        Удалить аккаунт
+                    </button>
+                </form>
             </div>
         </div>
+    {% endif %}
+
+    <div class="profile-container">
+    <div class="profile-info">
+    <div class="profile-header">
+        <img src="{% static 'assets/profile-default.png' %}" alt="Аватар пользователя" class="avatar">
+        <h1>{{ username }}</h1>
+        {% if is_owner %}
+            <img src="{% static 'assets/edit.svg' %}" alt="Изменить" class="edit" id="edit-profile">
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <div class="section-title">О себе:</div>
+        <p>{{ user_profile.about }}</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Контактная информация:</div>
+
+        {% if user_profile.email %}
+            <p>Email: {{ user_profile.email }}</p>
+        {% endif %}
+
+        {% if user_profile.phone %}
+            <p>Телефон: {{ user_profile.phone }}</p>
+        {% endif %}
+
+        {% if not user_profile.email and not user_profile.phone %}
+            <p>Не указаны</p>
+        {% endif %}
+    </div>
+
+
+    <div class="section">
+        <div class="section-title">Социальные сети:</div>
+        <div class="social-links">
+            {% for sn in social_network %}
+                <a href="{{ sn.linc }}">{{ sn.label }}</a>
+            {% empty %}
+                <p>Не указаны</p>
+            {% endfor %}
+        </div>
+    </div>
     <div>
-</div>
+    </div>
 
 {% endblock %}
