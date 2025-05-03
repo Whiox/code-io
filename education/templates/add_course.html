@@ -40,28 +40,27 @@
                 <h2 class="section-title">Программа курса</h2>
                 <div id="lesson-formset" class="lessons-container">
                     {{ lesson_formset.management_form }}
-                    {% for form in lesson_formset %}
+
+                    <div id="empty-lesson-form" style="display: none;">
                         <div class="lesson-form card">
                             <div class="lesson-header">
-                                <h3 class="lesson-number">Урок {{ forloop.counter }}</h3>
-                                <button type="button" class="remove-lesson btn-icon"
-                                        {% if lesson_formset.total_form_count == 1 %}disabled{% endif %}>
+                                <h3 class="lesson-number">Урок __prefix__</h3>
+                                <button type="button" class="remove-lesson btn-icon">
                                     <svg class="icon" viewBox="0 0 24 24">
                                         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
                                     </svg>
                                 </button>
                             </div>
                             <div class="lesson-content">
-                                {% for field in form %}
+                                {% for field in lesson_formset.empty_form %}
                                     <div class="form-group">
                                         <label for="{{ field.id_for_label }}"
                                                class="form-label">{{ field.label }}</label>
                                         {% if field.name == 'lesson_file' %}
                                             <div class="file-input-wrapper">
-                                                <label class="file-input">{{ field }}Выбрать файл</label>
+                                                {{ field }}
+                                                <button type="button" class="file-input">Выбрать файл</button>
                                                 <span class="file-name">Файл не выбран</span>
-                                                <input type="file" name="{{ field.name }}"
-                                                       id="{{ field.id_for_label }}">
                                             </div>
                                         {% else %}
                                             {{ field }}
@@ -70,8 +69,42 @@
                                 {% endfor %}
                             </div>
                         </div>
-                    {% endfor %}
+                    </div>
+
+                    <div id="lesson-forms-container">
+                        {% for form in lesson_formset %}
+                            <div class="lesson-form card">
+                                <div class="lesson-header">
+                                    <h3 class="lesson-number">Урок {{ forloop.counter }}</h3>
+                                    <button type="button" class="remove-lesson btn-icon"
+                                            {% if lesson_formset.total_form_count == 1 %}disabled{% endif %}>
+                                        <svg class="icon" viewBox="0 0 24 24">
+                                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="lesson-content">
+                                    {% for field in form %}
+                                        <div class="form-group">
+                                            <label for="{{ field.id_for_label }}"
+                                                   class="form-label">{{ field.label }}</label>
+                                            {% if field.name == 'lesson_file' %}
+                                                <div class="file-input-wrapper">
+                                                    {{ field }}
+                                                    <button type="button" class="file-input">Выбрать файл</button>
+                                                    <span class="file-name">Файл не выбран</span>
+                                                </div>
+                                            {% else %}
+                                                {{ field }}
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
+
                 <div class="form-actions">
                     <button type="button" id="add-lesson" class="btn-inline">
                         <svg class="icon" viewBox="0 0 24 24">
@@ -90,6 +123,7 @@
         </form>
     </section>
 {% endblock content %}
+
 {% block style %}
     <style>
         :root {
@@ -231,16 +265,19 @@
             line-height: 1;
         }
 
+        .lesson-content .form-group {
+            margin-bottom: 1.5rem;
+        }
+
         .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             position: relative;
-            overflow: hidden;
-            display: inline-block;
         }
 
         .file-input-wrapper input[type="file"] {
             position: absolute;
-            left: 0;
-            top: 0;
             opacity: 0;
             width: 100%;
             height: 100%;
@@ -248,17 +285,21 @@
         }
 
         .file-input {
-            display: inline-block;
-            background-color: var(--accent-color);
+            padding: 0.5rem 1.2rem;
+            background: var(--accent-color);
             color: #fff;
-            padding: 0.5rem 1rem;
+            border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.2s;
         }
 
-        .file-input-wrapper .file-name {
-            margin-left: 0.75rem;
+        .file-input:hover {
+            background: var(--hover-bg);
+        }
+
+        .file-name {
             font-size: 0.9rem;
             color: var(--text-color);
         }
@@ -325,7 +366,7 @@
 
         @media (max-width: 768px) {
             .form-grid {
-                grid-template-columns:1fr;
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -333,14 +374,13 @@
 
 {% block script %}
     <script>
-        (function () {
+        document.addEventListener('DOMContentLoaded', () => {
             const csrftoken = document.cookie.match(/csrftoken=([\w-]+)/)[1];
             let topics = [];
 
             async function loadTopics() {
-                const r = await fetch('{% url "get_topics" %}');
-                const j = await r.json();
-                topics = j.topics;
+                const res = await fetch('{% url "get_topics" %}');
+                topics = (await res.json()).topics;
                 renderSelect();
             }
 
@@ -357,34 +397,33 @@
                 });
             }
 
-            document.getElementById('add-topic-btn').addEventListener('click', async () => {
+            document.getElementById('add-topic-btn').onclick = async () => {
                 const inp = document.getElementById('new-topic-name');
                 const name = inp.value.trim();
                 if (!name) return;
-                let existing = topics.find(t => t.name.toLowerCase() === name.toLowerCase());
-                if (!existing) {
+                let ex = topics.find(t => t.name.toLowerCase() === name.toLowerCase());
+                if (!ex) {
                     const r = await fetch('{% url "create_topic" %}', {
                         method: 'POST',
                         headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
                         body: new URLSearchParams({name})
                     });
-                    const j = await r.json();
-                    if (j.status !== 'ok') return;
+                    const jr = await r.json();
+                    if (jr.status !== 'ok') return;
                     await loadTopics();
-                    existing = topics.find(t => t.id === j.ok);
+                    ex = topics.find(t => t.id === jr.ok);
                 }
-                selectTopic(existing.id, existing.name);
+                selectTopic(ex.id, ex.name);
                 renderSelect();
                 inp.value = '';
-            });
-
-            document.getElementById('topics-select').addEventListener('change', e => {
-                const opt = e.target.selectedOptions[0];
-                if (opt) {
-                    selectTopic(+opt.value, opt.textContent);
+            };
+            document.getElementById('topics-select').onchange = e => {
+                const o = e.target.selectedOptions[0];
+                if (o) {
+                    selectTopic(+o.value, o.textContent);
                     renderSelect();
                 }
-            });
+            };
 
             function selectTopic(id, name) {
                 const c = document.getElementById('selected-topics');
@@ -393,15 +432,65 @@
                 div.className = 'selected-topic';
                 div.dataset.id = id;
                 div.innerHTML = `${name}<button type="button">&times;</button>
-      <input type="hidden" name="topics" value="${id}">`;
-                div.querySelector('button').addEventListener('click', () => {
+                         <input type="hidden" name="topics" value="${id}">`;
+                div.querySelector('button').onclick = () => {
                     div.remove();
                     renderSelect();
-                });
+                };
                 c.append(div);
             }
 
-            document.addEventListener('DOMContentLoaded', loadTopics);
-        })();
+            loadTopics();
+
+            const addBtn = document.getElementById('add-lesson');
+            const container = document.getElementById('lesson-forms-container');
+            const totalInput = document.getElementById('id_form-TOTAL_FORMS');
+            const tpl = document.getElementById('empty-lesson-form').firstElementChild;
+
+            function renumber() {
+                container.querySelectorAll('.lesson-form').forEach((el, i) => {
+                    el.querySelectorAll('input, select, textarea, label').forEach(x => {
+                        if (x.name) x.name = x.name.replace(/form-(\d+|__prefix__)-/, `form-${i}-`);
+                        if (x.id) x.id = x.id.replace(/form-(\d+|__prefix__)-/, `form-${i}-`);
+                        if (x.htmlFor) x.htmlFor = x.htmlFor.replace(/form-(\d+|__prefix__)-/, `form-${i}-`);
+                    });
+                    const h = el.querySelector('.lesson-number');
+                    if (h) h.textContent = `Урок ${i + 1}`;
+                });
+            }
+
+            function updateRemovers() {
+                const forms = container.querySelectorAll('.lesson-form');
+                forms.forEach(f => {
+                    const btn = f.querySelector('.remove-lesson');
+                    if (btn) btn.disabled = forms.length === 1;
+                });
+            }
+
+            addBtn.onclick = () => {
+                const count = parseInt(totalInput.value, 10);
+                const clone = tpl.cloneNode(true);
+                clone.innerHTML = clone.innerHTML.replace(/__prefix__/g, count);
+                container.append(clone);
+                totalInput.value = count + 1;
+                renumber();
+                updateRemovers();
+            };
+            container.addEventListener('click', e => {
+                if (e.target.closest('.remove-lesson')) {
+                    e.target.closest('.lesson-form').remove();
+                    totalInput.value = parseInt(totalInput.value, 10) - 1;
+                    renumber();
+                    updateRemovers();
+                }
+            });
+            container.addEventListener('change', e => {
+                if (e.target.matches('input[type="file"]')) {
+                    const fn = e.target.files[0]?.name || 'Файл не выбран';
+                    e.target.closest('.file-input-wrapper').querySelector('.file-name').textContent = fn;
+                }
+            });
+            updateRemovers();
+        });
     </script>
 {% endblock script %}
