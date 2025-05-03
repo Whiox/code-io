@@ -43,4 +43,5 @@ docs-job:
 statistic-job:
   stage: statistic
   script:
+    - git clean -ffdx
     - python count.py
