@@ -15,11 +15,47 @@
         </div>
         <nav class="sidebar-nav">
             <ul>
-                <li><button data-target="users" class="sidebar-link active">👥 Пользователи</button></li>
-                <li><button data-target="courses" class="sidebar-link">📚 Курсы</button></li>
-                <li><button data-target="topics" class="sidebar-link">📌 Темы</button></li>
-                <li><button data-target="course_reports" class="sidebar-link">⚠️ Жалобы на курсы</button></li>
-                <li><button data-target="topic_reports" class="sidebar-link">🚩 Жалобы на темы</button></li>
+                <li>
+                    <button data-target="users" class="sidebar-link active">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                        </svg>
+                        Пользователи
+                    </button>
+                </li>
+                <li>
+                    <button data-target="courses" class="sidebar-link">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                        </svg>
+                        Курсы
+                    </button>
+                </li>
+                <li>
+                    <button data-target="topics" class="sidebar-link">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.22-1.05-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02z"/>
+                            <circle cx="6.5" cy="6.5" r="1.5"/>
+                        </svg>
+                        Темы
+                    </button>
+                </li>
+                <li>
+                    <button data-target="course_reports" class="sidebar-link">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        Жалобы на курсы
+                    </button>
+                </li>
+                <li>
+                    <button data-target="topic_reports" class="sidebar-link">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/>
+                        </svg>
+                        Жалобы на темы
+                    </button>
+                </li>
             </ul>
         </nav>
     </aside>
@@ -171,7 +207,7 @@
     --danger: #dc3545;
     --danger-hover: #bb2d3b;
     --background: #f8f9fa;
-    --surface: #ffffff;
+    --surface: #f3f3f3;
     --text: #212529;
     --border: #dee2e6;
     --text-muted: #6c757d;
@@ -182,8 +218,8 @@
     --primary-hover: #339af0;
     --danger: #ff6b6b;
     --danger-hover: #ff5252;
-    --background: #1a1a1a;
-    --surface: #2d2d2d;
+    --background: #333333;
+    --surface: #272727;
     --text: #f8f9fa;
     --border: #495057;
     --text-muted: #adb5bd;
@@ -194,6 +230,15 @@
     grid-template-columns: 260px 1fr;
     min-height: 100vh;
     background: var(--background);
+    border-radius: 10px;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    vertical-align: middle;
+    fill: currentColor;
 }
 
 .sidebar {
@@ -203,6 +248,7 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    border-radius: 10px;
 }
 
 .logo-wrapper {

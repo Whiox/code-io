@@ -29,7 +29,7 @@
                 {% if request.user.is_staff %}
                     <a href="{% url 'admin:index' %}" class="dropdown-item">Панель администратора</a>
                 {% endif %}
-                {% if request.user.is_staff or request.user.moderator %}
+                {% if request.user.is_staff or request.user.is_moderator %}
                     <a href="{% url 'moderator' %}" class="dropdown-item">Панель модератора</a>
                 {% endif %}
                 <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>
