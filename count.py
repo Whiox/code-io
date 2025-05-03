@@ -1,78 +1,155 @@
 import os
 import ast
+import re
+from collections import defaultdict
 
 
-def count_code_metrics(filepath):
-    """Анализирует файл и возвращает метрики кода"""
-    with open(filepath, 'r', encoding='utf-8') as f:
-        try:
-            content = f.read()
-        except UnicodeDecodeError:
-            return None
+def parse_html_content(content):
+    """Извлекает встроенные CSS и JS из HTML"""
+    css_blocks = re.findall(r'<style[^>]*>(.*?)</style>', content, re.DOTALL | re.IGNORECASE)
+    js_blocks = re.findall(r'<script[^>]*>(.*?)</script>', content, re.DOTALL | re.IGNORECASE)
 
-    lines = content.split('\n')
-    total_lines = len(lines)
-    total_chars = sum(len(line) for line in lines)
-
-    classes = set()
-    functions = set()
-
-    try:
-        tree = ast.parse(content)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                classes.add(node.name)
-            elif isinstance(node, ast.FunctionDef):
-                functions.add(node.name)
-    except SyntaxError:
-        pass
+    js_blocks = [block for block in js_blocks if
+                 not re.search(r'type=(["\'])(?!text/javascript|application/javascript)', block[0])]
 
     return {
-        'path': filepath,
-        'lines': total_lines,
-        'chars': total_chars,
-        'classes': len(classes),
-        'functions': len(functions)
+        'css': [css.strip() for css in css_blocks],
+        'js': [js.strip() for js in js_blocks]
     }
 
 
-def scan_directory(directory):
-    """Рекурсивно сканирует директорию для .py файлов"""
-    results = []
+def count_metrics(content, lang):
+    """Подсчитывает метрики для произвольного контента"""
+    lines = content.split('\n')
+    stats = {
+        'lines': len(lines),
+        'chars': sum(len(line) for line in lines)
+    }
+
+    if lang == 'python':
+        classes = set()
+        functions = set()
+        try:
+            tree = ast.parse(content)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef):
+                    classes.add(node.name)
+                elif isinstance(node, ast.FunctionDef):
+                    functions.add(node.name)
+            stats.update({'classes': len(classes), 'functions': len(functions)})
+        except SyntaxError:
+            stats.update({'classes': 0, 'functions': 0})
+    else:
+        stats.update({'classes': 0, 'functions': 0})
+
+    return stats
+
+
+def analyze_file(filepath):
+    """Анализирует файл и возвращает метрики"""
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except (UnicodeDecodeError, IOError):
+        return None
+
+    ext = os.path.splitext(filepath)[1].lower()
+    metrics = defaultdict(lambda: defaultdict(int))
+    file_type = None
+
+    if ext == '.py':
+        file_type = 'python'
+        res = count_metrics(content, 'python')
+        metrics['python'] = res
+    elif ext == '.html':
+        file_type = 'html'
+        html_metrics = count_metrics(content, 'html')
+        metrics['html'] = html_metrics
+
+        embedded = parse_html_content(content)
+        for css in embedded['css']:
+            css_metrics = count_metrics(css, 'css')
+            metrics['css']['lines'] += css_metrics['lines']
+            metrics['css']['chars'] += css_metrics['chars']
+
+        for js in embedded['js']:
+            js_metrics = count_metrics(js, 'js')
+            metrics['js']['lines'] += js_metrics['lines']
+            metrics['js']['chars'] += js_metrics['chars']
+    elif ext == '.css':
+        file_type = 'css'
+        res = count_metrics(content, 'css')
+        metrics['css'] = res
+    elif ext == '.js':
+        file_type = 'js'
+        res = count_metrics(content, 'js')
+        metrics['js'] = res
+    else:
+        return None
+
+    return {
+        'path': filepath,
+        'type': file_type,
+        'metrics': dict(metrics)
+    }
+
+
+def scan_project(directory):
+    """Рекурсивно сканирует проект"""
+    stats = defaultdict(lambda: {
+        'files': 0,
+        'lines': 0,
+        'chars': 0,
+        'classes': 0,
+        'functions': 0
+    })
+
     for root, _, files in os.walk(directory):
         for file in files:
-            if file.endswith('.py'):
+            ext = os.path.splitext(file)[1].lower()
+            if ext in ('.py', '.html', '.css', '.js'):
                 full_path = os.path.join(root, file)
-                metrics = count_code_metrics(full_path)
-                if metrics:
-                    results.append(metrics)
-    return results
+                result = analyze_file(full_path)
+                if result:
+                    for lang, metrics in result['metrics'].items():
+                        stats[lang]['files'] += 1
+                        stats[lang]['lines'] += metrics['lines']
+                        stats[lang]['chars'] += metrics['chars']
+                        stats[lang]['classes'] += metrics['classes']
+                        stats[lang]['functions'] += metrics['functions']
+
+    return stats
 
 
-def print_statistics(results):
-    """Выводит сводную статистику"""
-    total_files = len(results)
-    total_lines = sum(f['lines'] for f in results)
-    total_chars = sum(f['chars'] for f in results)
-    total_classes = sum(f['classes'] for f in results)
-    total_functions = sum(f['functions'] for f in results)
+def print_report(stats):
+    """Выводит форматированный отчет"""
+    print("\n{:=^50}".format(" Code Statistics Report "))
+    langs = ['python', 'html', 'css', 'js']
+    headers = ["Language", "Files", "Lines", "Chars", "Classes", "Functions"]
+    row_format = "| {:<8} | {:>6} | {:>8} | {:>10} | {:>7} | {:>8} |"
 
-    print(f"\n{' Статистика анализа ':━^50}")
-    print(f"▪ Всего файлов: {total_files}")
-    print(f"▪ Всего строк: {total_lines}")
-    print(f"▪ Всего символов: {total_chars}")
-    print(f"▪ Всего классов: {total_classes}")
-    print(f"▪ Всего функций: {total_functions}")
-    print("━" * 50)
+    print("+" + "-" * 49 + "+")
+    print(row_format.format(*headers))
+    print("+" + "-" * 49 + "+")
+
+    for lang in langs:
+        data = [
+            lang.upper(),
+            stats[lang]['files'],
+            stats[lang]['lines'],
+            stats[lang]['chars'],
+            stats[lang]['classes'] or '-',
+            stats[lang]['functions'] or '-'
+        ]
+        print(row_format.format(*data))
+
+    print("+" + "-" * 49 + "+")
+    print("{:=^50}\n".format(" End of Report "))
 
 
 if __name__ == "__main__":
-    current_dir = os.getcwd()
-    print(f"Сканирую Python-файлы в: {current_dir}")
+    project_dir = os.getcwd()
+    print(f"Analyzing code in: {project_dir}")
 
-    analysis_results = scan_directory(current_dir)
-
-    if analysis_results:
-        print_statistics(analysis_results)
-    else:
-        print("Не найдено ни одного .py файла")
+    statistics = scan_project(project_dir)
+    print_report(statistics)
