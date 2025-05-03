@@ -49,6 +49,11 @@ class Lessons(models.Model):
     lesson_id = models.AutoField(primary_key=True)
     course = models.ForeignKey(Courses, on_delete=models.CASCADE)
     title = models.TextField()
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('course', 'order')
+        ordering = ['order']
 
 
 class Task(models.Model):

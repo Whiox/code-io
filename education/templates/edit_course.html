@@ -18,7 +18,6 @@
         <form method="post" class="editor-form editor-form--topics">
             {% csrf_token %}
             <input type="hidden" name="update_topics" value="1">
-
             <div class="form-section">
                 <h2 class="section-title">Тематики курса</h2>
                 <div class="topics-controls">
@@ -53,11 +52,13 @@
         </form>
 
         <form method="get" class="editor-form">
-            <label for="lesson-select" class="form-label">Выберите урок:</label>
+            <label for="lesson-select" class="form-label">Урок:</label>
             <select id="lesson-select" name="lesson" class="styled-select" onchange="this.form.submit()">
                 <option value="">— не выбрано —</option>
-                {% for fn in files %}
-                    <option value="{{ fn }}" {% if fn == selected %}selected{% endif %}>{{ fn }}</option>
+                {% for les in lessons %}
+                    <option value="{{ les.order }}"{% if les.order|stringformat:"s" == selected %} selected{% endif %}>
+                        {{ les.title }}
+                    </option>
                 {% endfor %}
             </select>
         </form>
@@ -73,23 +74,17 @@
                 <button type="submit" class="btn btn--primary">Сохранить урок</button>
             </form>
         {% else %}
-            <p class="editor-note">Выберите файл урока, чтобы начать редактирование.</p>
+            <p class="editor-note">Выберите урок, чтобы начать редактирование.</p>
         {% endif %}
     </div>
 
     {{ all_topics|json_script:"topics-data" }}
     {{ course_topics|json_script:"selected-topics-data" }}
-
 {% endblock content %}
 
 {% block style %}
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/continuelist.min.js"></script>
 
     <style>
         :root {
@@ -264,11 +259,29 @@
             background: var(--primary-button-bg);
             padding: 0.6rem 1.2rem;
             margin-top: 1rem;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn--primary:hover {
+            background: var(--primary-button-hover);
+            transform: translateY(-1px);
+        }
+
+        .editor-note {
+            font-style: italic;
+            color: #666;
         }
     </style>
 {% endblock style %}
 
 {% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/continuelist.min.js"></script>
     <script>
         (function () {
             const csrftoken = document.cookie.match(/csrftoken=([\w-]+)/)?.[1];
@@ -277,35 +290,30 @@
             const topics = JSON.parse(document.getElementById('topics-data').textContent);
             const selectedTopics = JSON.parse(document.getElementById('selected-topics-data').textContent);
 
-            const elements = {
-                topicsSelect: document.getElementById('topics-select'),
-                selectedContainer: document.getElementById('selected-topics'),
-                addTopicBtn: document.getElementById('add-topic-btn')
-            };
-
-            if (!elements.topicsSelect || !elements.selectedContainer || !elements.addTopicBtn) return;
+            const topicsSelect = document.getElementById('topics-select');
+            const selectedContainer = document.getElementById('selected-topics');
+            const addTopicBtn = document.getElementById('add-topic-btn');
 
             function updateTopicSelect() {
-                const selectedIds = Array.from(elements.selectedContainer.querySelectorAll('input'))
+                const selectedIds = Array.from(selectedContainer.querySelectorAll('input'))
                     .map(i => parseInt(i.value))
                     .filter((v, i, arr) => arr.indexOf(v) === i);
 
-                elements.topicsSelect.innerHTML = '<option value="" disabled selected>— выберите тему —</option>';
+                topicsSelect.innerHTML = '<option value="" disabled selected>— выберите тему —</option>';
                 topics.forEach(t => {
                     if (!selectedIds.includes(t.id)) {
                         const option = document.createElement('option');
                         option.value = t.id;
                         option.textContent = t.name;
-                        elements.topicsSelect.appendChild(option);
+                        topicsSelect.appendChild(option);
                     }
                 });
             }
 
-            function handleRemoveTopic(event) {
-                const removeBtn = event.target.closest('.remove-topic-btn');
-                if (!removeBtn) return;
-
-                const topicDiv = removeBtn.closest('.selected-topic');
+            function handleRemoveTopic(e) {
+                const btn = e.target.closest('.remove-topic-btn');
+                if (!btn) return;
+                const topicDiv = btn.closest('.selected-topic');
                 if (topicDiv) {
                     const input = topicDiv.querySelector('input[name="topics"]');
                     if (input) input.remove();
@@ -330,13 +338,13 @@
                 return div;
             }
 
-            elements.selectedContainer.innerHTML = '';
-            selectedTopics.forEach(t => elements.selectedContainer.appendChild(createTopicElement(t)));
+            selectedContainer.innerHTML = '';
+            selectedTopics.forEach(t => selectedContainer.appendChild(createTopicElement(t)));
             updateTopicSelect();
 
-            elements.selectedContainer.addEventListener('click', handleRemoveTopic);
+            selectedContainer.addEventListener('click', handleRemoveTopic);
 
-            elements.addTopicBtn.addEventListener('click', async () => {
+            addTopicBtn.addEventListener('click', async () => {
                 const input = document.getElementById('new-topic-name');
                 const name = input.value.trim();
                 if (!name) return;
@@ -349,22 +357,22 @@
                     });
                     const data = await res.json();
                     if (data.status === 'ok') {
-                        const newTopic = {id: data.ok, name: name};
+                        const newTopic = {id: data.ok, name};
                         topics.push(newTopic);
-                        elements.selectedContainer.appendChild(createTopicElement(newTopic));
+                        selectedContainer.appendChild(createTopicElement(newTopic));
                         updateTopicSelect();
                         input.value = '';
                     }
                 } catch (e) {
-                    console.error('Error:', e);
+                    console.error(e);
                 }
             });
 
-            elements.topicsSelect.addEventListener('change', function () {
+            topicsSelect.addEventListener('change', function () {
                 if (this.value) {
                     const topic = topics.find(t => t.id == this.value);
                     if (topic) {
-                        elements.selectedContainer.appendChild(createTopicElement(topic));
+                        selectedContainer.appendChild(createTopicElement(topic));
                         updateTopicSelect();
                         this.value = '';
                     }
@@ -383,7 +391,6 @@
                     extraKeys: {'Enter': 'newlineAndIndentContinueMarkdownList'},
                     viewportMargin: Infinity
                 });
-
                 document.querySelector('form.editor-form--save')?.addEventListener('submit', () => {
                     editor.save();
                 });
