@@ -43,4 +43,4 @@ docs-job:
 statistic-job:
   stage: statistic
   script:
-    - python count
+    - python count.py
