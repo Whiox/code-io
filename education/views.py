@@ -7,7 +7,7 @@ import time
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, OuterRef, Exists
 from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms import formset_factory
@@ -105,19 +105,15 @@ class StaredCoursesView(View):
         if request.user.is_anonymous:
             return redirect('/login')
 
-        stared_ids = Stars.objects.filter(
-            user=request.user
-        ).values_list('course_id', flat=True)
-        stared_qs = Courses.objects.filter(
-            course_id__in=stared_ids
-        ).annotate(
+        stared_ids = Stars.objects.filter(user=request.user).values_list('course_id', flat=True)
+        stared_qs = Courses.objects.filter(course_id__in=stared_ids).annotate(
             lessons_count=Count('lessons')
         ).select_related('author').prefetch_related('topics')
 
-        content = {'courses': []}
+        courses = []
         for course in stared_qs:
             topics = [t.name for t in course.topics.all()] or ['Свободная тема']
-            content['courses'].append({
+            courses.append({
                 'id': course.course_id,
                 'title': course.title,
                 'author': course.author.username if course.author else 'Неизвестный автор',
@@ -126,7 +122,26 @@ class StaredCoursesView(View):
                 'lessons_count': course.lessons_count,
             })
 
-        return render(request, 'stared_courses.html', content)
+        popular_courses = None
+        if not courses:
+            if request.user.is_authenticated:
+                subquery = Stars.objects.filter(
+                    course=OuterRef('pk'),
+                    user=request.user
+                )
+                popular_courses = Courses.objects.prefetch_related('topics').annotate(
+                    stars_count=Count('stars'),
+                    is_stared=Exists(subquery)
+                ).order_by('-stars_count')[:3]
+            else:
+                popular_courses = Courses.objects.prefetch_related('topics').annotate(
+                    stars_count=Count('stars')
+                ).order_by('-stars_count')[:3]
+
+        return render(request, 'stared_courses.html', {
+            'courses': courses,
+            'popular_courses': popular_courses
+        })
 
 
 class MyCoursesView(View):
