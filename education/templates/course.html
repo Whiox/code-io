@@ -39,7 +39,7 @@
         <div class="content" id="content">
             {% for lesson in lessons %}
                 <div class="lesson" id="lesson-{{ forloop.counter }}">
-                    <h1>Урок {{ forloop.counter }}</h1>
+                    <h1>{{ lesson.title }}</h1>
                     <div class="lesson-content">{{ lesson.content|safe }}</div>
                 </div>
             {% endfor %}
