@@ -2,357 +2,406 @@
 {% block title %}Добавить курс{% endblock %}
 
 {% block content %}
-<section class="course-creation">
-  <h1 class="page-title">Создание нового курса</h1>
-  <form method="post" enctype="multipart/form-data" class="creation-form">
-    {% csrf_token %}
+    <section class="course-creation">
+        <h1 class="page-title">Создание нового курса</h1>
+        <form method="post" enctype="multipart/form-data" class="creation-form">
+            {% csrf_token %}
 
-    <div class="form-section">
-      <h2 class="section-title">Основная информация</h2>
-      <div class="form-grid">
-        {% for field in course_form %}
-        <div class="form-group">
-          <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-          {{ field }}
-          {% if field.help_text %}
-          <small class="form-helptext">{{ field.help_text }}</small>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h2 class="section-title">Выбор тематик</h2>
-      <div class="topics-controls">
-        <input type="text" id="new-topic-name" placeholder="Новая тема" class="topic-input">
-        <button type="button" id="add-topic-btn" class="btn-inline">Добавить тему</button>
-      </div>
-      <div class="topics-wrapper">
-        <select id="topics-select" class="form-input">
-          <option value="" disabled selected>— выберите тему —</option>
-        </select>
-        <div id="selected-topics" class="selected-topics"></div>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h2 class="section-title">Программа курса</h2>
-      <div id="lesson-formset" class="lessons-container">
-        {{ lesson_formset.management_form }}
-        {% for form in lesson_formset %}
-        <div class="lesson-form card">
-          <div class="lesson-header">
-            <h3 class="lesson-number">Урок {{ forloop.counter }}</h3>
-            <button type="button" class="remove-lesson btn-icon"
-                    {% if lesson_formset.total_form_count == 1 %}disabled{% endif %}>
-              <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </button>
-          </div>
-          <div class="lesson-content">
-            {% for field in form %}
-            <div class="form-group">
-              <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-              {% if field.name == 'lesson_file' %}
-              <div class="file-input-wrapper">
-                <label class="file-input">{{ field }}Выбрать файл</label>
-                <span class="file-name">Файл не выбран</span>
-                <input type="file" name="{{ field.name }}" id="{{ field.id_for_label }}">
-              </div>
-              {% else %}
-              {{ field }}
-              {% endif %}
+            <div class="form-section">
+                <h2 class="section-title">Основная информация</h2>
+                <div class="form-grid">
+                    {% for field in course_form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small class="form-helptext">{{ field.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-      <div class="form-actions">
-        <button type="button" id="add-lesson" class="btn-inline">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Добавить урок
-        </button>
-        <button type="submit" class="btn-inline">
-          Опубликовать курс
-          <svg class="icon" viewBox="0 0 24 24"><path d="M5 13h11.17l-4.88 4.88c-.39.39-.39 1.03 0 1.42.39.39 1.02.39 1.41 0l6.59-6.59a.996.996 0 0 0 0-1.41l-6.58-6.6a.996.996 0 1 0-1.41 1.41L16.17 11H5c-.55 0-1 .45-1 1s.45 1 1 1z"/></svg>
-        </button>
-      </div>
-    </div>
-  </form>
-</section>
 
-<style>
-:root {
-  --accent-color: #28a745;
-  --hover-bg: #4dc621;
-  --heading-color: #28a745;
-  --sidebar-bg: #f9f9f9;
-  --body-bg: #ffffff;
-  --text-color: #333333;
-  --border-color: #e0e0e0;
-  --lesson-bg: #f0f0f0;
-  --danger: #dc3545;
-  --danger-h: #c82333;
-}
-[data-theme="dark"] {
-  --accent-color: #FF6B35;
-  --hover-bg: #ff6f00;
-  --heading-color: #FF6B35;
-  --sidebar-bg: #2e2e2e;
-  --body-bg: #434343;
-  --text-color: #ffffff;
-  --border-color: #404040;
-  --lesson-bg: #444444;
-  --danger: #eb5757;
-  --danger-h: #d64545;
-}
-body {
-  background-color: var(--body-bg);
-}
-.course-creation {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-  background: var(--body-bg);
-  min-height: 100vh;
-}
-.page-title {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  color: var(--heading-color);
-}
-.creation-form {
-  background: var(--sidebar-bg);
-  color: var(--text-color);
-  width: 100%;
-  max-width: 800px;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-.form-section {
-  margin-bottom: 2rem;
-}
-.section-title {
-  font-size: 1.5rem;
-  color: var(--heading-color);
-  margin-bottom: 1rem;
-  border-bottom: 2px solid var(--border-color);
-  padding-bottom: 0.5rem;
-}
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2,1fr);
-  gap: 1.5rem;
-}
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-.form-label {
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-}
-.topics-controls {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-.topic-input {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background: var(--lesson-bg);
-  color: var(--text-color);
-}
-.topics-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-#topics-select {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background: var(--sidebar-bg);
-  color: var(--text-color);
-  font-size: 1rem;
-}
-.selected-topics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.selected-topic {
-  background: var(--accent-color);
-  color: #fff;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-.selected-topic button {
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  font-size: 1rem;
-  line-height: 1;
-}
-.file-input-wrapper {
-  position: relative;
-  overflow: hidden;
-  display: inline-block;
-}
-.file-input-wrapper input[type="file"] {
-  position: absolute;
-  left: 0; top: 0;
-  opacity: 0;
-  width: 100%; height: 100%;
-  cursor: pointer;
-}
-.file-input {
-  display: inline-block;
-  background-color: var(--accent-color);
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-.file-input-wrapper .file-name {
-  margin-left: 0.75rem;
-  font-size: 0.9rem;
-  color: var(--text-color);
-}
-.btn-inline {
-  background: var(--accent-color);
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background 0.3s;
-  display: inline-flex;
-  align-items: center;
-  height: 2.5rem;
-  vertical-align: middle;
-  gap: 0.5rem;
-}
-.btn-inline:hover {
-  background: var(--hover-bg);
-}
-.lesson-form {
-  background: var(--lesson-bg);
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.lesson-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-.lesson-number {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-.remove-lesson {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.remove-lesson svg {
-  width: 20px;
-  height: 20px;
-}
-.remove-lesson:hover svg {
-  fill: red;
-}
-.icon {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-}
-@media (max-width:768px){
-  .form-grid{grid-template-columns:1fr;}
-}
-</style>
+            <div class="form-section">
+                <h2 class="section-title">Выбор тематик</h2>
+                <div class="topics-controls">
+                    <input type="text" id="new-topic-name" placeholder="Новая тема" class="topic-input">
+                    <button type="button" id="add-topic-btn" class="btn-inline">Добавить тему</button>
+                </div>
+                <div class="topics-wrapper">
+                    <select id="topics-select" class="form-input">
+                        <option value="" disabled selected>— выберите тему —</option>
+                    </select>
+                    <div id="selected-topics" class="selected-topics"></div>
+                </div>
+            </div>
 
-<script>
-(function(){
-  const csrftoken = document.cookie.match(/csrftoken=([\w-]+)/)[1];
-  let topics = [];
+            <div class="form-section">
+                <h2 class="section-title">Программа курса</h2>
+                <div id="lesson-formset" class="lessons-container">
+                    {{ lesson_formset.management_form }}
+                    {% for form in lesson_formset %}
+                        <div class="lesson-form card">
+                            <div class="lesson-header">
+                                <h3 class="lesson-number">Урок {{ forloop.counter }}</h3>
+                                <button type="button" class="remove-lesson btn-icon"
+                                        {% if lesson_formset.total_form_count == 1 %}disabled{% endif %}>
+                                    <svg class="icon" viewBox="0 0 24 24">
+                                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="lesson-content">
+                                {% for field in form %}
+                                    <div class="form-group">
+                                        <label for="{{ field.id_for_label }}"
+                                               class="form-label">{{ field.label }}</label>
+                                        {% if field.name == 'lesson_file' %}
+                                            <div class="file-input-wrapper">
+                                                <label class="file-input">{{ field }}Выбрать файл</label>
+                                                <span class="file-name">Файл не выбран</span>
+                                                <input type="file" name="{{ field.name }}"
+                                                       id="{{ field.id_for_label }}">
+                                            </div>
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="add-lesson" class="btn-inline">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path>
+                        </svg>
+                        Добавить урок
+                    </button>
+                    <button type="submit" class="btn-inline">
+                        Опубликовать курс
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M5 13h11.17l-4.88 4.88c-.39.39-.39 1.03 0 1.42.39.39 1.02.39 1.41 0l6.59-6.59a.996.996 0 0 0 0-1.41l-6.58-6.6a.996.996 0 1 0-1.41 1.41L16.17 11H5c-.55 0-1 .45-1 1s.45 1 1 1z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+{% endblock content %}
+{% block style %}
+    <style>
+        :root {
+            --accent-color: #28a745;
+            --hover-bg: #4dc621;
+            --heading-color: #28a745;
+            --sidebar-bg: #f9f9f9;
+            --body-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --lesson-bg: #f0f0f0;
+            --danger: #dc3545;
+            --danger-h: #c82333;
+        }
 
-  async function loadTopics(){
-    const r = await fetch('{% url "get_topics" %}');
-    const j = await r.json();
-    topics = j.topics;
-    renderSelect();
-  }
+        [data-theme="dark"] {
+            --accent-color: #FF6B35;
+            --hover-bg: #ff6f00;
+            --heading-color: #FF6B35;
+            --sidebar-bg: #2e2e2e;
+            --body-bg: #434343;
+            --text-color: #ffffff;
+            --border-color: #404040;
+            --lesson-bg: #444444;
+            --danger: #eb5757;
+            --danger-h: #d64545;
+        }
 
-  function renderSelect(){
-    const sel = document.getElementById('topics-select');
-    sel.innerHTML = '<option value="" disabled selected>— выберите тему —</option>';
-    topics.forEach(t=>{
-      if(!document.querySelector(`.selected-topic[data-id="${t.id}"]`)){
-        const o = document.createElement('option');
-        o.value = t.id; o.textContent = t.name;
-        sel.append(o);
-      }
-    });
-  }
+        body {
+            background-color: var(--body-bg);
+        }
 
-  document.getElementById('add-topic-btn').addEventListener('click',async()=>{
-    const inp = document.getElementById('new-topic-name');
-    const name = inp.value.trim();
-    if(!name) return;
-    let existing = topics.find(t=>t.name.toLowerCase()===name.toLowerCase());
-    if(!existing){
-      const r = await fetch('{% url "create_topic" %}',{
-        method:'POST',
-        headers:{'X-CSRFToken':csrftoken,'Content-Type':'application/x-www-form-urlencoded'},
-        body:new URLSearchParams({name})
-      });
-      const j = await r.json();
-      if(j.status!=='ok') return;
-      await loadTopics();
-      existing = topics.find(t=>t.id===j.ok);
-    }
-    selectTopic(existing.id, existing.name);
-    renderSelect();
-    inp.value='';
-  });
+        .course-creation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background: var(--body-bg);
+            min-height: 100vh;
+        }
 
-  document.getElementById('topics-select').addEventListener('change',e=>{
-    const opt = e.target.selectedOptions[0];
-    if(opt){
-      selectTopic(+opt.value, opt.textContent);
-      renderSelect();
-    }
-  });
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--heading-color);
+        }
 
-  function selectTopic(id,name){
-    const c = document.getElementById('selected-topics');
-    if(c.querySelector(`[data-id="${id}"]`)) return;
-    const div = document.createElement('div');
-    div.className='selected-topic'; div.dataset.id=id;
-    div.innerHTML = `${name}<button type="button">&times;</button>
+        .creation-form {
+            background: var(--sidebar-bg);
+            color: var(--text-color);
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--heading-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .topics-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .topic-input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--lesson-bg);
+            color: var(--text-color);
+        }
+
+        .topics-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        #topics-select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--sidebar-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .selected-topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .selected-topic {
+            background: var(--accent-color);
+            color: #fff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .selected-topic button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .file-input-wrapper .file-name {
+            margin-left: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        .btn-inline {
+            background: var(--accent-color);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: inline-flex;
+            align-items: center;
+            height: 2.5rem;
+            vertical-align: middle;
+            gap: 0.5rem;
+        }
+
+        .btn-inline:hover {
+            background: var(--hover-bg);
+        }
+
+        .lesson-form {
+            background: var(--lesson-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .lesson-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-number {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .remove-lesson {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .remove-lesson svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .remove-lesson:hover svg {
+            fill: red;
+        }
+
+        .icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns:1fr;
+            }
+        }
+    </style>
+{% endblock style %}
+
+{% block script %}
+    <script>
+        (function () {
+            const csrftoken = document.cookie.match(/csrftoken=([\w-]+)/)[1];
+            let topics = [];
+
+            async function loadTopics() {
+                const r = await fetch('{% url "get_topics" %}');
+                const j = await r.json();
+                topics = j.topics;
+                renderSelect();
+            }
+
+            function renderSelect() {
+                const sel = document.getElementById('topics-select');
+                sel.innerHTML = '<option value="" disabled selected>— выберите тему —</option>';
+                topics.forEach(t => {
+                    if (!document.querySelector(`.selected-topic[data-id="${t.id}"]`)) {
+                        const o = document.createElement('option');
+                        o.value = t.id;
+                        o.textContent = t.name;
+                        sel.append(o);
+                    }
+                });
+            }
+
+            document.getElementById('add-topic-btn').addEventListener('click', async () => {
+                const inp = document.getElementById('new-topic-name');
+                const name = inp.value.trim();
+                if (!name) return;
+                let existing = topics.find(t => t.name.toLowerCase() === name.toLowerCase());
+                if (!existing) {
+                    const r = await fetch('{% url "create_topic" %}', {
+                        method: 'POST',
+                        headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
+                        body: new URLSearchParams({name})
+                    });
+                    const j = await r.json();
+                    if (j.status !== 'ok') return;
+                    await loadTopics();
+                    existing = topics.find(t => t.id === j.ok);
+                }
+                selectTopic(existing.id, existing.name);
+                renderSelect();
+                inp.value = '';
+            });
+
+            document.getElementById('topics-select').addEventListener('change', e => {
+                const opt = e.target.selectedOptions[0];
+                if (opt) {
+                    selectTopic(+opt.value, opt.textContent);
+                    renderSelect();
+                }
+            });
+
+            function selectTopic(id, name) {
+                const c = document.getElementById('selected-topics');
+                if (c.querySelector(`[data-id="${id}"]`)) return;
+                const div = document.createElement('div');
+                div.className = 'selected-topic';
+                div.dataset.id = id;
+                div.innerHTML = `${name}<button type="button">&times;</button>
       <input type="hidden" name="topics" value="${id}">`;
-    div.querySelector('button').addEventListener('click',()=>{
-      div.remove();
-      renderSelect();
-    });
-    c.append(div);
-  }
+                div.querySelector('button').addEventListener('click', () => {
+                    div.remove();
+                    renderSelect();
+                });
+                c.append(div);
+            }
 
-  document.addEventListener('DOMContentLoaded',loadTopics);
-})();
-</script>
-{% endblock %}
+            document.addEventListener('DOMContentLoaded', loadTopics);
+        })();
+    </script>
+{% endblock script %}

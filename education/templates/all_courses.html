@@ -4,104 +4,108 @@
 {% block title %}Все курсы{% endblock %}
 
 {% block content %}
-<h1>Список всех курсов</h1>
-<ul class="course-list">
-    {% for course in courses %}
-    <li class="course-item"
-        data-course-id="{{ course.id }}"
-        data-lessons-count="{{ course.lessons_count }}"
-    >
-        {% if request.user.is_authenticated %}
-        <div class="star-wrapper">
-            {% if course.is_stared %}
-            <img src="{% static 'assets/star-fill.png' %}"
-                 alt="star"
-                 class="star"
-                 data-course-id="{{ course.id }}">
-            {% else %}
-            <img src="{% static 'assets/star-empty.svg' %}"
-                 alt="star"
-                 class="star"
-                 data-course-id="{{ course.id }}">
-            {% endif %}
-        </div>
-        {% endif %}
+    <h1>Список всех курсов</h1>
+    <ul class="course-list">
+        {% for course in courses %}
+            <li class="course-item"
+                data-course-id="{{ course.id }}"
+                data-lessons-count="{{ course.lessons_count }}"
+            >
+                {% if request.user.is_authenticated %}
+                    <div class="star-wrapper">
+                        {% if course.is_stared %}
+                            <img src="{% static 'assets/star-fill.png' %}"
+                                 alt="star"
+                                 class="star"
+                                 data-course-id="{{ course.id }}">
+                        {% else %}
+                            <img src="{% static 'assets/star-empty.svg' %}"
+                                 alt="star"
+                                 class="star"
+                                 data-course-id="{{ course.id }}">
+                        {% endif %}
+                    </div>
+                {% endif %}
 
-        <h2>{{ course.title }}</h2>
-        <p>Автор: {{ course.author }}</p>
-        <p>Темы: {{ course.topics|join:", " }}</p>
-        <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
+                <h2>{{ course.title }}</h2>
+                <p>Автор: {{ course.author }}</p>
+                <p>Темы: {{ course.topics|join:", " }}</p>
+                <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
 
-        <!-- Прогресс -->
-        <div class="course-progress-wrapper">
-            <div class="course-progress-bar">
-                <div class="course-progress-fill"></div>
-            </div>
-            <span class="course-progress-text">0%</span>
-        </div>
-    </li>
-    {% empty %}
-    <li>Курсы не найдены.</li>
-    {% endfor %}
-</ul>
+                <div class="course-progress-wrapper">
+                    <div class="course-progress-bar">
+                        <div class="course-progress-fill"></div>
+                    </div>
+                    <span class="course-progress-text">0%</span>
+                </div>
+            </li>
+        {% empty %}
+            <li>Курсы не найдены.</li>
+        {% endfor %}
+    </ul>
+{% endblock content %}
 
-<style>
-    h1 {
-        text-align: center;
-        margin: 2rem 0;
-    }
+{% block style %}
+    <style>
+        h1 {
+            text-align: center;
+            margin: 2rem 0;
+        }
 
-    .course-progress-bar {
-        height: 8px;
-        background-color: #e0e0e0;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-top: 1rem;
-    }
+        .course-progress-bar {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
 
-    .course-progress-fill {
-        height: 100%;
-        background-color: #4CAF50;
-        width: 0;
-        transition: width 0.5s ease-in-out;
-        border-radius: 4px;
-    }
+        .course-progress-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0;
+            transition: width 0.5s ease-in-out;
+            border-radius: 4px;
+        }
 
-    .course-progress-text {
-        display: block;
-        text-align: right;
-        margin-top: 0.5rem;
-        font-size: 0.9em;
-        color: #666;
-    }
+        .course-progress-text {
+            display: block;
+            text-align: right;
+            margin-top: 0.5rem;
+            font-size: 0.9em;
+            color: #666;
+        }
 
-    [data-theme="dark"] .course-progress-bar {
-        background-color: #404040;
-    }
+        [data-theme="dark"] .course-progress-bar {
+            background-color: #404040;
+        }
 
-    [data-theme="dark"] .course-progress-fill {
-        background-color: #ff6a00;
-    }
+        [data-theme="dark"] .course-progress-fill {
+            background-color: #ff6a00;
+        }
 
-    [data-theme="dark"] .course-progress-text {
-        color: #ccc;
-    }
-</style>
+        [data-theme="dark"] .course-progress-text {
+            color: #ccc;
+        }
+    </style>
+{% endblock style %}
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.course-item').forEach(item => {
-        const cid = item.dataset.courseId;
-        const total = parseInt(item.dataset.lessonsCount, 10) || 0;
-        const key = `course-progress-${cid}`;
-        const done = JSON.parse(localStorage.getItem(key) || '[]').length;
-        const pct = total ? Math.round(done / total * 100) : 0;
+{% block script %}
 
-        requestAnimationFrame(() => {
-            item.querySelector('.course-progress-fill').style.width = pct + '%';
-            item.querySelector('.course-progress-text').textContent = pct + '%';
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.course-item').forEach(item => {
+                const cid = item.dataset.courseId;
+                const total = parseInt(item.dataset.lessonsCount, 10) || 0;
+                const key = `course-progress-${cid}`;
+                const done = JSON.parse(localStorage.getItem(key) || '[]').length;
+                const pct = total ? Math.round(done / total * 100) : 0;
+
+                requestAnimationFrame(() => {
+                    item.querySelector('.course-progress-fill').style.width = pct + '%';
+                    item.querySelector('.course-progress-text').textContent = pct + '%';
+                });
+            });
         });
-    });
-});
-</script>
-{% endblock %}
+    </script>
+{% endblock script %}

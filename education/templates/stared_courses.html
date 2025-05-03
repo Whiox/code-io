@@ -4,281 +4,299 @@
 {% block title %}Понравившиеся курсы{% endblock %}
 
 {% block content %}
-<section class="main-content">
-    {% if courses %}
-        <h1>Избранные курсы</h1>
-        <ul class="course-list">
-            {% for course in courses %}
-            <li class="course-item"
-                data-course-id="{{ course.id }}"
-                data-lessons-count="{{ course.lessons_count }}">
-                <div class="star-wrapper">
-                    <img src="{% static 'assets/star-fill.png' %}"
-                         alt="Убрать из избранного"
-                         class="star"
-                         data-course-id="{{ course.id }}">
-                </div>
-                <h2>{{ course.title }}</h2>
-                <p>Автор: {{ course.author }}</p>
-                <p>Темы: {{ course.topics|join:", " }}</p>
-                <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
-
-                <div class="course-progress-wrapper">
-                    <div class="course-progress-bar">
-                        <div class="course-progress-fill"></div>
-                    </div>
-                    <span class="course-progress-text">0%</span>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <div class="empty-state">
-            <h2>Здесь пока пусто</h2>
-            <p>Вы еще не добавили ни одного курса в избранное</p>
-            <a href="{% url 'all' %}" class="btn">Изучить курсы</a>
-
-            {% if popular_courses %}
-                <h2 class="section-title">Популярные курсы</h2>
-                <ul class="course-list">
-                    {% for course in popular_courses %}
-                    <li class="course-item">
-                        {% if request.user.is_authenticated %}
-                            <div class="star-wrapper">
-                                {% if course.is_stared %}
-                                    <img src="{% static 'assets/star-fill.png' %}"
-                                         alt="star"
-                                         class="star"
-                                         data-course-id="{{ course.course_id }}">
-                                {% else %}
-                                    <img src="{% static 'assets/star-empty.svg' %}"
-                                         alt="star"
-                                         class="star"
-                                         data-course-id="{{ course.course_id }}">
-                                {% endif %}
-                            </div>
-                        {% endif %}
+    <section class="main-content">
+        {% if courses %}
+            <h1>Избранные курсы</h1>
+            <ul class="course-list">
+                {% for course in courses %}
+                    <li class="course-item"
+                        data-course-id="{{ course.id }}"
+                        data-lessons-count="{{ course.lessons_count }}">
+                        <div class="star-wrapper">
+                            <img src="{% static 'assets/star-fill.png' %}"
+                                 alt="Убрать из избранного"
+                                 class="star"
+                                 data-course-id="{{ course.id }}">
+                        </div>
                         <h2>{{ course.title }}</h2>
-                        <p>Автор: {{ course.author.username|default:"Неизвестный автор" }}</p>
-                        <p>Темы: {{ course.topics.all|join:", " }}</p>
-                        <a href="{% url 'course' course.course_id %}" class="btn">Перейти на курс</a>
+                        <p>Автор: {{ course.author }}</p>
+                        <p>Темы: {{ course.topics|join:", " }}</p>
+                        <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
+
+                        <div class="course-progress-wrapper">
+                            <div class="course-progress-bar">
+                                <div class="course-progress-fill"></div>
+                            </div>
+                            <span class="course-progress-text">0%</span>
+                        </div>
                     </li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        </div>
-    {% endif %}
-</section>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="empty-state">
+                <h2>Здесь пока пусто</h2>
+                <p>Вы еще не добавили ни одного курса в избранное</p>
+                <a href="{% url 'all' %}" class="btn">Изучить курсы</a>
 
-<style>
-[data-theme="dark"] {
-    --main-gradient-start: #FF6B35;
-    --main-gradient-end: #FF914D;
-    --card-bg: #2d2d2d;
-    --border-color: #404040;
-    --primary-color: #FF6B35;
-    --secondary-text: #a0aec0;
-}
+                {% if popular_courses %}
+                    <h2 class="section-title">Популярные курсы</h2>
+                    <ul class="course-list">
+                        {% for course in popular_courses %}
+                            <li class="course-item">
+                                {% if request.user.is_authenticated %}
+                                    <div class="star-wrapper">
+                                        {% if course.is_stared %}
+                                            <img src="{% static 'assets/star-fill.png' %}"
+                                                 alt="star"
+                                                 class="star"
+                                                 data-course-id="{{ course.course_id }}">
+                                        {% else %}
+                                            <img src="{% static 'assets/star-empty.svg' %}"
+                                                 alt="star"
+                                                 class="star"
+                                                 data-course-id="{{ course.course_id }}">
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                                <h2>{{ course.title }}</h2>
+                                <p>Автор: {{ course.author.username|default:"Неизвестный автор" }}</p>
+                                <p>Темы: {{ course.topics.all|join:", " }}</p>
+                                <a href="{% url 'course' course.course_id %}" class="btn">Перейти на курс</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+{% endblock content %}
 
-[data-theme="light"] {
-    --main-gradient-start: #28a745;
-    --main-gradient-end: #1b752e;
-    --card-bg: #ffffff;
-    --border-color: #e2e8f0;
-    --primary-color: #28a745;
-    --secondary-text: #718096;
-}
-
-h1 {
-    text-align: center;
-    margin: 2rem 0;
-}
-
-.main-content {
-    max-width: 1200px;
-    margin: 4rem auto;
-    padding: 0 1.5rem;
-}
-
-.course-list {
-    display: grid;
-    gap: 2rem;
-    list-style: none;
-    padding: 0;
-}
-
-.course-item {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 2rem;
-    position: relative;
-    text-align: left;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease;
-}
-
-.course-item:hover {
-    transform: translateY(-3px);
-}
-
-.star-wrapper {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-}
-
-.star {
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.star:hover {
-    transform: scale(1.1);
-}
-
-.course-item h2 {
-    font-size: 1.5rem;
-    color: var(--main-gradient-start);
-    margin: 0 0 1rem;
-}
-
-.course-item p {
-    color: var(--secondary-text);
-    margin: 0.5rem 0;
-    line-height: 1.5;
-}
-
-.course-progress-wrapper {
-    margin-top: 1.5rem;
-}
-
-.course-progress-bar {
-    height: 6px;
-    background: var(--border-color);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.course-progress-fill {
-    height: 100%;
-    background: var(--main-gradient-start);
-    width: 0%;
-    transition: width 0.8s ease-out;
-}
-
-.course-progress-text {
-    display: block;
-    text-align: right;
-    font-size: 0.9rem;
-    color: var(--secondary-text);
-    margin-top: 0.5rem;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 4rem 0;
-}
-
-.empty-illustration {
-    width: 300px;
-    margin-bottom: 2rem;
-}
-
-.section-title {
-    margin: 4rem 0 2rem;
-    background: linear-gradient(45deg, var(--main-gradient-start), var(--main-gradient-end));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 2rem;
-}
-
-.btn {
-    display: inline-block;
-    padding: 0.8rem 1.5rem;
-    background: var(--primary-color);
-    color: white !important;
-    border-radius: 8px;
-    text-decoration: none;
-    margin-top: 1.5rem;
-    transition: filter 0.2s;
-}
-
-.btn:hover {
-    filter: brightness(1.1);
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.course-item {
-    animation: fadeIn 0.6s ease forwards;
-    opacity: 0;
-}
-
-.course-item:nth-child(1) { animation-delay: 0.1s; }
-.course-item:nth-child(2) { animation-delay: 0.2s; }
-.course-item:nth-child(3) { animation-delay: 0.3s; }
-
-@media (max-width: 768px) {
-    .main-content {
-        padding: 0 1rem;
-    }
-
-    .course-item {
-        padding: 1.5rem;
-    }
-
-    .star-wrapper {
-        top: 1rem;
-        right: 1rem;
-    }
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.course-item').forEach(item => {
-        const cid = item.dataset.courseId;
-        const total = parseInt(item.dataset.lessonsCount, 10) || 0;
-        const key = `course-progress-${cid}`;
-        const done = JSON.parse(localStorage.getItem(key) || '[]').length;
-        const pct = total ? Math.round(done / total * 100) : 0;
-
-        if(item.querySelector('.course-progress-fill')) {
-            item.querySelector('.course-progress-fill').style.width = pct + '%';
-            item.querySelector('.course-progress-text').textContent = pct + '%';
+{% block style %}
+    <style>
+        [data-theme="dark"] {
+            --main-gradient-start: #FF6B35;
+            --main-gradient-end: #FF914D;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --primary-color: #FF6B35;
+            --secondary-text: #a0aec0;
         }
-    });
 
-    document.querySelectorAll('.star').forEach(star => {
-        star.addEventListener('click', async function() {
-            const courseId = this.dataset.courseId;
-            const isActive = this.src.includes('star-fill');
+        [data-theme="light"] {
+            --main-gradient-start: #28a745;
+            --main-gradient-end: #1b752e;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --primary-color: #28a745;
+            --secondary-text: #718096;
+        }
 
-            try {
-                const response = await fetch(`/courses/${courseId}/toggle-star/`, {
-                    method: isActive ? 'DELETE' : 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json'
+        h1 {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .course-list {
+            display: grid;
+            gap: 2rem;
+            list-style: none;
+            padding: 0;
+        }
+
+        .course-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            text-align: left;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .course-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .star-wrapper {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+        }
+
+        .star {
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .star:hover {
+            transform: scale(1.1);
+        }
+
+        .course-item h2 {
+            font-size: 1.5rem;
+            color: var(--main-gradient-start);
+            margin: 0 0 1rem;
+        }
+
+        .course-item p {
+            color: var(--secondary-text);
+            margin: 0.5rem 0;
+            line-height: 1.5;
+        }
+
+        .course-progress-wrapper {
+            margin-top: 1.5rem;
+        }
+
+        .course-progress-bar {
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .course-progress-fill {
+            height: 100%;
+            background: var(--main-gradient-start);
+            width: 0%;
+            transition: width 0.8s ease-out;
+        }
+
+        .course-progress-text {
+            display: block;
+            text-align: right;
+            font-size: 0.9rem;
+            color: var(--secondary-text);
+            margin-top: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .empty-illustration {
+            width: 300px;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            margin: 4rem 0 2rem;
+            background: linear-gradient(45deg, var(--main-gradient-start), var(--main-gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: var(--primary-color);
+            color: white !important;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 1.5rem;
+            transition: filter 0.2s;
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .course-item {
+            animation: fadeIn 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .course-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .course-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .course-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0 1rem;
+            }
+
+            .course-item {
+                padding: 1.5rem;
+            }
+
+            .star-wrapper {
+                top: 1rem;
+                right: 1rem;
+            }
+        }
+    </style>
+{% endblock style %}
+
+{% block script %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.course-item').forEach(item => {
+                const cid = item.dataset.courseId;
+                const total = parseInt(item.dataset.lessonsCount, 10) || 0;
+                const key = `course-progress-${cid}`;
+                const done = JSON.parse(localStorage.getItem(key) || '[]').length;
+                const pct = total ? Math.round(done / total * 100) : 0;
+
+                if (item.querySelector('.course-progress-fill')) {
+                    item.querySelector('.course-progress-fill').style.width = pct + '%';
+                    item.querySelector('.course-progress-text').textContent = pct + '%';
+                }
+            });
+
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', async function () {
+                    const courseId = this.dataset.courseId;
+                    const isActive = this.src.includes('star-fill');
+
+                    try {
+                        const response = await fetch(`/courses/${courseId}/toggle-star/`, {
+                            method: isActive ? 'DELETE' : 'POST',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}',
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            this.src = isActive
+                                ? "{% static 'assets/star-empty.svg' %}"
+                                : "{% static 'assets/star-fill.png' %}";
+                        }
+                    } catch (error) {
+                        console.error('Ошибка:', error);
                     }
                 });
-
-                if (response.ok) {
-                    this.src = isActive
-                        ? "{% static 'assets/star-empty.svg' %}"
-                        : "{% static 'assets/star-fill.png' %}";
-                }
-            } catch (error) {
-                console.error('Ошибка:', error);
-            }
+            });
         });
-    });
-});
-</script>
-{% endblock %}
+    </script>
+{% endblock script %}
