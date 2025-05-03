@@ -13,10 +13,11 @@ def parse_html_content(content):
         script_tag, script_content = match.group(0), match.group(1)
         if re.search(r'type\s*=\s*["\'](?!text/javascript|application/javascript)', script_tag, re.IGNORECASE):
             continue
-        js_blocks.append(script_content.strip())
+        if script_content.strip():
+            js_blocks.append(script_content.strip())
 
     return {
-        'css': [css.strip() for css in css_blocks],
+        'css': [css.strip() for css in css_blocks if css.strip()],
         'js': js_blocks
     }
 
@@ -40,7 +41,7 @@ def count_metrics(content, lang):
                 elif isinstance(node, ast.FunctionDef):
                     functions.add(node.name)
             stats.update({'classes': len(classes), 'functions': len(functions)})
-        except SyntaxError:
+        except (SyntaxError, TypeError):
             stats.update({'classes': 0, 'functions': 0})
     else:
         stats.update({'classes': 0, 'functions': 0})
@@ -53,15 +54,13 @@ def analyze_file(filepath):
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
-    except (UnicodeDecodeError, IOError):
+    except (UnicodeDecodeError, IOError, PermissionError):
         return None
 
     ext = os.path.splitext(filepath)[1].lower()
     metrics = defaultdict(lambda: defaultdict(int))
-    file_type = None
 
     if ext == '.py':
-        file_type = 'python'
         res = count_metrics(content, 'python')
         metrics['python'] = res
 
@@ -69,7 +68,7 @@ def analyze_file(filepath):
         embedded = parse_html_content(content)
 
         cleaned_html = re.sub(
-            r'(?s)(<style[^>]*>.*?</style>|<script[^>]*>.*?</script>)',
+            r'(?s)<style[^>]*>.*?</style>|<script[^>]*>.*?</script>',
             '',
             content
         )
@@ -78,24 +77,20 @@ def analyze_file(filepath):
         metrics['html'] = html_metrics
 
         for css in embedded['css']:
-            if css:
-                css_metrics = count_metrics(css, 'css')
-                metrics['css']['lines'] += css_metrics['lines']
-                metrics['css']['chars'] += css_metrics['chars']
+            css_metrics = count_metrics(css, 'css')
+            metrics['css']['lines'] += css_metrics['lines']
+            metrics['css']['chars'] += css_metrics['chars']
 
         for js in embedded['js']:
-            if js:
-                js_metrics = count_metrics(js, 'js')
-                metrics['js']['lines'] += js_metrics['lines']
-                metrics['js']['chars'] += js_metrics['chars']
+            js_metrics = count_metrics(js, 'js')
+            metrics['js']['lines'] += js_metrics['lines']
+            metrics['js']['chars'] += js_metrics['chars']
 
     elif ext == '.css':
-        file_type = 'css'
         res = count_metrics(content, 'css')
         metrics['css'] = res
 
     elif ext == '.js':
-        file_type = 'js'
         res = count_metrics(content, 'js')
         metrics['js'] = res
 
@@ -104,7 +99,6 @@ def analyze_file(filepath):
 
     return {
         'path': filepath,
-        'type': file_type,
         'metrics': dict(metrics)
     }
 
@@ -119,19 +113,37 @@ def scan_project(directory):
         'functions': 0
     })
 
-    for root, _, files in os.walk(directory):
+    ignore_dirs = {'.git', '__pycache__', 'node_modules', 'venv', '.idea', 'dist', 'build'}
+    ignore_files = {'.DS_Store', 'package-lock.json', 'yarn.lock'}
+    gitignore = []
+
+    gitignore_path = os.path.join(directory, '.gitignore')
+    if os.path.exists(gitignore_path):
+        with open(gitignore_path, 'r') as f:
+            gitignore = [line.strip() for line in f
+                         if line.strip() and not line.startswith('#')]
+
+    for root, dirs, files in os.walk(directory):
+        dirs[:] = [d for d in dirs
+                   if d not in ignore_dirs
+                   and not any(fnmatch.fnmatch(d, p) for p in gitignore)]
+
+        files = [f for f in files
+                 if f not in ignore_files
+                 and not any(fnmatch.fnmatch(f, p) for p in gitignore)]
+
         for file in files:
             ext = os.path.splitext(file)[1].lower()
             if ext in ('.py', '.html', '.css', '.js'):
                 full_path = os.path.join(root, file)
                 result = analyze_file(full_path)
                 if result:
-                    for lang, metrics in result['metrics'].items():
+                    for lang, lang_metrics in result['metrics'].items():
                         stats[lang]['files'] += 1
-                        stats[lang]['lines'] += metrics['lines']
-                        stats[lang]['chars'] += metrics['chars']
-                        stats[lang]['classes'] += metrics['classes']
-                        stats[lang]['functions'] += metrics['functions']
+                        stats[lang]['lines'] += lang_metrics['lines']
+                        stats[lang]['chars'] += lang_metrics['chars']
+                        stats[lang]['classes'] += lang_metrics['classes']
+                        stats[lang]['functions'] += lang_metrics['functions']
 
     return stats
 
@@ -139,7 +151,6 @@ def scan_project(directory):
 def print_report(stats):
     """Выводит форматированный отчет"""
     print("\n{:=^50}".format(" Code Statistics Report "))
-    langs = ['python', 'html', 'css', 'js']
     headers = ["Language", "Files", "Lines", "Chars", "Classes", "Functions"]
     row_format = "| {:<8} | {:>6} | {:>8} | {:>10} | {:>7} | {:>8} |"
 
@@ -147,7 +158,7 @@ def print_report(stats):
     print(row_format.format(*headers))
     print("+" + "-" * 49 + "+")
 
-    for lang in langs:
+    for lang in ['python', 'html', 'css', 'js']:
         data = [
             lang.upper(),
             stats[lang]['files'],
@@ -163,6 +174,8 @@ def print_report(stats):
 
 
 if __name__ == "__main__":
+    import fnmatch
+
     project_dir = os.getcwd()
     print(f"Analyzing code in: {project_dir}")
 
