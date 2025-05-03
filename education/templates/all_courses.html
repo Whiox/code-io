@@ -45,18 +45,63 @@
     {% endfor %}
 </ul>
 
+<style>
+    h1 {
+        text-align: center;
+        margin: 2rem 0;
+    }
+
+    .course-progress-bar {
+        height: 8px;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 1rem;
+    }
+
+    .course-progress-fill {
+        height: 100%;
+        background-color: #4CAF50;
+        width: 0;
+        transition: width 0.5s ease-in-out;
+        border-radius: 4px;
+    }
+
+    .course-progress-text {
+        display: block;
+        text-align: right;
+        margin-top: 0.5rem;
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    [data-theme="dark"] .course-progress-bar {
+        background-color: #404040;
+    }
+
+    [data-theme="dark"] .course-progress-fill {
+        background-color: #ff6a00;
+    }
+
+    [data-theme="dark"] .course-progress-text {
+        color: #ccc;
+    }
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.course-item').forEach(item => {
-    const cid   = item.dataset.courseId;
-    const total = parseInt(item.dataset.lessonsCount, 10) || 0;
-    const key   = `course-progress-${cid}`;
-    const done  = JSON.parse(localStorage.getItem(key) || '[]').length;
-    const pct   = total ? Math.round(done / total * 100) : 0;
+    document.querySelectorAll('.course-item').forEach(item => {
+        const cid = item.dataset.courseId;
+        const total = parseInt(item.dataset.lessonsCount, 10) || 0;
+        const key = `course-progress-${cid}`;
+        const done = JSON.parse(localStorage.getItem(key) || '[]').length;
+        const pct = total ? Math.round(done / total * 100) : 0;
 
-    item.querySelector('.course-progress-fill').style.width = pct + '%';
-    item.querySelector('.course-progress-text').textContent = pct + '%';
-  });
+        requestAnimationFrame(() => {
+            item.querySelector('.course-progress-fill').style.width = pct + '%';
+            item.querySelector('.course-progress-text').textContent = pct + '%';
+        });
+    });
 });
 </script>
 {% endblock %}
