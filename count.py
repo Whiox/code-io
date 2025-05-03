@@ -64,12 +64,16 @@ def analyze_file(filepath):
         file_type = 'python'
         res = count_metrics(content, 'python')
         metrics['python'] = res
+
     elif ext == '.html':
-        file_type = 'html'
-        html_metrics = count_metrics(content, 'html')
+        embedded = parse_html_content(content)
+
+        cleaned_html = re.sub(r'(<style[^>]*>.*?</style>|<script[^>]*>.*?</script>)', '',
+                              content, flags=re.DOTALL | re.IGNORECASE)
+
+        html_metrics = count_metrics(cleaned_html, 'html')
         metrics['html'] = html_metrics
 
-        embedded = parse_html_content(content)
         for css in embedded['css']:
             css_metrics = count_metrics(css, 'css')
             metrics['css']['lines'] += css_metrics['lines']
