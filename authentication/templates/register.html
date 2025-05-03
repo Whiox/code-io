@@ -4,40 +4,40 @@
 
 {% block content %}
 
-<form method="POST" action="/register/" class="auth-form">
-    {% csrf_token %}
+    <form method="POST" action="/register/" class="auth-form">
+        {% csrf_token %}
 
-    <div class="auth-header">
-        <h1 class="auth-title">Создайте аккаунт</h1>
-        <p class="auth-subtitle">Уже зарегистрированы? <a href="{% url 'login' %}" class="auth-link">Войти</a></p>
-    </div>
+        <div class="auth-header">
+            <h1 class="auth-title">Создайте аккаунт</h1>
+            <p class="auth-subtitle">Уже зарегистрированы? <a href="{% url 'login' %}" class="auth-link">Войти</a></p>
+        </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
-                {{ message }}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="auth-fields">
+            <div class="input-group">
+                {{ RegisterForm.username }}
             </div>
-        {% endfor %}
-    {% endif %}
+            <div class="input-group">
+                {{ RegisterForm.email }}
+            </div>
+            <div class="input-group">
+                {{ RegisterForm.password }}
+            </div>
+            <div class="input-group">
+                {{ RegisterForm.repeat_password }}
+            </div>
+        </div>
 
-    <div class="auth-fields">
-        <div class="input-group">
-            {{ RegisterForm.username }}
-        </div>
-        <div class="input-group">
-            {{ RegisterForm.email }}
-        </div>
-        <div class="input-group">
-            {{ RegisterForm.password }}
-        </div>
-        <div class="input-group">
-            {{ RegisterForm.repeat_password }}
-        </div>
-    </div>
+        <button type="submit" class="btn submit-button">
+            Создать аккаунт
+        </button>
+    </form>
 
-    <button type="submit" class="btn submit-button">
-        Создать аккаунт
-    </button>
-</form>
-
-{% endblock %}
+{% endblock content %}

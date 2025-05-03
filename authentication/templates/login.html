@@ -4,38 +4,38 @@
 
 {% block content %}
 
-<form method="POST" action="/login/" class="auth-form">
-    {% csrf_token %}
-    
-    <div class="auth-header">
-        <h1 class="auth-title">Вход в аккаунт</h1>
-        <p class="auth-subtitle">
-            <a href="{% url 'register' %}" class="auth-link">Нет аккаунта?</a>
-            <span style="margin: 0 8px">•</span>
-            <a href="{% url 'reset_password' %}" class="auth-link">Забыли пароль?</a>
-        </p>
-    </div>
+    <form method="POST" action="/login/" class="auth-form">
+        {% csrf_token %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
-                {{ message }}
+        <div class="auth-header">
+            <h1 class="auth-title">Вход в аккаунт</h1>
+            <p class="auth-subtitle">
+                <a href="{% url 'register' %}" class="auth-link">Нет аккаунта?</a>
+                <span style="margin: 0 8px">•</span>
+                <a href="{% url 'reset_password' %}" class="auth-link">Забыли пароль?</a>
+            </p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="auth-fields">
+            <div class="input-group">
+                {{ LoginForm.email }}
             </div>
-        {% endfor %}
-    {% endif %}
-
-    <div class="auth-fields">
-        <div class="input-group">
-            {{ LoginForm.email }}
+            <div class="input-group">
+                {{ LoginForm.password }}
+            </div>
         </div>
-        <div class="input-group">
-            {{ LoginForm.password }}
-        </div>
-    </div>
 
-    <button type="submit" class="btn submit-button">
-        Войти
-    </button>
-</form>
+        <button type="submit" class="btn submit-button">
+            Войти
+        </button>
+    </form>
 
-{% endblock %}
+{% endblock content %}

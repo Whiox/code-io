@@ -216,22 +216,27 @@ class AddCourseView(View):
             course.topics.set(topic_form.cleaned_data['topics'])
 
             lesson_ids = []
-            for lf in lesson_formset:
+            for idx, lf in enumerate(lesson_formset):
                 desc = lf.cleaned_data.get('lesson_description')
                 if desc:
-                    lesson = Lessons.objects.create(course=course, title=desc)
-                    lesson_ids.append(lesson.lesson_id)
+                    lesson = Lessons.objects.create(
+                        course=course,
+                        title=desc,
+                        order=idx
+                    )
+                    lesson_ids.append((lesson.lesson_id, idx))
 
             folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
             os.makedirs(folder, exist_ok=True)
             os.makedirs(os.path.join(folder, 'tasks'), exist_ok=True)
-            for lf, lid in zip(lesson_formset, lesson_ids):
+
+            for (lesson_pk, idx), lf in zip(lesson_ids, lesson_formset):
                 uploaded = lf.cleaned_data.get('lesson_file')
                 if uploaded:
                     ext = os.path.splitext(uploaded.name)[1]
-                    name = f"lesson_{lid}{ext}"
-                    path = os.path.join(folder, name)
-                    with open(path, 'wb+') as dst:
+                    filename = f"lesson_{idx}.md"
+                    file_path = os.path.join(folder, filename)
+                    with open(file_path, 'wb+') as dst:
                         for chunk in uploaded.chunks():
                             dst.write(chunk)
 
@@ -329,30 +334,34 @@ class CourseEditorView(View):
             messages.error(request, "Нет прав на редактирование.")
             return redirect('course', course_id=course_id)
 
-        course_dir = os.path.join(settings.MEDIA_ROOT, str(course_id))
-        try:
-            files = sorted(
-                [f for f in os.listdir(course_dir) if f.endswith('.md')],
-                key=lambda fn: int(re.search(r'(\d+)', fn).group(1))
-            )
-        except FileNotFoundError:
-            messages.error(request, "Каталог не найден.")
-            return redirect('course', course_id=course_id)
+        lessons_qs = Lessons.objects.filter(course=course).order_by('order')
+        lessons = [
+            {
+                'order': les.order,
+                'title': les.title,
+                'filename': f"lesson_{les.order}.md"
+            }
+            for les in lessons_qs
+        ]
 
-        sel = request.GET.get('lesson')
+        selected = request.GET.get('lesson', '')
         raw_content = ''
-        if sel in files:
-            path = os.path.join(course_dir, sel)
-            with open(path, encoding='utf-8') as fp:
-                raw_content = fp.read()
+        if selected.isdigit():
+            filename = f"lesson_{selected}.md"
+            path = os.path.join(settings.MEDIA_ROOT, str(course_id), filename)
+            if os.path.isfile(path):
+                with open(path, 'r', encoding='utf-8') as fp:
+                    raw_content = fp.read()
+            else:
+                messages.error(request, "Файл урока не найден.")
 
         all_topics = list(Topic.objects.values('id', 'name'))
         course_topics = list(course.topics.all().values('id', 'name'))
 
         return render(request, 'edit_course.html', {
             'course': course,
-            'files': files,
-            'selected': sel,
+            'lessons': lessons,
+            'selected': selected,
             'content': raw_content,
             'all_topics': all_topics,
             'course_topics': course_topics
@@ -379,25 +388,29 @@ class CourseEditorView(View):
                 course.topics.set(existing_ids)
                 messages.success(request, 'Тематики курса успешно обновлены')
             except Exception as e:
-                messages.error(request, f'Ошибка обновления тем: {str(e)}')
+                messages.error(request, f'Ошибка обновления тем: {e}')
             return redirect('course_edit', course_id=course_id)
 
-        lesson = request.POST.get('lesson')
+        lesson_order = request.POST.get('lesson')
+        if not (lesson_order and lesson_order.isdigit()):
+            messages.error(request, "Урок не выбран или некорректен.")
+            return redirect('course_edit', course_id=course_id)
+
+        filename = f"lesson_{lesson_order}.md"
+        file_path = os.path.join(settings.MEDIA_ROOT, str(course_id), filename)
+        if not os.path.isfile(file_path):
+            messages.error(request, "Файл урока не найден.")
+            return redirect(f"{request.path}?lesson={lesson_order}")
+
         new_content = request.POST.get('content', '')
-        course_dir = os.path.join(settings.MEDIA_ROOT, str(course_id))
-        file_path = os.path.join(course_dir, lesson or '')
-        if not lesson or not os.path.isfile(file_path):
-            messages.error(request, "Некорректный урок.")
-            return redirect('course_edit', course_id=course_id)
-
         try:
             with open(file_path, 'wb') as fp:
                 fp.write(new_content.encode('utf-8'))
-            messages.success(request, f"Урок «{lesson}» сохранён.")
+            messages.success(request, f"Урок «{filename}» сохранён.")
         except Exception as e:
             messages.error(request, f"Ошибка при сохранении: {e}")
 
-        return redirect(f"{request.path}?lesson={lesson}")
+        return redirect(f"{request.path}?lesson={lesson_order}")
 
 
 class ReportCourseView(View):

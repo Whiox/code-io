@@ -4,273 +4,329 @@
 {% block title %}Редактирование: {{ course.title }}{% endblock %}
 
 {% block content %}
-<div class="editor-container">
-  <h1 class="editor-title">Редактирование курса «{{ course.title }}»</h1>
+    <div class="editor-container">
+        <h1 class="editor-title">Редактирование курса «{{ course.title }}»</h1>
 
-  {% if messages %}
-    <div class="message-container">
-      {% for message in messages %}
-        <div class="message message--{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <form method="post" class="editor-form editor-form--topics">
-    {% csrf_token %}
-    <input type="hidden" name="update_topics" value="1">
-
-    <div class="form-section">
-      <h2 class="section-title">Тематики курса</h2>
-      <div class="topics-controls">
-        <input type="text" id="new-topic-name" placeholder="Новая тема" class="topic-input">
-        <button type="button" id="add-topic-btn" class="btn-inline">Добавить тему</button>
-      </div>
-      <div class="topics-wrapper">
-        <select id="topics-select" class="form-input">
-          <option value="" disabled selected>— выберите тему —</option>
-          {% for topic in all_topics %}
-            <option value="{{ topic.id }}">{{ topic.name }}</option>
-          {% endfor %}
-        </select>
-        <div id="selected-topics" class="selected-topics">
-          {% for topic in course_topics %}
-            <div class="selected-topic" data-id="{{ topic.id }}">
-              {{ topic.name }}
-              <button type="button" class="remove-topic-btn">
-                <svg viewBox="0 0 24 24" width="16" height="16">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-              </button>
-              <input type="hidden" name="topics" value="{{ topic.id }}">
+        {% if messages %}
+            <div class="message-container">
+                {% for message in messages %}
+                    <div class="message message--{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
             </div>
-          {% endfor %}
-        </div>
-        <div class="topics-actions">
-          <button type="submit" class="btn-inline">Сохранить тематики</button>
-        </div>
-      </div>
+        {% endif %}
+
+        <form method="post" class="editor-form editor-form--topics">
+            {% csrf_token %}
+            <input type="hidden" name="update_topics" value="1">
+            <div class="form-section">
+                <h2 class="section-title">Тематики курса</h2>
+                <div class="topics-controls">
+                    <input type="text" id="new-topic-name" placeholder="Новая тема" class="topic-input">
+                    <button type="button" id="add-topic-btn" class="btn-inline">Добавить тему</button>
+                </div>
+                <div class="topics-wrapper">
+                    <select id="topics-select" class="form-input">
+                        <option value="" disabled selected>— выберите тему —</option>
+                        {% for topic in all_topics %}
+                            <option value="{{ topic.id }}">{{ topic.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <div id="selected-topics" class="selected-topics">
+                        {% for topic in course_topics %}
+                            <div class="selected-topic" data-id="{{ topic.id }}">
+                                {{ topic.name }}
+                                <button type="button" class="remove-topic-btn">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                    </svg>
+                                </button>
+                                <input type="hidden" name="topics" value="{{ topic.id }}">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="topics-actions">
+                        <button type="submit" class="btn-inline">Сохранить тематики</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <form method="get" class="editor-form">
+            <label for="lesson-select" class="form-label">Урок:</label>
+            <select id="lesson-select" name="lesson" class="styled-select" onchange="this.form.submit()">
+                <option value="">— не выбрано —</option>
+                {% for les in lessons %}
+                    <option value="{{ les.order }}"{% if les.order|stringformat:"s" == selected %} selected{% endif %}>
+                        {{ les.title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+
+        {% if selected %}
+            <form method="post" class="editor-form editor-form--save">
+                {% csrf_token %}
+                <input type="hidden" name="lesson" value="{{ selected }}">
+
+                <div class="codemirror-wrapper">
+                    <textarea id="code-editor" name="content">{{ content|escape }}</textarea>
+                </div>
+                <button type="submit" class="btn btn--primary">Сохранить урок</button>
+            </form>
+        {% else %}
+            <p class="editor-note">Выберите урок, чтобы начать редактирование.</p>
+        {% endif %}
     </div>
-  </form>
 
-  <form method="get" class="editor-form">
-    <label for="lesson-select" class="form-label">Выберите урок:</label>
-    <select id="lesson-select" name="lesson" class="styled-select" onchange="this.form.submit()">
-      <option value="">— не выбрано —</option>
-      {% for fn in files %}
-        <option value="{{ fn }}" {% if fn == selected %}selected{% endif %}>{{ fn }}</option>
-      {% endfor %}
-    </select>
-  </form>
+    {{ all_topics|json_script:"topics-data" }}
+    {{ course_topics|json_script:"selected-topics-data" }}
+{% endblock content %}
 
-  {% if selected %}
-  <form method="post" class="editor-form editor-form--save">
-    {% csrf_token %}
-    <input type="hidden" name="lesson" value="{{ selected }}">
+{% block style %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
 
-    <div class="codemirror-wrapper">
-      <textarea id="code-editor" name="content">{{ content|escape }}</textarea>
-    </div>
-    <button type="submit" class="btn btn--primary">Сохранить урок</button>
-  </form>
-  {% else %}
-    <p class="editor-note">Выберите файл урока, чтобы начать редактирование.</p>
-  {% endif %}
-</div>
+    <style>
+        :root {
+            --accent-color: #28a745;
+            --hover-bg: #4dc621;
+            --primary-button-bg: #28a745;
+            --primary-button-hover: #218838;
+            --border-color: #e0e0e0;
+            --input-bg: #fff;
+            --input-border: #ddd;
+            --focus-border: #e67e22;
+            --sidebar-bg: #f9f9f9;
+            --text-color: #333;
+        }
 
-{{ all_topics|json_script:"topics-data" }}
-{{ course_topics|json_script:"selected-topics-data" }}
+        [data-theme="dark"] {
+            --accent-color: #FF6B35;
+            --hover-bg: #ff6f00;
+            --primary-button-bg: #ff6a00;
+            --primary-button-hover: #d15701;
+            --border-color: #555555;
+            --input-bg: #444;
+            --input-border: #ddd;
+            --focus-border: #e67e22;
+            --sidebar-bg: #2e2e2e;
+            --text-color: #fff;
+        }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+        .editor-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/continuelist.min.js"></script>
+        .form-section {
+            margin-bottom: 2rem;
+            background: var(--sidebar-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
 
-<style>
-:root {
-  --accent-color: #28a745;
-  --hover-bg: #4dc621;
-  --primary-button-bg: #28a745;
-  --primary-button-hover: #218838;
-  --border-color: #e0e0e0;
-  --input-bg: #fff;
-  --input-border: #ddd;
-  --focus-border: #e67e22;
-  --sidebar-bg: #f9f9f9;
-  --text-color: #333;
-}
+        .topics-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
 
-[data-theme="dark"] {
-  --accent-color: #FF6B35;
-  --hover-bg: #ff6f00;
-  --primary-button-bg: #ff6a00;
-  --primary-button-hover: #d15701;
-  --border-color: #555555;
-  --input-bg: #444;
-  --input-border: #ddd;
-  --focus-border: #e67e22;
-  --sidebar-bg: #2e2e2e;
-  --text-color: #fff;
-}
+        .topic-input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
 
-.editor-container {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 1rem;
-  background: var(--input-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-}
+        .selected-topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
 
-.form-section {
-  margin-bottom: 2rem;
-  background: var(--sidebar-bg);
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-}
+        .selected-topic {
+            background: var(--accent-color);
+            color: #fff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
 
-.topics-controls {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
+        .remove-topic-btn {
+            all: unset;
+            cursor: pointer;
+            padding-left: 8px;
+            display: flex;
+            align-items: center;
+        }
 
-.topic-input {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background: var(--input-bg);
-  color: var(--text-color);
-}
+        .remove-topic-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: rgba(255, 255, 255, 0.8);
+            transition: fill 0.2s;
+        }
 
-.selected-topics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
+        .remove-topic-btn:hover svg {
+            fill: rgba(255, 255, 255, 1);
+        }
 
-.selected-topic {
-  background: var(--accent-color);
-  color: #fff;
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-}
+        .topics-actions {
+            text-align: right;
+            margin-top: 1rem;
+        }
 
-.remove-topic-btn {
-  all: unset;
-  cursor: pointer;
-  padding-left: 8px;
-  display: flex;
-  align-items: center;
-}
+        #topics-select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
 
-.remove-topic-btn svg {
-  width: 16px;
-  height: 16px;
-  fill: rgba(255,255,255,0.8);
-  transition: fill 0.2s;
-}
+        .btn-inline {
+            background: var(--accent-color);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-.remove-topic-btn:hover svg {
-  fill: rgba(255,255,255,1);
-}
+        .btn-inline:hover {
+            background: var(--primary-button-hover);
+        }
 
-.topics-actions {
-  text-align: right;
-  margin-top: 1rem;
-}
+        .message-container {
+            margin-bottom: 1rem;
+        }
 
-#topics-select {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background: var(--input-bg);
-  color: var(--text-color);
-}
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
 
-.btn-inline {
-  background: var(--accent-color);
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
+        .message--success {
+            background-color: #28a745;
+            color: #fff;
+        }
 
-.btn-inline:hover {
-  background: var(--primary-button-hover);
-}
+        .message--error {
+            background-color: #dc3545;
+            color: #fff;
+        }
 
-.message-container { margin-bottom: 1rem; }
-.message { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 0.5rem; }
-.message--success { background-color: #28a745; color: #fff; }
-.message--error { background-color: #dc3545; color: #fff; }
-.editor-title { color: var(--accent-color); }
-.styled-select { padding: 0.5rem; border: 1px solid var(--border-color); }
-.codemirror-wrapper { height: 70vh; border: 1px solid var(--border-color); position: relative; }
-.CodeMirror { height: 100%; font-family: monospace; font-size: 1rem; position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
-.btn--primary { background: var(--primary-button-bg); padding: 0.6rem 1.2rem; margin-top: 1rem; }
-</style>
+        .editor-title {
+            color: var(--accent-color);
+        }
 
-<script>
-(function(){
-  const csrftoken = document.cookie.match(/csrftoken=([\w-]+)/)?.[1];
-  if(!csrftoken) return;
+        .styled-select {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
 
-  const topics = JSON.parse(document.getElementById('topics-data').textContent);
-  const selectedTopics = JSON.parse(document.getElementById('selected-topics-data').textContent);
+        .codemirror-wrapper {
+            height: 70vh;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
 
-  const elements = {
-    topicsSelect: document.getElementById('topics-select'),
-    selectedContainer: document.getElementById('selected-topics'),
-    addTopicBtn: document.getElementById('add-topic-btn')
-  };
+        .CodeMirror {
+            height: 100%;
+            font-family: monospace;
+            font-size: 1rem;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
 
-  if(!elements.topicsSelect || !elements.selectedContainer || !elements.addTopicBtn) return;
+        .btn--primary {
+            background: var(--primary-button-bg);
+            padding: 0.6rem 1.2rem;
+            margin-top: 1rem;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
 
-  function updateTopicSelect() {
-    const selectedIds = Array.from(elements.selectedContainer.querySelectorAll('input'))
-      .map(i => parseInt(i.value))
-      .filter((v, i, arr) => arr.indexOf(v) === i);
+        .btn--primary:hover {
+            background: var(--primary-button-hover);
+            transform: translateY(-1px);
+        }
 
-    elements.topicsSelect.innerHTML = '<option value="" disabled selected>— выберите тему —</option>';
-    topics.forEach(t => {
-      if(!selectedIds.includes(t.id)) {
-        const option = document.createElement('option');
-        option.value = t.id;
-        option.textContent = t.name;
-        elements.topicsSelect.appendChild(option);
-      }
-    });
-  }
+        .editor-note {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+{% endblock style %}
 
-  function handleRemoveTopic(event) {
-    const removeBtn = event.target.closest('.remove-topic-btn');
-    if(!removeBtn) return;
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/continuelist.min.js"></script>
+    <script>
+        (function () {
+            const csrftoken = document.cookie.match(/csrftoken=([\w-]+)/)?.[1];
+            if (!csrftoken) return;
 
-    const topicDiv = removeBtn.closest('.selected-topic');
-    if(topicDiv) {
-      const input = topicDiv.querySelector('input[name="topics"]');
-      if(input) input.remove();
-      topicDiv.remove();
-      updateTopicSelect();
-    }
-  }
+            const topics = JSON.parse(document.getElementById('topics-data').textContent);
+            const selectedTopics = JSON.parse(document.getElementById('selected-topics-data').textContent);
 
-  function createTopicElement(topic) {
-    const div = document.createElement('div');
-    div.className = 'selected-topic';
-    div.dataset.id = topic.id;
-    div.innerHTML = `
+            const topicsSelect = document.getElementById('topics-select');
+            const selectedContainer = document.getElementById('selected-topics');
+            const addTopicBtn = document.getElementById('add-topic-btn');
+
+            function updateTopicSelect() {
+                const selectedIds = Array.from(selectedContainer.querySelectorAll('input'))
+                    .map(i => parseInt(i.value))
+                    .filter((v, i, arr) => arr.indexOf(v) === i);
+
+                topicsSelect.innerHTML = '<option value="" disabled selected>— выберите тему —</option>';
+                topics.forEach(t => {
+                    if (!selectedIds.includes(t.id)) {
+                        const option = document.createElement('option');
+                        option.value = t.id;
+                        option.textContent = t.name;
+                        topicsSelect.appendChild(option);
+                    }
+                });
+            }
+
+            function handleRemoveTopic(e) {
+                const btn = e.target.closest('.remove-topic-btn');
+                if (!btn) return;
+                const topicDiv = btn.closest('.selected-topic');
+                if (topicDiv) {
+                    const input = topicDiv.querySelector('input[name="topics"]');
+                    if (input) input.remove();
+                    topicDiv.remove();
+                    updateTopicSelect();
+                }
+            }
+
+            function createTopicElement(topic) {
+                const div = document.createElement('div');
+                div.className = 'selected-topic';
+                div.dataset.id = topic.id;
+                div.innerHTML = `
       ${topic.name}
       <button type="button" class="remove-topic-btn">
         <svg viewBox="0 0 24 24" width="16" height="16">
@@ -279,65 +335,66 @@
       </button>
       <input type="hidden" name="topics" value="${topic.id}">
     `;
-    return div;
-  }
+                return div;
+            }
 
-  elements.selectedContainer.innerHTML = '';
-  selectedTopics.forEach(t => elements.selectedContainer.appendChild(createTopicElement(t)));
-  updateTopicSelect();
+            selectedContainer.innerHTML = '';
+            selectedTopics.forEach(t => selectedContainer.appendChild(createTopicElement(t)));
+            updateTopicSelect();
 
-  elements.selectedContainer.addEventListener('click', handleRemoveTopic);
+            selectedContainer.addEventListener('click', handleRemoveTopic);
 
-  elements.addTopicBtn.addEventListener('click', async () => {
-    const input = document.getElementById('new-topic-name');
-    const name = input.value.trim();
-    if(!name) return;
+            addTopicBtn.addEventListener('click', async () => {
+                const input = document.getElementById('new-topic-name');
+                const name = input.value.trim();
+                if (!name) return;
 
-    try {
-      const res = await fetch('{% url "create_topic" %}', {
-        method: 'POST',
-        headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
-        body: new URLSearchParams({name})
-      });
-      const data = await res.json();
-      if(data.status === 'ok') {
-        const newTopic = {id: data.ok, name: name};
-        topics.push(newTopic);
-        elements.selectedContainer.appendChild(createTopicElement(newTopic));
-        updateTopicSelect();
-        input.value = '';
-      }
-    } catch(e) { console.error('Error:', e); }
-  });
+                try {
+                    const res = await fetch('{% url "create_topic" %}', {
+                        method: 'POST',
+                        headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
+                        body: new URLSearchParams({name})
+                    });
+                    const data = await res.json();
+                    if (data.status === 'ok') {
+                        const newTopic = {id: data.ok, name};
+                        topics.push(newTopic);
+                        selectedContainer.appendChild(createTopicElement(newTopic));
+                        updateTopicSelect();
+                        input.value = '';
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
 
-  elements.topicsSelect.addEventListener('change', function() {
-    if(this.value) {
-      const topic = topics.find(t => t.id == this.value);
-      if(topic) {
-        elements.selectedContainer.appendChild(createTopicElement(topic));
-        updateTopicSelect();
-        this.value = '';
-      }
-    }
-  });
-})();
+            topicsSelect.addEventListener('change', function () {
+                if (this.value) {
+                    const topic = topics.find(t => t.id == this.value);
+                    if (topic) {
+                        selectedContainer.appendChild(createTopicElement(topic));
+                        updateTopicSelect();
+                        this.value = '';
+                    }
+                }
+            });
+        })();
 
-document.addEventListener('DOMContentLoaded', () => {
-  const editorElement = document.getElementById('code-editor');
-  if(editorElement) {
-    const editor = CodeMirror.fromTextArea(editorElement, {
-      mode: 'markdown',
-      lineNumbers: true,
-      lineWrapping: true,
-      theme: document.documentElement.dataset.theme === 'dark' ? 'dracula' : 'default',
-      extraKeys: {'Enter': 'newlineAndIndentContinueMarkdownList'},
-      viewportMargin: Infinity
-    });
-
-    document.querySelector('form.editor-form--save')?.addEventListener('submit', () => {
-      editor.save();
-    });
-  }
-});
-</script>
-{% endblock %}
+        document.addEventListener('DOMContentLoaded', () => {
+            const editorElement = document.getElementById('code-editor');
+            if (editorElement) {
+                const editor = CodeMirror.fromTextArea(editorElement, {
+                    mode: 'markdown',
+                    lineNumbers: true,
+                    lineWrapping: true,
+                    theme: document.documentElement.dataset.theme === 'dark' ? 'dracula' : 'default',
+                    extraKeys: {'Enter': 'newlineAndIndentContinueMarkdownList'},
+                    viewportMargin: Infinity
+                });
+                document.querySelector('form.editor-form--save')?.addEventListener('submit', () => {
+                    editor.save();
+                });
+            }
+        });
+    </script>
+{% endblock script %}
