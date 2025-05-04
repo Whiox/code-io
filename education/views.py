@@ -16,7 +16,7 @@ from django.http import JsonResponse, QueryDict
 from django.conf import settings
 
 from education.files import get_all_lessons, get_lesson_number
-from education.models import Courses, Lessons, Stars, ReportCourse, Topic
+from education.models import Courses, Lessons, Stars, ReportCourse, Topic, CourseProgress
 from education.forms import AddCourseForm, AddLessonForm, TopicChoiceForm
 
 
@@ -313,6 +313,34 @@ class AddStar(View):
             status = True
 
         return JsonResponse({"status": status})
+
+
+class LessonProgress(View):
+    @method_decorator(login_required)
+    def get(self, request, course_id, lesson_id):
+        lesson = get_object_or_404(Lessons, pk=lesson_id)
+        progress, _ = CourseProgress.objects.get_or_create(user=request.user, lesson=lesson)
+
+        return JsonResponse({"status": "ok", "data": progress.status})
+
+    @method_decorator(login_required)
+    def post(self, request, course_id, lesson_id):
+        lesson = get_object_or_404(Lessons, pk=lesson_id)
+        progress, _ = CourseProgress.objects.get_or_create(user=request.user, lesson=lesson)
+        progress.status = not progress.status
+        progress.save()
+        return JsonResponse({"status": "ok", "data": progress.status})
+
+
+class CourseProgressList(View):
+    @method_decorator(login_required)
+    def get(self, request, course_id):
+        progresses = CourseProgress.objects.filter(
+            user=request.user,
+            lesson__course_id=course_id
+        )
+        done = [p.lesson_id for p in progresses if p.status]
+        return JsonResponse({"status": "ok", "done_lessons": done})
 
 
 class CourseEditorView(View):

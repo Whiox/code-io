@@ -14,10 +14,12 @@ def get_all_lessons(course, course_path, lessons, lessons_content):
         idx = int(m.group(1)) if m else None
 
         title = None
+        lesson_id = None
         if idx is not None:
             try:
                 obj = Lessons.objects.get(course=course, order=idx)
                 title = obj.title
+                lesson_id = obj.lesson_id
             except Lessons.DoesNotExist:
                 title = None
 
@@ -27,6 +29,7 @@ def get_all_lessons(course, course_path, lessons, lessons_content):
                 data = lesson_chain.handle((lesson_path, lesson_name, course_path))
                 if title:
                     data['title'] = title
+                    data['lesson_id'] = lesson_id
                 lessons_content.append(data)
             except Exception as e:
                 lessons_content.append({
@@ -41,7 +44,6 @@ def get_all_lessons(course, course_path, lessons, lessons_content):
                 'tasks': [],
             })
 
-    # если есть папка tasks — убрать последний элемент (служебный файл)
     tasks_path = os.path.join(course_path, 'tasks')
     if os.path.exists(tasks_path) and lessons_content:
         lessons_content.pop()

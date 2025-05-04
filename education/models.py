@@ -61,9 +61,11 @@ class CourseProgress(models.Model):
 
     :ivar models.ForeignKey user: Пользователь
     :ivar models.ForeignKey lesson: Урок
+    :ivar models.BooleanField status: Статус выполнения
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lessons, on_delete=models.CASCADE)
+    status = models.BooleanField(default=False)
 
 
 class Task(models.Model):
