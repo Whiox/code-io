@@ -56,6 +56,16 @@ class Lessons(models.Model):
         ordering = ['order']
 
 
+class CourseProgress(models.Model):
+    """Модель прогресса для курса
+
+    :ivar models.ForeignKey user: Пользователь
+    :ivar models.ForeignKey lesson: Урок
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lessons, on_delete=models.CASCADE)
+
+
 class Task(models.Model):
     """Модель задания.
 
