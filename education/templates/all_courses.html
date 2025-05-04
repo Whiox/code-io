@@ -14,10 +14,14 @@
                 {% if request.user.is_authenticated %}
                     <div class="star-wrapper">
                         {% if course.is_stared %}
-                            <img src="{% static 'assets/star-fill.png' %}" alt="star" class="star"
+                            <img src="{% static 'assets/star-fill.png' %}"
+                                 alt="star"
+                                 class="star"
                                  data-course-id="{{ course.id }}">
                         {% else %}
-                            <img src="{% static 'assets/star-empty.svg' %}" alt="star" class="star"
+                            <img src="{% static 'assets/star-empty.svg' %}"
+                                 alt="star"
+                                 class="star"
                                  data-course-id="{{ course.id }}">
                         {% endif %}
                     </div>
@@ -87,29 +91,20 @@
 {% endblock style %}
 
 {% block script %}
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.course-item').forEach(item => {
                 const cid = item.dataset.courseId;
                 const total = parseInt(item.dataset.lessonsCount, 10) || 0;
-                const url = `/courses/${cid}/progress/`;
+                const key = `course-progress-${cid}`;
+                const done = JSON.parse(localStorage.getItem(key) || '[]').length;
+                const pct = total ? Math.round(done / total * 100) : 0;
 
-                fetch(url, {credentials: 'same-origin'})
-                    .then(resp => resp.json())
-                    .then(json => {
-                        if (json.status === 'ok') {
-                            const done = json.done_lessons.length;
-                            const pct = total ? Math.round(done / total * 100) : 0;
-
-                            requestAnimationFrame(() => {
-                                item.querySelector('.course-progress-fill').style.width = pct + '%';
-                                item.querySelector('.course-progress-text').textContent = pct + '%';
-                            });
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Не удалось загрузить прогресс для курса', cid, err);
-                    });
+                requestAnimationFrame(() => {
+                    item.querySelector('.course-progress-fill').style.width = pct + '%';
+                    item.querySelector('.course-progress-text').textContent = pct + '%';
+                });
             });
         });
     </script>

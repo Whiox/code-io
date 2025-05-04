@@ -42,9 +42,7 @@
                     <h2 class="section-title">Популярные курсы</h2>
                     <ul class="course-list">
                         {% for course in popular_courses %}
-                            <li class="course-item"
-                                data-course-id="{{ course.course_id }}"
-                                data-lessons-count="{{ course.lessons_count|default:0 }}">
+                            <li class="course-item">
                                 {% if request.user.is_authenticated %}
                                     <div class="star-wrapper">
                                         {% if course.is_stared %}
@@ -262,52 +260,40 @@
 {% block script %}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.course-item[data-lessons-count]').forEach(item => {
+            document.querySelectorAll('.course-item').forEach(item => {
                 const cid = item.dataset.courseId;
                 const total = parseInt(item.dataset.lessonsCount, 10) || 0;
-                const url = `/courses/${cid}/progress/`;
+                const key = `course-progress-${cid}`;
+                const done = JSON.parse(localStorage.getItem(key) || '[]').length;
+                const pct = total ? Math.round(done / total * 100) : 0;
 
-                fetch(url, {credentials: 'same-origin'})
-                    .then(r => r.json())
-                    .then(json => {
-                        if (json.status === 'ok') {
-                            const done = json.done_lessons.length;
-                            const pct = total ? Math.round(done / total * 100) : 0;
-                            requestAnimationFrame(() => {
-                                const fill = item.querySelector('.course-progress-fill');
-                                const text = item.querySelector('.course-progress-text');
-                                if (fill && text) {
-                                    fill.style.width = pct + '%';
-                                    text.textContent = pct + '%';
-                                }
-                            });
-                        }
-                    })
-                    .catch(console.error);
+                if (item.querySelector('.course-progress-fill')) {
+                    item.querySelector('.course-progress-fill').style.width = pct + '%';
+                    item.querySelector('.course-progress-text').textContent = pct + '%';
+                }
             });
 
             document.querySelectorAll('.star').forEach(star => {
-                star.addEventListener('click', async () => {
-                    const courseId = star.dataset.courseId;
-                    const isActive = star.src.includes('star-fill');
+                star.addEventListener('click', async function () {
+                    const courseId = this.dataset.courseId;
+                    const isActive = this.src.includes('star-fill');
+
                     try {
-                        const response = await fetch(
-                            `/courses/${courseId}/${isActive ? 'remove_star' : 'add_star'}/`,
-                            {
-                                method: isActive ? 'DELETE' : 'POST',
-                                credentials: 'same-origin',
-                                headers: {
-                                    'X-CSRFToken': '{{ csrf_token }}',
-                                },
+                        const response = await fetch(`/courses/${courseId}/toggle-star/`, {
+                            method: isActive ? 'DELETE' : 'POST',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}',
+                                'Content-Type': 'application/json'
                             }
-                        );
+                        });
+
                         if (response.ok) {
-                            star.src = isActive
+                            this.src = isActive
                                 ? "{% static 'assets/star-empty.svg' %}"
                                 : "{% static 'assets/star-fill.png' %}";
                         }
-                    } catch (e) {
-                        console.error('Ошибка переключения звезды', e);
+                    } catch (error) {
+                        console.error('Ошибка:', error);
                     }
                 });
             });
