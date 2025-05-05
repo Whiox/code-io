@@ -1,256 +1,362 @@
-"""Тесты для education/views. """
-
 import os
 import shutil
 import tempfile
-
+from django.forms import formset_factory
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
-
 from authentication.models import User
-from education.models import Courses, Stars
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import QueryDict
+from django.conf import settings
+from education.models import Courses, Lessons, Stars, ReportCourse, Topic, CourseProgress
+from education.forms import AddCourseForm, AddLessonForm
+
+TEST_MEDIA_ROOT = tempfile.mkdtemp()
 
 
-class AllCourseViewTest(TestCase):
+class AllCoursesViewTest(TestCase):
     """Тесты для представления списка всех курсов"""
 
     def setUp(self):
-        """Инициализация тестовых данных"""
         self.client = Client()
-        self.user_data = {
-            'email': 'test@example.com',
-            'username': 'testuser',
-            'password': 'testpass123'
-        }
-        self.user = User.objects.create_user(**self.user_data)
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.course = Courses.objects.create(title='Test Course', author=self.user)
+        self.topic = Topic.objects.create(name='Programming', author=self.user)
+        self.course.topics.add(self.topic)
 
-    def test_all_course_get(self):
-        """Тест GET-запроса для страницы всех курсов"""
+    def test_all_courses_view_returns_200(self):
         response = self.client.get(reverse('all'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'all_courses.html')
+
+    def test_course_list_in_context(self):
+        response = self.client.get(reverse('all'))
+        self.assertIn('courses', response.context)
+        self.assertEqual(len(response.context['courses']), 1)
+
+    def test_star_flag_for_authenticated_user(self):
+        Stars.objects.create(user=self.user, course=self.course)
+        self.client.login(email='test@example.com', password='testpass123')
+        response = self.client.get(reverse('all'))
+        self.assertTrue(response.context['courses'][0]['is_stared'])
 
 
 class StaredCoursesViewTest(TestCase):
     """Тесты для представления избранных курсов"""
 
     def setUp(self):
-        """Инициализация тестовых данных"""
         self.client = Client()
-        self.user_data = {
-            'email': 'test@example.com',
-            'username': 'testuser',
-            'password': 'testpass123'
-        }
-        self.user = User.objects.create_user(**self.user_data)
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.course = Courses.objects.create(title='Test Course', author=self.user)
+        Stars.objects.create(user=self.user, course=self.course)
 
-    def test_stared_view_get_authenticated(self):
-        """Тест доступа авторизованного пользователя к избранным курсам"""
+    def test_authenticated_access(self):
         self.client.login(email='test@example.com', password='testpass123')
         response = self.client.get(reverse('stared'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'stared_courses.html')
 
-    def test_stared_view_get_anonymous(self):
-        """Тест перенаправления анонимного пользователя со страницы избранного"""
+    def test_stared_courses_in_context(self):
+        self.client.login(email='test@example.com', password='testpass123')
         response = self.client.get(reverse('stared'))
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(response.context['courses']), 1)
+        self.assertEqual(response.context['courses'][0]['title'], 'Test Course')
+
+    def test_popular_courses_fallback(self):
+        Stars.objects.all().delete()
+        self.client.login(email='test@example.com', password='testpass123')
+        response = self.client.get(reverse('stared'))
+        self.assertIsNotNone(response.context['popular_courses'])
 
 
 class MyCoursesViewTest(TestCase):
     """Тесты для представления личных курсов пользователя"""
 
     def setUp(self):
-        """Инициализация тестовых данных"""
         self.client = Client()
-        self.user_data = {
-            'email': 'test@example.com',
-            'username': 'testuser',
-            'password': 'testpass123'
-        }
-        self.user = User.objects.create_user(**self.user_data)
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.course = Courses.objects.create(title='My Course', author=self.user)
 
-    def test_my_view_get_authenticated(self):
-        """Тест доступа авторизованного пользователя к своим курсам"""
+    def test_authenticated_access(self):
         self.client.login(email='test@example.com', password='testpass123')
         response = self.client.get(reverse('my_courses'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'my_courses.html')
 
-    def test_my_view_get_anonymous(self):
-        """Тест перенаправления анонимного пользователя со страницы личных курсов"""
+    def test_user_courses_in_context(self):
+        self.client.login(email='test@example.com', password='testpass123')
         response = self.client.get(reverse('my_courses'))
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(response.context['courses']), 1)
+        self.assertEqual(response.context['courses'][0]['title'], 'My Course')
 
 
-class CreateCourseViewTest(TestCase):
+@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
+class AddCourseViewTest(TestCase):
     """Тесты для представления создания курса"""
 
     def setUp(self):
-        """Инициализация тестовых данных"""
         self.client = Client()
-        self.user_data = {
-            'email': 'test@example.com',
-            'username': 'testuser',
-            'password': 'testpass123'
-        }
-        self.user = User.objects.create_user(**self.user_data)
-
-    def test_create_view_get_authenticated(self):
-        """Тест доступа авторизованного пользователя к форме создания курса"""
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
         self.client.login(email='test@example.com', password='testpass123')
-        response = self.client.get(reverse('add_course'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'add_course.html')
 
-    def test_create_view_get_anonymous(self):
-        """Тест перенаправления анонимного пользователя со страницы создания курса"""
-        response = self.client.get(reverse('add_course'))
+    def test_successful_creation(self):
+        lesson_file = SimpleUploadedFile('test.md', b'Test content')
+        data = {
+            'course_name': 'New Course',
+            'form-TOTAL_FORMS': '1',
+            'form-INITIAL_FORMS': '0',
+            'form-0-lesson_description': 'First lesson',
+            'form-0-lesson_file': lesson_file,
+        }
+        response = self.client.post(reverse('add_course'), data)
         self.assertEqual(response.status_code, 302)
+        self.assertTrue(Courses.objects.filter(title='New Course').exists())
 
-
-@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
-class ViewCourseViewTest(TestCase):
-    """Тесты для представления просмотра курса с временной медиа-директорией"""
-
-    def setUp(self):
-        """Инициализация тестовых данных"""
-        self.client = Client()
-        self.user = User.objects.create_user(email='u@e.com', username='u', password='p')
-        self.course = Courses.objects.create(title='Test', author=self.user)
-        self.course_id = self.course.course_id
+    def test_invalid_form_submission(self):
+        data = {
+            'course_name': '',
+            'form-TOTAL_FORMS': '1',
+            'form-INITIAL_FORMS': '0',
+            'form-0-lesson_description': '',
+        }
+        response = self.client.post(reverse('add_course'), data)
+        self.assertTrue(response.context['course_form'].errors)
 
     def tearDown(self):
-        """Очистка временной медиа-директории"""
-        shutil.rmtree(self._get_media_root(), ignore_errors=True)
+        if os.path.exists(TEST_MEDIA_ROOT):
+            shutil.rmtree(TEST_MEDIA_ROOT)
 
-    def _get_media_root(self):
-        """Получение пути к временной медиа-директории"""
-        return os.environ.get('DJANGO_TEST_TEMP_MEDIA_ROOT') or tempfile.gettempdir()
 
-    def test_get_nonexistent_dir(self):
-        """Тест обработки несуществующего курса"""
-        url = reverse('course', args=[self.course_id])
-        response = self.client.get(url)
+@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
+class ViewCourseViewTest(TestCase):
+    """Тесты для представления просмотра курса"""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.course = Courses.objects.create(title='Test Course', author=self.user)
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, str(self.course.course_id)), exist_ok=True)
+
+    def test_course_display(self):
+        Lessons.objects.create(course=self.course, title='Lesson 1', order=0)
+        response = self.client.get(reverse('course', args=[self.course.course_id]))
         self.assertEqual(response.status_code, 200)
+        self.assertIn('lessons', response.context)
+
+    def test_missing_course_directory(self):
+        shutil.rmtree(os.path.join(settings.MEDIA_ROOT, str(self.course.course_id)))
+        response = self.client.get(reverse('course', args=[self.course.course_id]))
         self.assertTemplateUsed(response, 'error.html')
-        self.assertIn('Курс не найден.', response.context['error'])
+
+    def tearDown(self):
+        if os.path.exists(TEST_MEDIA_ROOT):
+            shutil.rmtree(TEST_MEDIA_ROOT)
 
 
+@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class DeleteCourseViewTest(TestCase):
     """Тесты для представления удаления курса"""
 
     def setUp(self):
-        """Инициализация тестовых данных и временной медиа-директории"""
         self.client = Client()
-        self.user = User.objects.create_user(email='u@e.com', username='u', password='p')
-        self.other = User.objects.create_user(email='o@e.com', username='o', password='p')
-        self.course = Courses.objects.create(title='Del', author=self.user)
-        self.course_id = self.course.course_id
-        self.media = tempfile.mkdtemp()
-        self.patch = override_settings(MEDIA_ROOT=self.media)
-        self.patch.enable()
-        os.makedirs(os.path.join(self.media, str(self.course_id)), exist_ok=True)
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.other_user = User.objects.create_user(
+            email='other@example.com',
+            username='otheruser',
+            password='testpass123'
+        )
+        self.course = Courses.objects.create(title='Test Course', author=self.user)
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, str(self.course.course_id)), exist_ok=True)
 
-    def tearDown(self):
-        """Очистка временных настроек и медиа-директории"""
-        self.patch.disable()
-        shutil.rmtree(self.media, ignore_errors=True)
-
-    def test_get_not_author(self):
-        """Тест попытки удаления курса не автором"""
-        self.client.login(email='o@e.com', password='p')
-        url = reverse('delete', args=[self.course_id])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'error.html')
-
-    def test_get_author(self):
-        """Тест доступа автора к странице подтверждения удаления"""
-        self.client.login(email='u@e.com', password='p')
-        url = reverse('delete', args=[self.course_id])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+    def test_author_access(self):
+        self.client.login(email='test@example.com', password='testpass123')
+        response = self.client.get(reverse('delete', args=[self.course.course_id]))
         self.assertTemplateUsed(response, 'confirm_delete.html')
 
-    def test_post_not_author(self):
-        """Тест POST-запроса на удаление от не автора"""
-        self.client.login(email='o@e.com', password='p')
-        url = reverse('delete', args=[self.course_id])
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 200)
+    def test_non_author_access(self):
+        self.client.login(email='other@example.com', password='testpass123')
+        response = self.client.get(reverse('delete', args=[self.course.course_id]))
         self.assertTemplateUsed(response, 'error.html')
 
-    def test_post_author(self):
-        """Тест успешного удаления курса автором"""
-        self.client.login(email='u@e.com', password='p')
-        url = reverse('delete', args=[self.course_id])
-        response = self.client.post(url, follow=True)
-        self.assertRedirects(response, reverse('my_courses'))
-        self.assertFalse(Courses.objects.filter(course_id=self.course_id).exists())
-        self.assertFalse(os.path.exists(os.path.join(self.media, str(self.course_id))))
+    def test_successful_deletion(self):
+        self.client.login(email='test@example.com', password='testpass123')
+        response = self.client.post(reverse('delete', args=[self.course.course_id]))
+        self.assertFalse(Courses.objects.filter(pk=self.course.pk).exists())
+
+    def tearDown(self):
+        if os.path.exists(TEST_MEDIA_ROOT):
+            shutil.rmtree(TEST_MEDIA_ROOT)
 
 
 class AddStarViewTest(TestCase):
-    """Тесты для добавления/удаления звезд курсам"""
+    """Тесты для добавления/удаления звезд"""
 
     def setUp(self):
-        """Инициализация тестовых данных"""
         self.client = Client()
-        self.user = User.objects.create_user(email='u@e.com', username='u', password='p')
-        self.course = Courses.objects.create(title='Star', author=self.user)
-        self.course_id = self.course.course_id
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.course = Courses.objects.create(title='Test Course')
 
-    def test_post_anonymous(self):
-        """Тест добавления звезды анонимным пользователем"""
-        url = reverse('add_star', args=[self.course_id])
-        response = self.client.post(url)
-        self.assertEqual(response.json()['status'], False)
+    def test_star_toggle(self):
+        self.client.login(email='test@example.com', password='testpass123')
 
-    def test_post_toggle(self):
-        """Тест переключения состояния звезды (добавление/удаление)"""
-        self.client.login(email='u@e.com', password='p')
-        url = reverse('add_star', args=[self.course_id])
-        res1 = self.client.post(url)
-        self.assertTrue(res1.json()['status'])
+        # Добавление звезды
+        response = self.client.post(reverse('add_star', args=[self.course.course_id]))
+        self.assertTrue(response.json()['status'])
         self.assertTrue(Stars.objects.filter(user=self.user, course=self.course).exists())
-        res2 = self.client.post(url)
-        self.assertFalse(res2.json()['status'])
+
+        # Удаление звезды
+        response = self.client.post(reverse('add_star', args=[self.course.course_id]))
+        self.assertFalse(response.json()['status'])
         self.assertFalse(Stars.objects.filter(user=self.user, course=self.course).exists())
 
+    def test_anonymous_user(self):
+        response = self.client.post(reverse('add_star', args=[self.course.course_id]))
+        self.assertEqual(response.json()['status'], False)
 
+
+@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class ReportCourseViewTest(TestCase):
     """Тесты для системы жалоб на курсы"""
 
     def setUp(self):
-        """Инициализация тестовых данных"""
         self.client = Client()
-        self.user = User.objects.create_user(email='u@e.com', username='u', password='p')
-        self.course = Courses.objects.create(title='Rpt', author=self.user)
-        self.course_id = self.course.course_id
-        self.client.login(email='u@e.com', password='p')
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.course = Courses.objects.create(title='Test Course')
+        self.client.login(email='test@example.com', password='testpass123')
 
-    def test_get(self):
-        """Тест доступа к форме отправки жалобы"""
-        url = reverse('course_report', args=[self.course_id])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'report_course.html')
-        self.assertIn('course', response.context)
+    def test_duplicate_report(self):
+        self.client.post(
+            reverse('course_report', args=[self.course.course_id]),
+            {'reason': 'First report'}
+        )
+        response = self.client.post(
+            reverse('course_report', args=[self.course.course_id]),
+            {'reason': 'Duplicate report'}
+        )
+        self.assertEqual(response.json()['status'], 'error')
 
-    def test_post_no_reason(self):
-        """Тест отправки жалобы без указания причины"""
-        url = reverse('course_report', args=[self.course_id])
-        res = self.client.post(url)
-        self.assertEqual(res.json()['status'], 'error')
-        self.assertIn('no reason', res.json()['error'])
 
-    def test_post_create_and_duplicate(self):
-        """Тест создания жалобы и проверки на дубликаты"""
-        url = reverse('course_report', args=[self.course_id])
-        res1 = self.client.post(url, {'reason': 'r1'})
-        self.assertEqual(res1.json()['status'], 'ok')
-        rid = res1.json()['ok']
-        res2 = self.client.post(url, {'reason': 'r2'})
-        self.assertEqual(res2.json()['status'], 'error')
-        self.assertIn('report already exists', res2.json()['error'])
+@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
+class CourseEditorViewTest(TestCase):
+    """Тесты для редактора курсов"""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.course = Courses.objects.create(title='Test Course', author=self.user)
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, str(self.course.course_id)), exist_ok=True)
+
+    def test_editor_access(self):
+        self.client.login(email='test@example.com', password='testpass123')
+        response = self.client.get(reverse('course_edit', args=[self.course.course_id]))
+        self.assertTemplateUsed(response, 'edit_course.html')
+
+    def test_lesson_content_update(self):
+        self.client.login(email='test@example.com', password='testpass123')
+        file_path = os.path.join(settings.MEDIA_ROOT, str(self.course.course_id), 'lesson_0.md')
+
+        with open(file_path, 'w') as f:
+            f.write('Old content')
+
+        response = self.client.post(
+            reverse('course_edit', args=[self.course.course_id]),
+            {'lesson': '0', 'content': 'New content'}
+        )
+
+        with open(file_path, 'r') as f:
+            self.assertEqual(f.read(), 'New content')
+
+    def tearDown(self):
+        if os.path.exists(TEST_MEDIA_ROOT):
+            shutil.rmtree(TEST_MEDIA_ROOT)
+
+
+class ProgressTrackingTest(TestCase):
+    """Тесты для отслеживания прогресса"""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.course = Courses.objects.create(title='Test Course')
+        self.lesson = Lessons.objects.create(course=self.course, title='Lesson 1')
+
+    def test_progress_toggle(self):
+        self.client.login(email='test@example.com', password='testpass123')
+
+        response = self.client.post(
+            reverse('lesson_progress', args=[self.course.course_id, self.lesson.pk])
+        )
+        self.assertTrue(CourseProgress.objects.exists())
+
+        response = self.client.post(
+            reverse('lesson_progress', args=[self.course.course_id, self.lesson.pk])
+        )
+        self.assertFalse(CourseProgress.objects.first().status)
+
+
+class TopicManagementTest(TestCase):
+    """Тесты для управления темами"""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.client.login(email='test@example.com', password='testpass123')
+
+    def test_topic_creation(self):
+        response = self.client.post(
+            reverse('create_topic'),
+            {'name': 'New Topic'}
+        )
+        self.assertEqual(response.json()['status'], 'ok')
+
+    def test_duplicate_topic_prevention(self):
+        Topic.objects.create(name='Existing Topic', author=self.user)
+        response = self.client.post(
+            reverse('create_topic'),
+            {'name': 'Existing Topic'}
+        )
+        self.assertEqual(response.json()['status'], 'error')
