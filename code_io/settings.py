@@ -23,11 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-n1)04c4p)t)%vc49wh@1zi@o!0vso%d1zw9mo+!(=tarm+)2im'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["fd8057339456.vps.myjino.ru"]
+ALLOWED_HOSTS = ["*"]
 
-CSRF_TRUSTED_ORIGINS = ["https://fd8057339456.vps.myjino.ru"]
+CSRF_TRUSTED_ORIGINS = ["*"]
 
 # Application definition
 
