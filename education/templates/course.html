@@ -16,7 +16,7 @@
                     <div class="progress"></div>
                 </div>
                 {% if not user.is_authenticated %}
-                <p class="login-prompt">Для сохранения прогресса войдите в аккаунт</p>
+                <p class="login-prompt">Для сохранения прогресса в облаке войдите в аккаунт</p>
                 {% endif %}
             </div>
             <ul class="lessons-list">
@@ -87,9 +87,11 @@
 
             const courseContainer = document.querySelector('.course-container');
             const isAuthenticated = courseContainer.dataset.userAuthenticated === 'true';
+            const courseId = courseContainer.dataset.courseId;
             const totalLessons = {{ lessons|length }};
             const progressBar = document.querySelector('.progress');
             const progressText = document.querySelector('.progress-percent');
+            const key = `course-progress-${courseId}`;
 
             function updateProgressUI() {
                 const done = document.querySelectorAll('.completed-checkbox:checked').length;
@@ -99,14 +101,15 @@
             }
 
             if (isAuthenticated) {
-                const courseId = courseContainer.dataset.courseId;
-                function getCsrfToken() { return document.querySelector('meta[name="csrf-token"]').content; }
+                function getCsrfToken() {
+                    return document.querySelector('meta[name="csrf-token"]').content;
+                }
 
                 async function loadProgressFromServer() {
                     const url = `/courses/${courseId}/progress/`;
                     const resp = await fetch(url, { credentials: 'same-origin' });
                     const json = await resp.json();
-                    if (json.status === 'ok') {
+                    if (json.status === 'ok' && Array.isArray(json.done_lessons)) {
                         document.querySelectorAll('.lessons-list li').forEach(li => {
                             const cb = li.querySelector('.completed-checkbox');
                             cb.checked = json.done_lessons.includes(+li.dataset.lesson);
@@ -122,7 +125,9 @@
                             const lessonId = li.dataset.lesson;
                             const url = `/courses/${courseId}/${lessonId}/progress/`;
                             const resp = await fetch(url, {
-                                method: 'POST', credentials: 'same-origin', headers: { 'X-CSRFToken': getCsrfToken() }
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: { 'X-CSRFToken': getCsrfToken() }
                             });
                             const json = await resp.json();
                             if (json.status === 'ok') {
@@ -138,9 +143,29 @@
 
                 await loadProgressFromServer();
                 bindPersistentCheckboxes();
+
             } else {
+                const saved = JSON.parse(localStorage.getItem(key) || '[]');
+                document.querySelectorAll('.lessons-list li').forEach(li => {
+                    const cb = li.querySelector('.completed-checkbox');
+                    const lessonId = li.dataset.lesson;
+                    cb.checked = saved.includes(lessonId);
+                });
+                updateProgressUI();
+
                 document.querySelectorAll('.completed-checkbox').forEach(cb => {
-                    cb.addEventListener('change', updateProgressUI);
+                    cb.addEventListener('change', e => {
+                        const li = e.target.closest('li');
+                        const lessonId = li.dataset.lesson;
+                        let arr = JSON.parse(localStorage.getItem(key) || '[]');
+                        if (e.target.checked) {
+                            if (!arr.includes(lessonId)) arr.push(lessonId);
+                        } else {
+                            arr = arr.filter(id => id !== lessonId);
+                        }
+                        localStorage.setItem(key, JSON.stringify(arr));
+                        updateProgressUI();
+                    });
                 });
             }
 
@@ -167,7 +192,8 @@
                 const btn = document.querySelector('.toggle-button');
                 const content = document.getElementById('content');
                 if (sb && btn && !sb.contains(e.target) && !btn.contains(e.target)) {
-                    sb.classList.remove('active'); content.classList.remove('shifted');
+                    sb.classList.remove('active');
+                    content.classList.remove('shifted');
                 }
             });
         });
