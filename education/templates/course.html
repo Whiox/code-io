@@ -5,7 +5,7 @@
 
 {% block content %}
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <div class="course-container" data-course-id="{{ course_id }}">
+    <div class="course-container" data-course-id="{{ course_id }}" data-user-authenticated="{{ user.is_authenticated|lower }}">
         <div class="sidebar" id="sidebar">
             <div class="course-progress">
                 <h3>
@@ -15,24 +15,21 @@
                 <div class="progress-bar">
                     <div class="progress"></div>
                 </div>
+                {% if not user.is_authenticated %}
+                <p class="login-prompt">Для сохранения прогресса войдите в аккаунт</p>
+                {% endif %}
             </div>
             <ul class="lessons-list">
                 {% for lesson in lessons %}
-                    <li data-lesson="{{ lesson.lesson_id }}">
+                    <li data-lesson="{{ lesson.lesson_id }}" onclick="scrollToLesson(event, '{{ lesson.lesson_id }}')">
                         <label class="lesson-checkbox">
-                            <input
-                                    type="checkbox"
-                                    class="completed-checkbox"
-                            >
+                            <input type="checkbox" class="completed-checkbox">
                             <span class="checkmark"></span>
-                            <span class="lesson-title">{{ lesson.title }}</span>
                         </label>
+                        <span class="lesson-title">{{ lesson.title }}</span>
                     </li>
                 {% endfor %}
             </ul>
-            <div class="report-course-button">
-                <a href="{% url 'course_report' course_id %}" class="btn-report">Пожаловаться на курс</a>
-            </div>
         </div>
 
         <button class="toggle-button" onclick="toggleSidebar()">☰ Меню уроков</button>
@@ -41,31 +38,58 @@
             {% for lesson in lessons %}
                 <div class="lesson" id="lesson-{{ lesson.lesson_id }}">
                     <h1>{{ lesson.title }}</h1>
-                    <div class="lesson-content">{{ lesson.content|safe }}</div>
+                    <div class="lesson-content">
+                        {{ lesson.content|safe }}
+                    </div>
                 </div>
             {% endfor %}
         </div>
+
+        <a href="{% url 'course_report' course_id %}" class="btn-report-floating" title="Пожаловаться на курс">&#x26A0;</a>
     </div>
-{% endblock content %}
+{% endblock %}
 
 {% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link id="code-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
     <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            sidebar && sidebar.classList.toggle('active');
+            content.classList.toggle('shifted');
+        }
+
+        function scrollToLesson(event, lessonId) {
+            if (event.target.closest('.lesson-checkbox')) return;
+            const lessonElement = document.getElementById(`lesson-${lessonId}`);
+            if (lessonElement) lessonElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function copyCode(button) {
+            const block = button.closest('.codehilite');
+            const code = block.querySelector('code');
+            if (!code) return;
+            navigator.clipboard.writeText(code.innerText)
+                .then(() => {
+                    button.textContent = 'Скопировано!';
+                    setTimeout(() => button.textContent = 'Копировать', 2000);
+                })
+                .catch(err => console.error('Ошибка копирования:', err));
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             hljs.highlightAll();
             updateCodeTheme();
-            new MutationObserver(updateCodeTheme).observe(
-                document.documentElement,
-                {attributes: true, attributeFilter: ['data-theme']}
-            );
+            new MutationObserver(updateCodeTheme)
+                .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-            const courseId = document.querySelector('.course-container').dataset.courseId;
+            const courseContainer = document.querySelector('.course-container');
+            const isAuthenticated = courseContainer.dataset.userAuthenticated === 'true';
             const totalLessons = {{ lessons|length }};
             const progressBar = document.querySelector('.progress');
             const progressText = document.querySelector('.progress-percent');
-
-            function getCsrfToken() {
-                return document.querySelector('meta[name="csrf-token"]').content;
-            }
 
             function updateProgressUI() {
                 const done = document.querySelectorAll('.completed-checkbox:checked').length;
@@ -74,82 +98,81 @@
                 progressText.textContent = `${percent}%`;
             }
 
-            async function loadProgressFromServer() {
-              const url = `/courses/${courseId}/progress/`;
-              const resp = await fetch(url, {
-                credentials: 'same-origin'
-              });
-              const json = await resp.json();
-              if (json.status === 'ok') {
-                document.querySelectorAll('.lessons-list li').forEach(li => {
-                  const cb = li.querySelector('.completed-checkbox');
-                  cb.checked = json.done_lessons.includes(+li.dataset.lesson);
+            if (isAuthenticated) {
+                const courseId = courseContainer.dataset.courseId;
+                function getCsrfToken() { return document.querySelector('meta[name="csrf-token"]').content; }
+
+                async function loadProgressFromServer() {
+                    const url = `/courses/${courseId}/progress/`;
+                    const resp = await fetch(url, { credentials: 'same-origin' });
+                    const json = await resp.json();
+                    if (json.status === 'ok') {
+                        document.querySelectorAll('.lessons-list li').forEach(li => {
+                            const cb = li.querySelector('.completed-checkbox');
+                            cb.checked = json.done_lessons.includes(+li.dataset.lesson);
+                        });
+                        updateProgressUI();
+                    }
+                }
+
+                function bindPersistentCheckboxes() {
+                    document.querySelectorAll('.completed-checkbox').forEach(cb => {
+                        cb.addEventListener('change', async e => {
+                            const li = e.target.closest('li');
+                            const lessonId = li.dataset.lesson;
+                            const url = `/courses/${courseId}/${lessonId}/progress/`;
+                            const resp = await fetch(url, {
+                                method: 'POST', credentials: 'same-origin', headers: { 'X-CSRFToken': getCsrfToken() }
+                            });
+                            const json = await resp.json();
+                            if (json.status === 'ok') {
+                                e.target.checked = json.data;
+                                updateProgressUI();
+                            } else {
+                                e.target.checked = !e.target.checked;
+                                alert('Не удалось сохранить прогресс на сервере.');
+                            }
+                        });
+                    });
+                }
+
+                await loadProgressFromServer();
+                bindPersistentCheckboxes();
+            } else {
+                document.querySelectorAll('.completed-checkbox').forEach(cb => {
+                    cb.addEventListener('change', updateProgressUI);
                 });
-                updateProgressUI();
-              }
             }
 
-            function bindCheckboxes() {
-              document.querySelectorAll('.completed-checkbox').forEach(cb => {
-                cb.addEventListener('change', async e => {
-                  const li = e.target.closest('li');
-                  const lessonId = li.dataset.lesson;
-                  const url = `/courses/${courseId}/${lessonId}/progress/`;
+            document.querySelectorAll('.codehilite').forEach(block => {
+                block.style.position = 'relative';
+                const btn = document.createElement('button');
+                btn.className = 'copy-button';
+                btn.textContent = 'Копировать';
+                btn.addEventListener('click', () => copyCode(btn));
+                block.appendChild(btn);
+            });
 
-                  const resp = await fetch(url, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                      'X-CSRFToken': getCsrfToken(),
-                    },
-                  });
-                  const json = await resp.json();
-                  if (json.status === 'ok') {
-                    e.target.checked = json.data;
-                    updateProgressUI();
-                  } else {
-                    e.target.checked = !e.target.checked;
-                    alert('Не удалось сохранить прогресс на сервере.');
-                  }
-                });
-              });
+            function updateCodeTheme() {
+                const theme = document.documentElement.getAttribute('data-theme') || 'light';
+                const link = document.getElementById('code-theme');
+                link.href = theme === 'dark'
+                    ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+                    : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+                hljs.highlightAll();
             }
 
-            await loadProgressFromServer();
-            bindCheckboxes();
-        });
-
-        function updateCodeTheme() {
-            const theme = document.documentElement.getAttribute('data-theme') || 'light';
-            const link = document.getElementById('code-theme');
-            link.href = theme === 'dark'
-                ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
-                : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
-            hljs.highlightAll();
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('content').classList.toggle('shifted');
-        }
-
-        document.addEventListener('click', e => {
-            const sb = document.getElementById('sidebar');
-            const btn = document.querySelector('.toggle-button');
-            if (!sb.contains(e.target) && !btn.contains(e.target)) {
-                sb.classList.remove('active');
-                document.getElementById('content').classList.remove('shifted');
-            }
+            document.addEventListener('click', e => {
+                const sb = document.getElementById('sidebar');
+                const btn = document.querySelector('.toggle-button');
+                const content = document.getElementById('content');
+                if (sb && btn && !sb.contains(e.target) && !btn.contains(e.target)) {
+                    sb.classList.remove('active'); content.classList.remove('shifted');
+                }
+            });
         });
     </script>
-
-    <link
-        id="code-theme"
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
-    >
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-{% endblock script %}
+{% endblock %}
 
 {% block style %}
     <style>
@@ -157,112 +180,35 @@
             --form-section-bg: #ffffff;
             --secondary-text: #666;
             --accent-color: #ff8c42;
-            --primary-button-bg: #28a745;
-            --primary-button-hover: #218838;
             --border-color: #e0e0e0;
             --sidebar-bg: #ffffff;
             --sidebar-text: #333;
-            --form-bg: #ffffff;
-            --form-border: #ddd;
             --input-bg: #fff;
-            --input-border: #ddd;
-            --focus-border: #e67e22;
-            --checkbox-color: #e67e22;
-            --lesson-form-bg: #f9f9f9;
-            --lesson-form-border: #f0b27a;
-            --remove-btn: #e74c3c;
-            --remove-hover: #c0392b;
-            --toggle-bg: linear-gradient(135deg, #32CD32, #FFA500);
         }
-
         [data-theme="dark"] {
-            --form-section-bg: #2a2a2a;
-            --secondary-text: #888;
-            --accent-color: #ff6b35;
-            --primary-button-bg: #1b752e;
-            --primary-button-hover: #155724;
-            --border-color: #404040;
             --sidebar-bg: #333333;
             --sidebar-text: #ffffff;
-            --form-bg: #333333;
-            --form-border: #555;
-            --input-bg: #444;
-            --input-border: #555;
-            --focus-border: #ff8c42;
-            --checkbox-color: #ff8c42;
-            --lesson-form-bg: #3a3a3a;
-            --lesson-form-border: #ff8c42;
-            --remove-btn: #d9534f;
-            --remove-hover: #c9302c;
-            --toggle-bg: #ff8c42;
+            --accent-color: #ff6b35;
+            --border-color: #404040;
         }
 
         .sidebar {
             position: fixed;
-            left: -300px;
+            left: -280px;
             top: 0;
             bottom: 0;
             width: 280px;
             background: var(--sidebar-bg);
             transition: transform 0.3s ease;
             z-index: 1000;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
             padding: 1rem;
             overflow-y: auto;
         }
+        .sidebar.active { transform: translateX(280px); }
 
-        .sidebar.active {
-            transform: translateX(280px);
-        }
-
-        .report-course-button {
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .btn-report {
-            display: inline-block;
-            background: #dc3545;
-            color: white;
-            padding: 10px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.3s;
-        }
-
-        .btn-report:hover {
-            background: #c82333;
-        }
-
-        [data-theme="dark"] .btn-report {
-            background: #e74c3c;
-        }
-
-        [data-theme="dark"] .btn-report:hover {
-            background: #c0392b;
-        }
-
-        .content {
-            transition: margin-left 0.3s ease;
-            padding: 2rem;
-            margin-left: 0;
-        }
-
-        .lessons-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            padding-left: 0.5rem;
-        }
-
-        .lessons-list li {
-            list-style: none;
-        }
-
-        .content.shifted {
-            margin-left: 280px;
-        }
+        .content { transition: margin-left 0.3s ease; padding: 2rem; margin-left: 0; }
+        .content.shifted { margin-left: 280px; }
 
         .toggle-button {
             position: fixed;
@@ -275,124 +221,50 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             transition: transform 0.2s;
         }
+        .toggle-button:hover { transform: translateY(-2px); }
 
-        .toggle-button:hover {
-            transform: translateY(-2px);
+        .btn-report-floating {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 48px;
+            height: 48px;
+            background: var(--accent-color) !important;
+            color: var(--sidebar-bg) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 50%;
+            font-size: 24px;
+            line-height: 1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            text-decoration: none;
         }
+        .btn-report-floating:hover { transform: scale(1.1); }
 
-        /* Чекбоксы уроков */
-        .lesson-checkbox {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            margin: 4px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
+        .course-progress { padding: 1rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; }
+        .progress-bar { height: 8px; background: var(--input-bg); border-radius: 4px; overflow: hidden; }
+        .progress { height: 100%; background: var(--accent-color); transition: width 0.3s ease; }
 
-        .lesson-checkbox:hover {
-            background: var(--hover-bg);
-        }
+        .login-prompt { font-size: 12px; color: var(--secondary-text); margin-top: 4px; }
 
-        .lesson-checkbox input {
-            opacity: 0;
-            position: absolute;
-        }
+        .lessons-list { list-style: none; padding: 0 0.5rem; margin: 0; }
+        .lessons-list li { margin: 4px 0; display: flex; align-items: center; }
+        .lesson-checkbox { position: relative; display: flex; align-items: center; padding: 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s; margin-right: 8px; }
+        .lesson-checkbox:hover { background: rgba(0,0,0,0.05); }
+        .lesson-checkbox input { opacity: 0; position: absolute; }
+        .checkmark { width: 20px; height: 20px; border: 2px solid var(--accent-color); border-radius: 4px; margin-right: 12px; position: relative; }
+        .checkmark::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 12px; height: 12px; background: var(--accent-color); border-radius: 2px; opacity: 0; transition: opacity 0.2s; }
+        .completed-checkbox:checked ~ .checkmark::after { opacity: 1; }
 
-        .checkmark {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--accent-color);
-            border-radius: 4px;
-            margin-right: 12px;
-            position: relative;
-            flex-shrink: 0;
-        }
+        .codehilite { position: relative; }
+        .copy-button { position: absolute; top: 8px; right: 8px; z-index: 10; padding: 5px 10px; font-size: 12px; background-color: var(--accent-color); color: white; border: none; border-radius: 5px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s, transform 0.2s; }
+        .copy-button:hover { opacity: 1; transform: scale(1.05); }
 
-        .checkmark::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 12px;
-            height: 12px;
-            background: var(--accent-color);
-            border-radius: 2px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .completed-checkbox:checked ~ .checkmark::after {
-            opacity: 1;
-        }
-
-        .lesson-title {
-            color: var(--text-color);
-        }
-
-        .hljs {
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
-
-        .course-progress {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 1rem;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: var(--bg-color);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress {
-            height: 100%;
-            background: var(--accent-color);
-            transition: width 0.3s ease;
-        }
-
-        .lesson h1 {
-            color: var(--accent-color);
-            margin-bottom: 2rem;
-        }
-
-        .copy-button {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            padding: 5px 10px;
-            font-size: 12px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s, transform 0.2s;
-        }
-
-        .copy-button:hover {
-            opacity: 1;
-            transform: scale(1.05);
-        }
-
-        @media (max-width: 768px) {
-            .content.shifted {
-                margin-left: 0;
-            }
-
-            .sidebar.active {
-                transform: translateX(280px);
-            }
-        }
+        @media (max-width: 768px) { .content.shifted { margin-left: 0; } }
     </style>
-{% endblock style %}
+{% endblock %}
