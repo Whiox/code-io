@@ -10,7 +10,7 @@
             <li class="course-item"
                 data-course-id="{{ course.id }}"
                 data-lessons-count="{{ course.lessons_count }}"
-            >
+                data-user-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}">
                 {% if request.user.is_authenticated %}
                     <div class="star-wrapper">
                         {% if course.is_stared %}
@@ -91,19 +91,62 @@
 {% endblock style %}
 
 {% block script %}
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.course-item').forEach(item => {
-                const cid = item.dataset.courseId;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+            document.querySelectorAll('.course-item').forEach(async item => {
+                const courseId = item.dataset.courseId;
                 const total = parseInt(item.dataset.lessonsCount, 10) || 0;
-                const key = `course-progress-${cid}`;
-                const done = JSON.parse(localStorage.getItem(key) || '[]').length;
-                const pct = total ? Math.round(done / total * 100) : 0;
+                const fillEl = item.querySelector('.course-progress-fill');
+                const textEl = item.querySelector('.course-progress-text');
+                let pct = 0;
+
+                if (item.dataset.userAuthenticated === 'true') {
+                    try {
+                        const resp = await fetch(`/courses/${courseId}/progress/`, {
+                            credentials: 'same-origin',
+                            headers: {'X-CSRFToken': csrfToken}
+                        });
+                        const json = await resp.json();
+                        if (json.status === 'ok' && Array.isArray(json.done_lessons)) {
+                            pct = total ? Math.round(json.done_lessons.length / total * 100) : 0;
+                        }
+                    } catch (err) {
+                        console.error(`Ошибка загрузки прогресса курса ${courseId}:`, err);
+                    }
+                } else {
+                    const done = JSON.parse(localStorage.getItem(`course-progress-${courseId}`) || '[]').length;
+                    pct = total ? Math.round(done / total * 100) : 0;
+                }
 
                 requestAnimationFrame(() => {
-                    item.querySelector('.course-progress-fill').style.width = pct + '%';
-                    item.querySelector('.course-progress-text').textContent = pct + '%';
+                    fillEl.style.width = pct + '%';
+                    textEl.textContent = pct + '%';
+                });
+            });
+
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', async function () {
+                    const courseId = this.dataset.courseId;
+                    const isActive = this.src.includes('star-fill');
+                    try {
+                        const response = await fetch(`/courses/${courseId}/toggle-star/`, {
+                            method: isActive ? 'DELETE' : 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'X-CSRFToken': csrfToken,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        if (response.ok) {
+                            this.src = isActive
+                                ? "{% static 'assets/star-empty.svg' %}"
+                                : "{% static 'assets/star-fill.png' %}";
+                        }
+                    } catch (error) {
+                        console.error('Ошибка:', error);
+                    }
                 });
             });
         });

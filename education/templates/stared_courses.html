@@ -4,14 +4,15 @@
 {% block title %}Понравившиеся курсы{% endblock %}
 
 {% block content %}
-    <section class="main-content">
-        {% if courses %}
-            <h1>Избранные курсы</h1>
+    {% if courses %}
+        <h1>Избранные курсы</h1>
+        <section class="main-content">
             <ul class="course-list">
                 {% for course in courses %}
                     <li class="course-item"
                         data-course-id="{{ course.id }}"
-                        data-lessons-count="{{ course.lessons_count }}">
+                        data-lessons-count="{{ course.lessons_count }}"
+                        data-user-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}">
                         <div class="star-wrapper">
                             <img src="{% static 'assets/star-fill.png' %}"
                                  alt="Убрать из избранного"
@@ -32,14 +33,17 @@
                     </li>
                 {% endfor %}
             </ul>
-        {% else %}
-            <div class="empty-state">
-                <h2>Здесь пока пусто</h2>
-                <p>Вы ещё не добавили ни одного курса в избранное</p>
-                <a href="{% url 'all' %}" class="btn">Изучить курсы</a>
+        </section>
+    {% else %}
+        <div class="empty-state">
+            <h2>Здесь пока пусто</h2>
+            <h2>Вы ещё не добавили ни одного курса в избранное</h2>
+            <a href="{% url 'all' %}" class="btn">Изучить курсы</a>
+
+            <section class="main-content">
 
                 {% if popular_courses %}
-                    <h2 class="section-title">Популярные курсы</h2>
+                    <h1 class="section-title">Популярные курсы</h1>
                     <ul class="course-list">
                         {% for course in popular_courses %}
                             <li class="course-item">
@@ -66,9 +70,9 @@
                         {% endfor %}
                     </ul>
                 {% endif %}
-            </div>
-        {% endif %}
-    </section>
+            </section>
+        </div>
+    {% endif %}
 {% endblock content %}
 
 {% block style %}
@@ -94,6 +98,7 @@
         h1 {
             text-align: center;
             margin: 2rem 0;
+            color: var(--main-gradient-start);
         }
 
         .main-content {
@@ -184,11 +189,6 @@
             padding: 4rem 0;
         }
 
-        .empty-illustration {
-            width: 300px;
-            margin-bottom: 2rem;
-        }
-
         .section-title {
             margin: 4rem 0 2rem;
             background: linear-gradient(45deg, var(--main-gradient-start), var(--main-gradient-end));
@@ -260,16 +260,38 @@
 {% block script %}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.course-item').forEach(item => {
-                const cid = item.dataset.courseId;
-                const total = parseInt(item.dataset.lessonsCount, 10) || 0;
-                const key = `course-progress-${cid}`;
-                const done = JSON.parse(localStorage.getItem(key) || '[]').length;
-                const pct = total ? Math.round(done / total * 100) : 0;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-                if (item.querySelector('.course-progress-fill')) {
-                    item.querySelector('.course-progress-fill').style.width = pct + '%';
-                    item.querySelector('.course-progress-text').textContent = pct + '%';
+            document.querySelectorAll('.course-item').forEach(async item => {
+                const courseId = item.dataset.courseId;
+                const total = parseInt(item.dataset.lessonsCount, 10) || 0;
+                const fillEl = item.querySelector('.course-progress-fill');
+                const textEl = item.querySelector('.course-progress-text');
+                let pct = 0;
+
+                if (item.dataset.userAuthenticated === 'true') {
+                    try {
+                        const resp = await fetch(`/courses/${courseId}/progress/`, {
+                            credentials: 'same-origin',
+                            headers: {
+                                'X-CSRFToken': csrfToken
+                            }
+                        });
+                        const json = await resp.json();
+                        if (json.status === 'ok' && Array.isArray(json.done_lessons)) {
+                            pct = total ? Math.round(json.done_lessons.length / total * 100) : 0;
+                        }
+                    } catch (err) {
+                        console.error(`Не удалось загрузить прогресс курса ${courseId}:`, err);
+                    }
+                } else {
+                    const done = JSON.parse(localStorage.getItem(`course-progress-${courseId}`) || '[]').length;
+                    pct = total ? Math.round(done / total * 100) : 0;
+                }
+
+                if (fillEl) {
+                    fillEl.style.width = pct + '%';
+                    textEl.textContent = pct + '%';
                 }
             });
 
@@ -277,16 +299,15 @@
                 star.addEventListener('click', async function () {
                     const courseId = this.dataset.courseId;
                     const isActive = this.src.includes('star-fill');
-
                     try {
                         const response = await fetch(`/courses/${courseId}/toggle-star/`, {
                             method: isActive ? 'DELETE' : 'POST',
+                            credentials: 'same-origin',
                             headers: {
-                                'X-CSRFToken': '{{ csrf_token }}',
+                                'X-CSRFToken': csrfToken,
                                 'Content-Type': 'application/json'
                             }
                         });
-
                         if (response.ok) {
                             this.src = isActive
                                 ? "{% static 'assets/star-empty.svg' %}"
