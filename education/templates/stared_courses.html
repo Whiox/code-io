@@ -42,22 +42,15 @@
                     <h2 class="section-title">Популярные курсы</h2>
                     <ul class="course-list">
                         {% for course in popular_courses %}
-                            <li class="course-item">
-                                {% if request.user.is_authenticated %}
-                                    <div class="star-wrapper">
-                                        {% if course.is_stared %}
-                                            <img src="{% static 'assets/star-fill.png' %}"
-                                                 alt="star"
-                                                 class="star"
-                                                 data-course-id="{{ course.course_id }}">
-                                        {% else %}
-                                            <img src="{% static 'assets/star-empty.svg' %}"
-                                                 alt="star"
-                                                 class="star"
-                                                 data-course-id="{{ course.course_id }}">
-                                        {% endif %}
-                                    </div>
-                                {% endif %}
+                            <li class="course-item"
+                                data-course-id="{{ course.course_id }}"
+                                data-lessons-count="{{ course.lessons_count }}">
+                                <div class="star-wrapper">
+                                    <img src="{% static course.is_stared|yesno:'assets/star-fill.png,assets/star-empty.svg' %}"
+                                         alt="star"
+                                         class="star"
+                                         data-course-id="{{ course.course_id }}">
+                                </div>
                                 <h2>{{ course.title }}</h2>
                                 <p>Автор: {{ course.author.username|default:"Неизвестный автор" }}</p>
                                 <p>Темы: {{ course.topics.all|join:", " }}</p>
@@ -266,34 +259,30 @@
                 const key = `course-progress-${cid}`;
                 const done = JSON.parse(localStorage.getItem(key) || '[]').length;
                 const pct = total ? Math.round(done / total * 100) : 0;
-
-                if (item.querySelector('.course-progress-fill')) {
-                    item.querySelector('.course-progress-fill').style.width = pct + '%';
-                    item.querySelector('.course-progress-text').textContent = pct + '%';
+                const fill = item.querySelector('.course-progress-fill');
+                const text = item.querySelector('.course-progress-text');
+                if (fill && text) {
+                    fill.style.width = pct + '%';
+                    text.textContent = pct + '%';
                 }
             });
-
+            // иконки звезд
             document.querySelectorAll('.star').forEach(star => {
-                star.addEventListener('click', async function () {
-                    const courseId = this.dataset.courseId;
-                    const isActive = this.src.includes('star-fill');
-
+                star.addEventListener('click', async () => {
+                    const id = star.dataset.courseId;
+                    const active = star.src.includes('star-fill');
                     try {
-                        const response = await fetch(`/courses/${courseId}/toggle-star/`, {
-                            method: isActive ? 'DELETE' : 'POST',
-                            headers: {
-                                'X-CSRFToken': '{{ csrf_token }}',
-                                'Content-Type': 'application/json'
-                            }
+                        const resp = await fetch(`/courses/${id}/toggle-star/`, {
+                            method: active ? 'DELETE' : 'POST',
+                            headers: {'X-CSRFToken': '{{ csrf_token }}'}
                         });
-
-                        if (response.ok) {
-                            this.src = isActive
+                        if (resp.ok) {
+                            star.src = active
                                 ? "{% static 'assets/star-empty.svg' %}"
                                 : "{% static 'assets/star-fill.png' %}";
                         }
-                    } catch (error) {
-                        console.error('Ошибка:', error);
+                    } catch (e) {
+                        console.error(e);
                     }
                 });
             });
