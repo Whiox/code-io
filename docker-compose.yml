@@ -49,6 +49,7 @@ services:
     image: nginx:latest
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - static_volume:/app/static
@@ -64,7 +65,19 @@ services:
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
-    command: certonly --webroot --webroot-path=/var/www/certbot --email your@email.com --agree-tos --no-eff-email -d code-io.ru -d www.code-io.ru
+    entrypoint: >
+      sh -c "certbot certonly --webroot --webroot-path=/var/www/certbot
+      --email your@email.com --agree-tos --no-eff-email
+      -d code-io.ru -d www.code-io.ru"
+
+  certbot-renew:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    entrypoint: >
+      sh -c "certbot renew --webroot --webroot-path=/var/www/certbot &&
+      nginx -s reload"
 
 volumes:
   postgres_data:
