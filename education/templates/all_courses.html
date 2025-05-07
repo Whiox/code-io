@@ -5,44 +5,46 @@
 
 {% block content %}
     <h1>Список всех курсов</h1>
-    <ul class="course-list">
-        {% for course in courses %}
-            <li class="course-item"
-                data-course-id="{{ course.id }}"
-                data-lessons-count="{{ course.lessons_count }}"
-                data-user-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}">
-                {% if request.user.is_authenticated %}
-                    <div class="star-wrapper">
-                        {% if course.is_stared %}
-                            <img src="{% static 'assets/star-fill.png' %}"
-                                 alt="star"
-                                 class="star"
-                                 data-course-id="{{ course.id }}">
-                        {% else %}
-                            <img src="{% static 'assets/star-empty.svg' %}"
-                                 alt="star"
-                                 class="star"
-                                 data-course-id="{{ course.id }}">
-                        {% endif %}
-                    </div>
-                {% endif %}
+    <section class="main-content">
+        <ul class="course-list">
+            {% for course in courses %}
+                <li class="course-item"
+                    data-course-id="{{ course.id }}"
+                    data-lessons-count="{{ course.lessons_count }}"
+                    data-user-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}">
+                    {% if request.user.is_authenticated %}
+                        <div class="star-wrapper">
+                            {% if course.is_stared %}
+                                <img src="{% static 'assets/star-fill.png' %}"
+                                     alt="star"
+                                     class="star"
+                                     data-course-id="{{ course.id }}">
+                            {% else %}
+                                <img src="{% static 'assets/star-empty.svg' %}"
+                                     alt="star"
+                                     class="star"
+                                     data-course-id="{{ course.id }}">
+                            {% endif %}
+                        </div>
+                    {% endif %}
 
-                <h2>{{ course.title }}</h2>
-                <p>Автор: {{ course.author }}</p>
-                <p>Темы: {{ course.topics|join:", " }}</p>
-                <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
+                    <h2>{{ course.title }}</h2>
+                    <p>Автор: {{ course.author }}</p>
+                    <p>Темы: {{ course.topics|join:", " }}</p>
+                    <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
 
-                <div class="course-progress-wrapper">
-                    <div class="course-progress-bar">
-                        <div class="course-progress-fill"></div>
+                    <div class="course-progress-wrapper">
+                        <div class="course-progress-bar">
+                            <div class="course-progress-fill"></div>
+                        </div>
+                        <span class="course-progress-text">0%</span>
                     </div>
-                    <span class="course-progress-text">0%</span>
-                </div>
-            </li>
-        {% empty %}
-            <li>Курсы не найдены.</li>
-        {% endfor %}
-    </ul>
+                </li>
+            {% empty %}
+                <li>Курсы не найдены.</li>
+            {% endfor %}
+        </ul>
+    </section>
 {% endblock content %}
 
 {% block style %}
@@ -50,6 +52,17 @@
         h1 {
             text-align: center;
             margin: 2rem 0;
+            color: var(--heading-color);
+        }
+
+        h1 {
+            color: var(--heading-color);
+        }
+
+        .main-content {
+            max-width: 2000px;
+            margin: 4rem auto;
+            padding: 0 1.5rem;
         }
 
         .course-progress-bar {

@@ -13,9 +13,9 @@
     --text-color: #ffffff;
     --course-item-bg: #333333;
     --course-item-border: #444444;
-    --btn-bg: #ff8c42;
-    --btn-hover: #e67e3b;
-    --heading-color: #ff8c42;
+    --btn-bg: #FF6B35;
+    --btn-hover: #ff5d23;
+    --heading-color: #FF6B35;
 }
 
 body {
@@ -48,7 +48,7 @@ body {
 }
 
 .course-item:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 .btn {

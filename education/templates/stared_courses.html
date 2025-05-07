@@ -43,7 +43,7 @@
             <section class="main-content">
 
                 {% if popular_courses %}
-                    <h1 class="section-title">Популярные курсы</h1>
+                    <h2 class="section-title">Популярные курсы</h2>
                     <ul class="course-list">
                         {% for course in popular_courses %}
                             <li class="course-item">
@@ -98,6 +98,10 @@
         h1 {
             text-align: center;
             margin: 2rem 0;
+            color: var(--main-gradient-start);
+        }
+
+        h2 {
             color: var(--main-gradient-start);
         }
 
