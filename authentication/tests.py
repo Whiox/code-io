@@ -1,11 +1,12 @@
 """Тесты для authentication/views. """
 
-from authentication.models import ResetRequest
-from authentication.methods import user_info_view
 from secrets import token_urlsafe
 
 from django.test import TestCase, Client
 from django.urls import reverse
+
+from authentication.models import ResetRequest
+from authentication.methods import user_info_view
 from authentication.models import User
 
 
