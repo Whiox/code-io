@@ -11,7 +11,7 @@ pylint-job:
   stage: pylint
   script:
     - pip install -r requirements.txt
-    - pylint --load-plugins pylint_django --django-settings-module=code_io.settings --fail-under=8 *
+    - pylint --load-plugins pylint_django --django-settings-module=code_io.settings --fail-under=8 .
   artifacts:
     untracked: false
     when: on_success
