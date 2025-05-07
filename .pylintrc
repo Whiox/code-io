@@ -1,6 +1,2 @@
 [MAIN]
 ignore=.venv, migrations, __pycache__, .pytest_cache, docs, manage.py
-
-[MESSAGES CONTROL]
-disable=
-    E1101
