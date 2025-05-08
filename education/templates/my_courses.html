@@ -1,238 +1,48 @@
 {% extends 'base.html' %}
-{% load static %}
 
 {% block title %}Мои курсы{% endblock %}
 
 {% block content %}
-    <div class="courses-container">
-        {% if courses %}
-            <h1 class="page-title">Список курсов</h1>
-            <ul class="course-list">
-                {% for course in courses %}
-                    <li class="course-item">
-                        <div class="course-info">
-                            <div class="course-header">
-                                <h2>{{ course.title }}</h2>
-                                <div class="course-meta">
-                            <span class="course-id">
-                                <svg class="icon" viewBox="0 0 24 24">
-                                    <path fill="currentColor"
-                                          d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path>
-                                </svg>
-                                ID: {{ course.id }}
-                            </span>
-                                </div>
-                            </div>
 
-                            <div class="course-actions">
-                                <a href="{% url 'course' course.id %}" class="btn btn--primary">
-                                    <svg class="icon" viewBox="0 0 24 24">
-                                        <path fill="currentColor"
-                                              d="M5 13h11.17l-4.88 4.88c-.39.39-.39 1.03 0 1.42.39.39 1.02.39 1.41 0l6.59-6.59a.996.996 0 0 0 0-1.41l-6.58-6.6a.996.996 0 1 0-1.41 1.41L16.17 11H5c-.55 0-1 .45-1 1s.45 1 1 1z"></path>
-                                    </svg>
-                                    Перейти
-                                </a>
-                                <a href="{% url 'course_edit' course.id %}" class="btn btn--secondary">
-                                    <svg class="icon" viewBox="0 0 24 24">
-                                        <path fill="currentColor"
-                                              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path>
-                                    </svg>
-                                    Редактировать
-                                </a>
-                                <a href="{% url 'delete' course.id %}" class="btn btn--danger">
-                                    <svg class="icon" viewBox="0 0 24 24">
-                                        <path fill="currentColor"
-                                              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path>
-                                    </svg>
-                                    Удалить
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <div class="empty-state">
-                <h2 class="empty-title">У вас пока нет курсов</h2>
-                <p class="empty-description">Создайте свой первый общедоступный курс</p>
-                <a href="{% url 'add_course' %}" class="btn btn--primary btn--lg">
-                    <svg class="icon" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path>
-                    </svg>
-                    Создать курс
-                </a>
-            </div>
-        {% endif %}
-    </div>
-{% endblock content %}
+    <h1>Список курсов</h1>
+    <section class="main-content">
+        {% for course in courses %}
+            <li class="course-item-my"
+                style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ccc; padding: 10px;">
+                <div>
+                    <h2 style="display: inline;">{{ course.title }}</h2>
+                    <p>ID курса: {{ course.id }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
+                    <a href="{% url 'course_edit' course.id %}" class="btn" style="margin-left: 10px;">Редактировать</a>
+                    <a href="{% url 'delete' course.id %}" class="btn" style="background-color: red;">Удалить</a>
+                </div>
+            </li>
+        {% empty %}
+            <h1>Курсы не найдены</h1>
+            <a href="{% url 'add_course' %}" class="btn centered">Создайте ваш первый курс</a>
+        {% endfor %}
+    </section>
+
+{% endblock %}
 
 {% block style %}
     <style>
-        :root {
-            --primary: #28a745;
-            --primary-hover: #218838;
-            --danger: #dc3545;
-            --danger-hover: #bb2d3b;
-            --secondary: #6c757d;
-            --secondary-hover: #5a6268;
-            --text: #212529;
-            --text-muted: #6c757d;
-            --border: #dee2e6;
+        h1 {
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--heading-color);
         }
 
-        [data-theme="dark"] {
-            --primary: #ff6a00;
-            --primary-hover: #339af0;
-            --danger: #ff6b6b;
-            --danger-hover: #ff5252;
-            --secondary: #adb5bd;
-            --secondary-hover: #868e96;
-            --text: #f8f9fa;
-            --text-muted: #adb5bd;
-            --border: #495057;
+        .centered {
+            text-align: center;
         }
 
-        .courses-container {
-            max-width: 1200px;
-            margin: 2rem auto;
+        .main-content {
+            max-width: 280px;
+            margin: 4rem auto;
             padding: 0 1.5rem;
-        }
-
-        .page-title {
-            font-size: 2.5rem;
-            text-align: center;
-            margin-bottom: 2rem;
-            color: var(--text);
-        }
-
-        .course-list {
-            list-style: none;
-            padding: 0;
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .course-item {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: transform 0.2s;
-        }
-
-        .course-item:hover {
-            transform: translateY(-3px);
-        }
-
-        .course-header {
-            margin-bottom: 0.5rem;
-        }
-
-        .course-meta {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .course-id {
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .icon {
-            width: 1.2rem;
-            height: 1.2rem;
-        }
-
-        .course-actions {
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: filter 0.2s;
-        }
-
-        .btn--primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn--primary:hover {
-            filter: brightness(1.1);
-        }
-
-        .btn--secondary {
-            background: var(--secondary);
-            color: white;
-        }
-
-        .btn--secondary:hover {
-            filter: brightness(1.1);
-        }
-
-        .btn--danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn--danger:hover {
-            filter: brightness(1.1);
-        }
-
-        .btn--lg {
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 4rem 0;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .empty-illustration {
-            width: 300px;
-            max-width: 100%;
-            margin-bottom: 2rem;
-        }
-
-        .empty-title {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--text);
-        }
-
-        .empty-description {
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
-        @media (max-width: 768px) {
-            .course-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .course-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
         }
     </style>
 {% endblock style %}

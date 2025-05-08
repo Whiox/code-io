@@ -41,7 +41,8 @@
                     </div>
                 </li>
             {% empty %}
-                <li>Курсы не найдены.</li>
+                <h1>Курсы не найдены</h1>
+                <a href="{% url 'add_course' %}" class="btn">Создайте ваш первый курс</a>
             {% endfor %}
         </ul>
     </section>

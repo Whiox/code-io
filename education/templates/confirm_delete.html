@@ -5,14 +5,34 @@
 {% block content %}
     <h1>Подтверждение удаления курса</h1>
 
-    {% if course %}
-        <form action="{% url 'delete' course.course_id %}" method="post">
-            <p>Вы уверены, что хотите удалить курс "{{ course.title }}"?</p>
-            {% csrf_token %}
-            <button type="submit" class="btn">Да, удалить</button>
-            <a href="{% url 'my_courses' %}" class="btn">Нет, отмена</a>
-        </form>
-    {% else %}
-        <p>Курс не найден.</p>
-    {% endif %}
+    <section class="main-content">
+        {% if course %}
+            <form action="{% url 'delete' course.course_id %}" method="post">
+                <p>Вы уверены, что хотите удалить курс "{{ course.title }}"?</p>
+                {% csrf_token %}
+                <button type="submit" class="btn">Да, удалить</button>
+                <a href="{% url 'my_courses' %}" class="btn">Нет, отмена</a>
+            </form>
+        {% else %}
+            <p>Курс не найден.</p>
+        {% endif %}
+    </section>
 {% endblock content %}
+
+{% block style %}
+    <style>
+        h1 {
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--heading-color);
+        }
+
+        .main-content {
+            text-align: center;
+            max-width: 2000px;
+            margin: 4rem auto;
+            padding: 0 1.5rem;
+        }
+    </style>
+{% endblock style %}
+
