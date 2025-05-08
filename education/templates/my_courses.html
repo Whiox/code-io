@@ -21,7 +21,10 @@
             </li>
         {% empty %}
             <h1>Курсы не найдены</h1>
-            <a href="{% url 'add_course' %}" class="btn centered">Создайте ваш первый курс</a>
+            <a href="{% url 'add_course' %}" class="btn btn-primary centered">
+                <span class="btn-icon">➕</span>
+                Создать курс
+            </a>
         {% endfor %}
     </section>
 
@@ -40,9 +43,51 @@
         }
 
         .main-content {
-            max-width: 280px;
+            max-width: 1200px;
             margin: 4rem auto;
             padding: 0 1.5rem;
         }
+
+        .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border: 2px solid transparent;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+        cursor: pointer;
+    }
+
+    .btn-icon {
+        margin-right: 0.5rem;
+        font-size: 1.2em;
+        line-height: 1;
+    }
+
+    .btn-primary {
+        background-color: var(--heading-color);
+        color: #fff;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-color: var(--heading-color);
+    }
+    .btn-primary:hover {
+        background-color: var(--heading-color);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
+    }
+    .btn-primary:active {
+        background-color: var(--heading-color);
+        box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        transform: translateY(0);
+    }
+
+    .centered {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
     </style>
 {% endblock style %}
