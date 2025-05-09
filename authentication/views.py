@@ -9,19 +9,16 @@ from django.contrib.auth import authenticate, login, logout
 from django.views import View
 from django.urls import reverse
 from django.contrib import messages
-from authentication.forms import (
-    RegisterForm, LoginForm,
-    ResetPasswordForm, ChangePasswordForm
-)
-from authentication.methods import (
-    generate_password, user_info_view, is_author
-)
+from authentication.forms import RegisterForm, LoginForm, ResetPasswordForm, ChangePasswordForm
+from authentication.methods import generate_password, user_info_view, is_author
 from authentication.models import ResetRequest, User
 from django.core.mail import send_mail
 from secrets import token_urlsafe
 
+from code_io.mixins import LoggingMixin
 
-class RegisterView(View):
+
+class RegisterView(LoggingMixin, View):
     """Регистрация нового пользователя.
 
     :cvar get: Отображает форму регистрации.
@@ -82,7 +79,7 @@ class RegisterView(View):
         return render(request, 'register.html', {'RegisterForm': RegisterForm})
 
 
-class LoginView(View):
+class LoginView(LoggingMixin, View):
     """Вход пользователя в аккаунт.
 
     :cvar get: Отображает форму входа.
@@ -129,7 +126,7 @@ class LoginView(View):
         return render(request, 'login.html', {'LoginForm': LoginForm})
 
 
-class LogoutView(View):
+class LogoutView(LoggingMixin, View):
     """Выход пользователя из аккаунта.
 
     :cvar get: Обрабатывает logout и редиректит на страницу входа.
@@ -149,7 +146,7 @@ class LogoutView(View):
         return redirect('/')
 
 
-class ResetPasswordView(View):
+class ResetPasswordView(LoggingMixin, View):
     """Инициация процедуры сброса пароля.
 
     :cvar get: Отображает форму для запроса ссылки сброса.
@@ -206,7 +203,7 @@ class ResetPasswordView(View):
         return render(request, 'reset.html', {'ResetPasswordForm': ResetPasswordForm()})
 
 
-class ResetPasswordConfirmView(View):
+class ResetPasswordConfirmView(LoggingMixin, View):
     """Подтверждение сброса пароля по токену.
 
     :cvar get: Генерирует новый пароль и отправляет пользователю.
@@ -254,7 +251,7 @@ class ResetPasswordConfirmView(View):
         return render(request, 'reset.html', {'ResetPasswordForm': ResetPasswordForm()})
 
 
-class ChangePasswordView(View):
+class ChangePasswordView(LoggingMixin, View):
     """Смена текущего пароля пользователя.
 
     :cvar get: Отображает форму смены пароля.

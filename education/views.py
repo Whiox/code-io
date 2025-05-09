@@ -15,6 +15,8 @@ from django.views import View
 from django.http import JsonResponse, QueryDict
 from django.conf import settings
 
+from code_io.mixins import LoggingMixin
+
 from education.files import get_all_lessons, get_lesson_number
 from education.models import Courses, Lessons, Stars, ReportCourse, Topic, CourseProgress
 from education.forms import AddCourseForm, AddLessonForm, TopicChoiceForm
@@ -32,7 +34,7 @@ def author_or_staff(user, course):
     return user.is_staff or course.author == user
 
 
-class ViewCourseView(View):
+class ViewCourseView(LoggingMixin, View):
     """Просмотр содержимого курса."""
 
     @staticmethod
@@ -55,7 +57,7 @@ class ViewCourseView(View):
         return render(request, 'course.html', content)
 
 
-class AllCoursesView(View):
+class AllCoursesView(LoggingMixin, View):
     """Просмотр всех курсов с количеством уроков и отметками звезд."""
 
     @staticmethod
@@ -91,7 +93,7 @@ class AllCoursesView(View):
         return render(request, 'all_courses.html', content)
 
 
-class StaredCoursesView(View):
+class StaredCoursesView(LoggingMixin, View):
     """Просмотр курсов, отмеченных звездой текущим пользователем."""
 
     @staticmethod
@@ -144,7 +146,7 @@ class StaredCoursesView(View):
         })
 
 
-class MyCoursesView(View):
+class MyCoursesView(LoggingMixin, View):
     """Просмотр курсов текущего пользователя."""
 
     @staticmethod
@@ -168,7 +170,7 @@ class MyCoursesView(View):
         return render(request, 'my_courses.html', content)
 
 
-class AddCourseView(View):
+class AddCourseView(LoggingMixin, View):
     """Добавление нового курса вместе с уроками и темами."""
 
     @staticmethod
@@ -249,7 +251,7 @@ class AddCourseView(View):
         })
 
 
-class DeleteCourseView(View):
+class DeleteCourseView(LoggingMixin, View):
     """Удаление курса с подтверждением."""
 
     @staticmethod
@@ -287,7 +289,7 @@ class DeleteCourseView(View):
         return redirect('my_courses')
 
 
-class AddStar(View):
+class AddStar(LoggingMixin, View):
     """Добавление или удаление «звезды» курса через AJAX."""
 
     @staticmethod
@@ -315,7 +317,7 @@ class AddStar(View):
         return JsonResponse({"status": status})
 
 
-class LessonProgress(View):
+class LessonProgress(LoggingMixin, View):
     @method_decorator(login_required)
     def get(self, request, course_id, lesson_id):
         lesson = get_object_or_404(Lessons, pk=lesson_id)
@@ -332,7 +334,7 @@ class LessonProgress(View):
         return JsonResponse({"status": "ok", "data": progress.status})
 
 
-class CourseProgressList(View):
+class CourseProgressList(LoggingMixin, View):
     @method_decorator(login_required)
     def get(self, request, course_id):
         progresses = CourseProgress.objects.filter(
@@ -343,7 +345,7 @@ class CourseProgressList(View):
         return JsonResponse({"status": "ok", "done_lessons": done})
 
 
-class CourseEditorView(View):
+class CourseEditorView(LoggingMixin, View):
     """Редактирование содержимого уроков курса."""
 
     @method_decorator(login_required)
@@ -441,7 +443,7 @@ class CourseEditorView(View):
         return redirect(f"{request.path}?lesson={lesson_order}")
 
 
-class ReportCourseView(View):
+class ReportCourseView(LoggingMixin, View):
     """Обработка жалоб на курс.
 
     :cvar get: Показать страницу создания или просмотра жалобы.
@@ -535,7 +537,7 @@ class ReportCourseView(View):
         return JsonResponse({'status': 'ok', 'ok': 'report deleted'})
 
 
-class CreateTopicView(View):
+class CreateTopicView(LoggingMixin, View):
     @method_decorator(login_required)
     def post(self, request):
         name = request.POST.get('name')
@@ -551,7 +553,7 @@ class CreateTopicView(View):
         return JsonResponse({'status': 'ok', 'ok': topic.id})
 
 
-class GetTopicsView(View):
+class GetTopicsView(LoggingMixin, View):
     @method_decorator(login_required)
     def get(self, request):
         qs = Topic.objects.order_by('name').values('id', 'name')
@@ -559,7 +561,7 @@ class GetTopicsView(View):
         return JsonResponse({'status': 'ok', 'topics': list(qs)})
 
 
-class GetTopicView(View):
+class GetTopicView(LoggingMixin, View):
     @method_decorator(login_required)
     def get(self, request, topic_id):
         topic = Topic.objects.filter(id=topic_id).first()

@@ -15,6 +15,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 
 from code_io import settings
+from code_io.mixins import LoggingMixin
 from home.models import UserProfile, SocialNetwork, Interest
 from authentication.models import User
 from education.models import Courses, Stars, ReportCourse, Topic, ReportTopic
@@ -24,7 +25,7 @@ def user_is_staff_or_moderator(user: User) -> bool:
     return True if user.is_staff or user.is_moderator else False
 
 
-class HomeView(View):
+class HomeView(LoggingMixin, View):
     """Главная страница сайта.
 
     :cvar get: Отображает три самых популярных курса (с учётом отмеченных звёздочкой).
@@ -57,7 +58,7 @@ class HomeView(View):
         })
 
 
-class ProfileView(View):
+class ProfileView(LoggingMixin, View):
     """Страница профиля пользователя.
 
     :cvar get: Отображает профиль пользователя по given user_id.
@@ -123,7 +124,7 @@ class ProfileView(View):
         return redirect('profile', user_id=user_id)
 
 
-class ModeratorPanelView(View):
+class ModeratorPanelView(LoggingMixin, View):
     """Панель модератора для просмотра пользователей, жалоб и курсов.
 
     :cvar get: Отображает страницу с таблицами users, reports, courses.
@@ -154,7 +155,7 @@ class ModeratorPanelView(View):
         return render(request, 'moderator_page.html', context)
 
 
-class AddModerator(View):
+class AddModerator(LoggingMixin, View):
     """Назначение и снятие статуса модератора для пользователя.
 
     :cvar post: Сделать пользователя модератором.
@@ -203,7 +204,7 @@ class AddModerator(View):
         return JsonResponse({'status': 'ok', 'ok': user.id})
 
 
-class DeleteUser(View):
+class DeleteUser(LoggingMixin, View):
     """Удаление пользователя модератором или staff."""
 
     @method_decorator(login_required)
@@ -233,7 +234,7 @@ class DeleteUser(View):
         return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
 
 
-class DeleteCourse(View):
+class DeleteCourse(LoggingMixin, View):
     """Удаление курса модератором или staff-пользователем."""
 
     @method_decorator(login_required)
@@ -261,7 +262,7 @@ class DeleteCourse(View):
         return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
 
 
-class DeleteCourseReport(View):
+class DeleteCourseReport(LoggingMixin, View):
     """Удаление жалобы на курсы модератором или staff-пользователем."""
 
     @method_decorator(login_required)
@@ -285,7 +286,7 @@ class DeleteCourseReport(View):
         return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
 
 
-class DeleteTopic(View):
+class DeleteTopic(LoggingMixin, View):
     """Удаление топика модератором или staff-пользователем."""
 
     @method_decorator(login_required)
@@ -309,7 +310,7 @@ class DeleteTopic(View):
         return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
 
 
-class DeleteTopicReport(View):
+class DeleteTopicReport(LoggingMixin, View):
     """Удаление жалобы на темы модератором или staff-пользователем."""
 
     @method_decorator(login_required)
