@@ -34,6 +34,8 @@
 
 Стандартный
 
+Для работы сайта через питоновский запуск нужно выключить Debug режим
+
 ```shell
 python manage.py migrate
 python manage.py runserver
@@ -42,6 +44,16 @@ python manage.py runserver
 Для запуска через Docker (PortgreSQL, nginx, gunicorn):
 ```bash
 docker-compose up --build
+```
+
+### pylint
+
+Запускается в CI
+
+Для ручного запуска:
+
+```bash
+pylint --load-plugins pylint_django --django-settings-module=code_io.settings --fail-under=8 .
 ```
 
 ### Тестирование
