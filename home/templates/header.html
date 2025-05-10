@@ -8,6 +8,9 @@
             {% if request.user.is_authenticated %}
                 <li class="menu-item"><a href="{% url 'stared' %}" class="menu-link">Избранные</a></li>
                 <li class="menu-item"><a href="{% url 'my_courses' %}" class="menu-link">Созданные</a></li>
+                {% if request.user.is_staff or request.user.is_moderator %}
+                    <li class="menu-item"><a href="{% url 'users_courses' %}" class="menu-link">Курсы пользователей</a></li>
+                {% endif %}
                 <li class="menu-item"><a href="{% url 'add_course' %}" class="menu-link">Создать</a></li>
             {% else %}
                 <li class="menu-item"><a href="{% url 'register' %}" class="menu-link">Регистрация</a></li>

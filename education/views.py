@@ -159,6 +159,31 @@ class MyCoursesView(LoggingMixin, View):
         return render(request, 'my_courses.html', content)
 
 
+class AdminCoursesView(LoggingMixin, View):
+    """Просмотр всех курсов для администраторов."""
+
+    @staticmethod
+    def get(request):
+        """
+        Отображает список всех курсов.
+
+        :param request: HTTP-запрос Django
+        :return: redirect на 'login' если не авторизован, иначе render в 'user_courses.html'
+        """
+        if not request.user.is_authenticated:
+            return redirect('login')
+
+        courses = Courses.objects.filter()
+        content = {'courses': []}
+        for course in courses:
+            content['courses'].append({
+                'id': course.course_id,
+                'title': course.title,
+                'author': course.author
+            })
+        return render(request, 'user_courses.html', content)
+
+
 class AddCourseView(LoggingMixin, View):
     """Добавление нового курса вместе с уроками и темами."""
 
