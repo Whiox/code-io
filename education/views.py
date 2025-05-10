@@ -17,6 +17,7 @@ from django.conf import settings
 
 from code_io.mixins import LoggingMixin
 
+from education.methods import get_most_popular_courses
 from education.files import get_all_lessons, get_lesson_number
 from education.models import Courses, Lessons, Stars, ReportCourse, Topic, CourseProgress
 from education.forms import AddCourseForm, AddLessonForm, TopicChoiceForm
@@ -126,19 +127,7 @@ class StaredCoursesView(LoggingMixin, View):
 
         popular_courses = None
         if not courses:
-            if request.user.is_authenticated:
-                subquery = Stars.objects.filter(
-                    course=OuterRef('pk'),
-                    user=request.user
-                )
-                popular_courses = Courses.objects.prefetch_related('topics').annotate(
-                    stars_count=Count('stars'),
-                    is_stared=Exists(subquery)
-                ).order_by('-stars_count')[:3]
-            else:
-                popular_courses = Courses.objects.prefetch_related('topics').annotate(
-                    stars_count=Count('stars')
-                ).order_by('-stars_count')[:3]
+            popular_courses = get_most_popular_courses(request.user)
 
         return render(request, 'stared_courses.html', {
             'courses': courses,

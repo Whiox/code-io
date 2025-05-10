@@ -18,6 +18,7 @@ from code_io import settings
 from code_io.mixins import LoggingMixin
 from home.models import UserProfile, SocialNetwork, Interest
 from authentication.models import User
+from education.methods import get_most_popular_courses
 from education.models import Courses, Stars, ReportCourse, Topic, ReportTopic
 
 
@@ -39,19 +40,7 @@ class HomeView(LoggingMixin, View):
         :param request: HTTP Django request
         :return: render в 'home.html' с контекстом popular_courses
         """
-        if request.user.is_authenticated:
-            subquery = Stars.objects.filter(
-                course=OuterRef('pk'),
-                user=request.user
-            )
-            popular_courses = Courses.objects.prefetch_related('topics').annotate(
-                stars_count=Count('stars'),
-                is_stared=Exists(subquery)
-            ).order_by('-stars_count')[:3]
-        else:
-            popular_courses = Courses.objects.prefetch_related('topics').annotate(
-                stars_count=Count('stars')
-            ).order_by('-stars_count')[:3]
+        popular_courses = get_most_popular_courses(request.user)
 
         return render(request, 'home.html', {
             'popular_courses': popular_courses
