@@ -4,16 +4,18 @@
 регистрация, вход, выход, сброс и смена пароля.
 """
 
+from secrets import token_urlsafe
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.views import View
 from django.urls import reverse
 from django.contrib import messages
+from django.core.mail import send_mail
+
 from authentication.forms import RegisterForm, LoginForm, ResetPasswordForm, ChangePasswordForm
 from authentication.methods import generate_password, user_info_view, is_author
 from authentication.models import ResetRequest, User
-from django.core.mail import send_mail
-from secrets import token_urlsafe
 
 from code_io.mixins import LoggingMixin
 
