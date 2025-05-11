@@ -321,3 +321,7 @@ class DeleteTopicReport(LoggingMixin, View):
 
         report.delete()
         return JsonResponse({'status': 'ok', 'ok': 'success deleting'})
+
+
+def error404(request, exc):
+    return render(request, '404.html')
