@@ -25,7 +25,7 @@
                         </div>
                     {% endif %}
                     <h2>{{ course.title }}</h2>
-                    <p>Автор: {{ course.author }}</p>
+                    <p>Автор: {{ course.author.username }}</p>
                     <p>Темы: {{ course.topics.all|join:", " }}</p>
                     <a href="{% url 'course' course_id=course.course_id %}" class="btn">Перейти на курс</a>
                 </li>
