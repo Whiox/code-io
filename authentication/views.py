@@ -35,7 +35,7 @@ class RegisterView(LoggingMixin, View):
         :param request: HTTP Django request
         :return: render: register.html + RegisterForm
         """
-        return render(request, 'register.html', {'form': RegisterForm})
+        return render(request, 'register.html', {'RegisterForm': RegisterForm})
 
     @staticmethod
     def post(request):
@@ -49,26 +49,36 @@ class RegisterView(LoggingMixin, View):
         """
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = User.objects.create_user(
-                username=form.cleaned_data['username'],
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password']
-            )
-            send_mail(
-                subject="Добро пожаловать!",
-                message="Вы успешно зарегистрировались на сайте.",
-                from_email="code-io.no-reply@yandex.ru",
-                recipient_list=[user.email],
-                fail_silently=False,
-            )
-            login(request, user)
-            messages.success(request, "Вы успешно вошли!")
-            return render(request, 'register.html', {'form': form})
+            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            repeat_password = form.cleaned_data['repeat_password']
 
-        for field, errors in form.errors.items():
-            for error in errors:
-                messages.error(request, error)
-        return render(request, 'register.html', {'form': form})
+            errors = None
+            if password != repeat_password:
+                errors = True
+                messages.error(request, "Пароли не совпадают")
+            if User.objects.filter(email=email).exists():
+                errors = True
+                messages.error(request, "Пользователь с такой почтой уже зарегистрирован.")
+
+            if errors is None:
+                user = User.objects.create_user(
+                    email=email, password=password, username=username
+                )
+                send_mail(
+                    subject="Добро пожаловать!",
+                    message="Вы зарегистрировались на сайте",
+                    from_email="code-io.no-reply@yandex.ru",
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+                login(request, user)
+                messages.success(request, "Вы успешно вошли!")
+        else:
+            messages.error(request, "Форма заполнена неправильно")
+
+        return render(request, 'register.html', {'RegisterForm': RegisterForm})
 
 
 class LoginView(LoggingMixin, View):
