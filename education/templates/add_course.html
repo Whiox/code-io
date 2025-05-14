@@ -54,12 +54,11 @@
                             <div class="lesson-content">
                                 {% for field in lesson_formset.empty_form %}
                                     <div class="form-group">
-                                        <label for="{{ field.id_for_label }}"
-                                               class="form-label">{{ field.label }}</label>
+                                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                                         {% if field.name == 'lesson_file' %}
                                             <div class="file-input-wrapper">
                                                 {{ field }}
-                                                <button type="button" class="file-input">Выбрать файл</button>
+                                                <button type="button" class="file-input">Выбрать файл .md</button>
                                                 <span class="file-name">Файл не выбран</span>
                                             </div>
                                         {% else %}
@@ -86,12 +85,11 @@
                                 <div class="lesson-content">
                                     {% for field in form %}
                                         <div class="form-group">
-                                            <label for="{{ field.id_for_label }}"
-                                                   class="form-label">{{ field.label }}</label>
+                                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                                             {% if field.name == 'lesson_file' %}
                                                 <div class="file-input-wrapper">
                                                     {{ field }}
-                                                    <button type="button" class="file-input">Выбрать файл</button>
+                                                    <button type="button" class="file-input">Выбрать файл .md</button>
                                                     <span class="file-name">Файл не выбран</span>
                                                 </div>
                                             {% else %}
@@ -123,6 +121,7 @@
         </form>
     </section>
 {% endblock content %}
+
 
 {% block style %}
     <style>

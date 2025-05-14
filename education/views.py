@@ -243,16 +243,14 @@ class AddCourseView(LoggingMixin, View):
                     lesson_ids.append((lesson.lesson_id, idx))
 
             folder = os.path.join(settings.MEDIA_ROOT, str(course.course_id))
-            os.makedirs(folder, exist_ok=True)
             os.makedirs(os.path.join(folder, 'tasks'), exist_ok=True)
 
             for (lesson_pk, idx), lf in zip(lesson_ids, lesson_formset):
                 uploaded = lf.cleaned_data.get('lesson_file')
                 if uploaded:
-                    ext = os.path.splitext(uploaded.name)[1]
                     filename = f"lesson_{idx}.md"
-                    file_path = os.path.join(folder, filename)
-                    with open(file_path, 'wb+') as dst:
+                    path = os.path.join(folder, filename)
+                    with open(path, 'wb+') as dst:
                         for chunk in uploaded.chunks():
                             dst.write(chunk)
 
