@@ -34,29 +34,37 @@
                 {% endif %}
             </div>
 
-            <div class="up-section">
-                <div class="up-section__title">Социальные сети</div>
-                <div class="up-social-links">
-                    {% for sn in social_network %}
-                        <a class="up-social-links__item" href="{{ sn.linc }}" target="_blank" rel="noopener">
-                            {{ sn.label }}
-                        </a>
-                    {% empty %}
-                        <p class="up-section__text">Не указаны</p>
-                    {% endfor %}
-                </div>
-            </div>
+            {% if social_network %}
 
-            <div class="up-section">
-                <div class="up-section__title">Технологии</div>
-                <ul class="up-tech-list">
-                    {% for tech in interest %}
-                        <li class="up-tech-list__item">{{ tech.label }}</li>
-                    {% empty %}
-                        <li class="up-tech-list__item">Не указаны</li>
-                    {% endfor %}
-                </ul>
-            </div>
+                <div class="up-section">
+                    <div class="up-section__title">Социальные сети</div>
+                    <div class="up-social-links">
+                        {% for sn in social_network %}
+                            <a class="up-social-links__item" href="{{ sn.linc }}" target="_blank" rel="noopener">
+                                {{ sn.label }}
+                            </a>
+                        {% empty %}
+                            <p class="up-section__text">Не указаны</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            {% endif %}
+
+            {% if interest %}
+
+                <div class="up-section">
+                    <div class="up-section__title">Технологии</div>
+                    <ul class="up-tech-list">
+                        {% for tech in interest %}
+                            <li class="up-tech-list__item">{{ tech.label }}</li>
+                        {% empty %}
+                            <li class="up-tech-list__item">Не указаны</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+            {% endif %}
 
         </div>
 
