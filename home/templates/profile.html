@@ -1,87 +1,148 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Все курсы{% endblock %}
+{% block title %}Профиль пользователя{% endblock %}
 
 {% block content %}
-
-    {% load static %}
-
-    {% if is_owner %}
-        <div class="modal" id="edit-profile-modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Редактирование профиля</h2>
-                <form method="POST" id="edit-profile-form">
-                    {% csrf_token %}
-                    <label for="username">Имя:</label>
-                    <input type="text" id="username" name="username" value="{{ username }}">
-
-                    <label for="about">О себе:</label>
-                    <textarea id="about" name="about">{{ user_profile.about }}</textarea>
-
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" value="{{ user_profile.email }}">
-
-                    <label for="phone">Телефон:</label>
-                    <input type="text" id="phone" name="phone" value="{{ user_profile.phone }}">
-
-                    <button type="submit">Сохранить</button>
-                </form>
-                <form method="POST" style="margin-top: 30px;">
-                    {% csrf_token %}
-                    <button type="submit" name="action" value="delete_account"
-                            onclick="return confirm('Вы точно хотите удалить аккаунт? Это действие необратимо.')"
-                            style="background: #e53935; color: white; border: none; padding: 10px 20px; cursor: pointer;">
-                        Удалить аккаунт
+    <div class="user-profile-page">
+        <div class="up-container">
+            {% if is_owner %}
+                <div class="up-actions">
+                    <button class="up-button up-button--edit" id="up-edit-btn" aria-label="Редактировать профиль">
+                        <img src="{% static 'assets/edit.svg' %}" alt="Редактировать">
                     </button>
-                </form>
+                </div>
+            {% endif %}
+
+            <div class="up-header">
+                <img src="{% static 'assets/profile-default.png' %}"
+                     alt="Аватар пользователя" class="up-avatar">
+                <h1 class="up-username">{{ username }}</h1>
             </div>
-        </div>
-    {% endif %}
 
-    <div class="profile-container">
-    <div class="profile-info">
-    <div class="profile-header">
-        <img src="{% static 'assets/profile-default.png' %}" alt="Аватар пользователя" class="avatar">
-        <h1>{{ username }}</h1>
+            <div class="up-section">
+                <div class="up-section__title">О себе</div>
+                <p class="up-section__text">{{ user_profile.about }}</p>
+            </div>
+
+            <div class="up-section">
+                <div class="up-section__title">Контакты</div>
+                {% if user_profile.email %}
+                    <p class="up-section__text">Email: {{ user_profile.email }}</p>
+                {% else %}
+                    <p class="up-section__text">Не указано</p>
+                {% endif %}
+            </div>
+
+            <div class="up-section">
+                <div class="up-section__title">Социальные сети</div>
+                <div class="up-social-links">
+                    {% for sn in social_network %}
+                        <a class="up-social-links__item" href="{{ sn.linc }}" target="_blank" rel="noopener">
+                            {{ sn.label }}
+                        </a>
+                    {% empty %}
+                        <p class="up-section__text">Не указаны</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="up-section">
+                <div class="up-section__title">Технологии</div>
+                <ul class="up-tech-list">
+                    {% for tech in interest %}
+                        <li class="up-tech-list__item">{{ tech.label }}</li>
+                    {% empty %}
+                        <li class="up-tech-list__item">Не указаны</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+
         {% if is_owner %}
-            <img src="{% static 'assets/edit.svg' %}" alt="Изменить" class="edit" id="edit-profile">
+            <div class="up-modal" id="up-modal">
+                <div class="up-modal__content">
+                    <span class="up-modal__close" id="up-modal-close" aria-label="Закрыть">&times;</span>
+                    <h2 class="up-modal__title">Редактирование профиля</h2>
+
+                    <form method="post" class="up-form">
+                        {% csrf_token %}
+                        <label class="up-form__label" for="username">Имя</label>
+                        <input class="up-form__input" type="text" name="username" id="username" value="{{ username }}">
+
+                        <label class="up-form__label" for="about">О себе</label>
+                        <textarea class="up-form__textarea" name="about" id="about"
+                                  rows="4">{{ user_profile.about }}</textarea>
+
+                        <label class="up-form__label" for="email">Email</label>
+                        <input class="up-form__input" type="email" name="email" id="email"
+                               value="{{ user_profile.email }}">
+
+                        <label class="up-form__label" for="tech-input">Добавить технологию</label>
+                        <input class="up-form__input" type="text" id="tech-input" placeholder="Например, Django">
+                        <button class="up-form__btn up-form__btn--add-tech" type="button" id="add-tech-btn">Добавить
+                        </button>
+
+                        <ul class="up-form__tech-chips" id="tech-chips">
+                            {% for tech in interest %}
+                                <li class="up-form__tech-chip">
+                                    <span>{{ tech.label }}</span>
+                                    <button type="button" class="up-form__tech-remove">×</button>
+                                    <input type="hidden" name="technologies" value="{{ tech.label }}">
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                        <button class="up-form__btn" type="submit">Сохранить профиль</button>
+
+                        <form method="post" class="up-form up-form--inline-delete">
+                            {% csrf_token %}
+                            <button class="up-button up-button--delete"
+                                    name="action" value="delete_account"
+                                    onclick="return confirm('Удалить аккаунт? Это действие необратимо.')"
+                                    aria-label="Удалить аккаунт">
+                                Удалить аккаунт
+                            </button>
+                        </form>
+                    </form>
+                </div>
+            </div>
         {% endif %}
     </div>
 
-    <div class="section">
-        <div class="section-title">О себе:</div>
-        <p>{{ user_profile.about }}</p>
-    </div>
+    <script>
+        document.getElementById('up-edit-btn')?.addEventListener('click', () => {
+            document.getElementById('up-modal').style.display = 'flex';
+        });
+        document.getElementById('up-modal-close')?.addEventListener('click', () => {
+            document.getElementById('up-modal').style.display = 'none';
+        });
+        window.addEventListener('click', e => {
+            if (e.target.id === 'up-modal') {
+                document.getElementById('up-modal').style.display = 'none';
+            }
+        });
 
-    <div class="section">
-        <div class="section-title">Контактная информация:</div>
+        const addBtn = document.getElementById('add-tech-btn');
+        const techInput = document.getElementById('tech-input');
+        const chipsList = document.getElementById('tech-chips');
 
-        {% if user_profile.email %}
-            <p>Email: {{ user_profile.email }}</p>
-        {% endif %}
+        addBtn?.addEventListener('click', () => {
+            const val = techInput.value.trim();
+            if (!val) return;
+            const li = document.createElement('li');
+            li.className = 'up-form__tech-chip';
+            li.innerHTML = `<span>${val}</span><button type=\"button\" class=\"up-form__tech-remove\">×</button>` +
+                `<input type=\"hidden\" name=\"technologies\" value=\"${val}\">`;
+            chipsList.append(li);
+            techInput.value = '';
+        });
 
-        {% if user_profile.phone %}
-            <p>Телефон: {{ user_profile.phone }}</p>
-        {% endif %}
-
-        {% if not user_profile.email and not user_profile.phone %}
-            <p>Не указаны</p>
-        {% endif %}
-    </div>
-
-
-    <div class="section">
-        <div class="section-title">Социальные сети:</div>
-        <div class="social-links">
-            {% for sn in social_network %}
-                <a href="{{ sn.linc }}">{{ sn.label }}</a>
-            {% empty %}
-                <p>Не указаны</p>
-            {% endfor %}
-        </div>
-    </div>
-    <div>
-    </div>
-
+        chipsList?.addEventListener('click', e => {
+            if (e.target.matches('.up-form__tech-remove')) {
+                e.target.closest('li').remove();
+            }
+        });
+    </script>
 {% endblock %}

@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from authentication.models import User
 from django.contrib import messages
-from home.models import UserProfile, SocialNetwork, Interest
+from home.models import UserProfile, SocialNetwork, Technology
 from education.models import Courses, Stars
 
 
@@ -43,7 +43,7 @@ class HomeViewsTests(TestCase):
             label='GitHub',
             linc='https://github.com/test'
         )
-        self.interest = Interest.objects.create(
+        self.interest = Technology.objects.create(
             user_profile=self.profile,
             label='Programming'
         )

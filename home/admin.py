@@ -17,7 +17,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.admin.sites import NotRegistered
 
-from home.models import UserProfile, SocialNetwork, Interest
+from home.models import UserProfile, SocialNetwork, Technology
 from authentication.models import ResetRequest
 from education.models import Topic, Courses, Lessons, Task, Stars
 
@@ -39,7 +39,7 @@ class InterestInline(admin.TabularInline):
     Inline-класс для отображения и редактирования
     объектов Interest (интересов) в интерфейсе профиля пользователя.
     """
-    model = Interest
+    model = Technology
     extra = 0
 
 
@@ -84,9 +84,9 @@ class UserProfileAdmin(admin.ModelAdmin):
     Отображает пользователя, контактную информацию и описание,
     а также inline-редактирование социальных сетей и интересов.
     """
-    list_display = ('user', 'about', 'email', 'phone')
+    list_display = ('user', 'about', 'email')
     inlines = [SocialNetworkInline, InterestInline]
-    search_fields = ('user__username', 'email', 'phone')
+    search_fields = ('user__username', 'email')
 
 
 # --- Соцсети ---
@@ -102,7 +102,7 @@ class SocialNetworkAdmin(admin.ModelAdmin):
 
 
 # --- Интересы ---
-@admin.register(Interest)
+@admin.register(Technology)
 class InterestAdmin(admin.ModelAdmin):
     """
     Админка для модели Interest.

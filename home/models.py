@@ -8,14 +8,12 @@ class UserProfile(models.Model):
     :ivar models.AutoField profile_id: Уникальный идентификатор профиля
     :ivar models.ForeignKey user: Пользователь, к которому относится профиль
     :ivar models.TextField about: Краткая информация о пользователе (по умолчанию "Не указано")
-    :ivar models.TextField email: Контактный email пользователя (по умолчанию "Не указано")
-    :ivar models.TextField phone: Номер телефона пользователя (по умолчанию "Не указано")
+    :ivar models.EmailField email: Контактный email пользователя (по умолчанию "Null")
     """
     profile_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='profile')
     about = models.TextField(default='Не указано')
-    email = models.TextField(default='Не указано')
-    phone = models.TextField(default='Не указано')
+    email = models.EmailField(blank=True)
 
 
 class SocialNetwork(models.Model):
@@ -32,12 +30,12 @@ class SocialNetwork(models.Model):
     linc = models.TextField(null=False)
 
 
-class Interest(models.Model):
-    """Модель интересов пользователя.
+class Technology(models.Model):
+    """Модель технологий пользователя.
 
-    :ivar models.AutoField interest_id: Уникальный идентификатор интереса
+    :ivar models.AutoField interest_id: Уникальный идентификатор технологии
     :ivar models.ForeignKey user_profile: Профиль пользователя, к которому относится интерес
-    :ivar models.TextField label: Название интереса (например, Программирование, Музыка)
+    :ivar models.TextField label: Название технологии (например, Django, Go)
     """
     interest_id = models.AutoField(primary_key=True)
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)

@@ -16,7 +16,7 @@ from django.views import View
 
 from code_io import settings
 from code_io.mixins import LoggingMixin
-from home.models import UserProfile, SocialNetwork, Interest
+from home.models import UserProfile, SocialNetwork, Technology
 from authentication.models import User
 from education.methods import get_most_popular_courses
 from education.models import Courses, Stars, ReportCourse, Topic, ReportTopic
@@ -64,13 +64,13 @@ class ProfileView(LoggingMixin, View):
         :return: render в 'profile.html' с данными профиля и связями
         """
         profile_owner = get_object_or_404(User, id=user_id)
-        user_profile, created = UserProfile.objects.get_or_create(user=profile_owner)
+        user_profile, _ = UserProfile.objects.get_or_create(user=profile_owner)
 
         content = {
             'username': profile_owner.username,
             'user_profile': user_profile,
             'social_network': SocialNetwork.objects.filter(user_profile=user_profile),
-            'interest': Interest.objects.filter(user_profile=user_profile),
+            'interest': Technology.objects.filter(user_profile=user_profile),
             'is_owner': profile_owner == request.user,
         }
         return render(request, 'profile.html', content)
@@ -98,7 +98,7 @@ class ProfileView(LoggingMixin, View):
         new_username = request.POST.get('username', '').strip()
         new_about = request.POST.get('about', '').strip()
         new_email = request.POST.get('email', '').strip()
-        new_phone = request.POST.get('phone', '').strip()
+        tech_string = request.POST.get('technologies', '').strip()
 
         if new_username:
             request.user.username = new_username
@@ -106,10 +106,16 @@ class ProfileView(LoggingMixin, View):
 
         user_profile.about = new_about
         user_profile.email = new_email
-        user_profile.phone = new_phone
         user_profile.save()
 
-        messages.success(request, "Профиль успешно сохранён.")
+        Technology.objects.filter(user_profile=user_profile).delete()
+        if tech_string:
+            tech_list = request.POST.getlist('technologies')
+            tech_list = [label.strip() for label in tech_list if label.strip()]
+            for label in tech_list:
+                Technology.objects.create(user_profile=user_profile, label=label)
+
+        messages.success(request, "Профиль успешно обновлён.")
         return redirect('profile', user_id=user_id)
 
 
