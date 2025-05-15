@@ -1,43 +1,54 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}Code-io{% endblock %}</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Code-io{% endblock %}</title>
 
+    <script>
+        (function () {
+            const stored = localStorage.getItem('theme');
+            const theme = stored === 'light' || stored === 'dark'
+                ? stored
+                : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 
-        <link rel="icon" href="{% static 'assets/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'assets/favicon.ico' %}" type="image/x-icon">
 
-        <!-- css -->
+    <!-- css -->
 
-        <link rel="stylesheet" href="{% static 'css/body.css' %}">
-        <link rel="stylesheet" href="{% static 'css/auth-form.css' %}">
-        <link rel="stylesheet" href="{% static 'css/header.css' %}">
-        <link rel="stylesheet" href="{% static 'css/course.css' %}">
-        <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/body.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth-form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/course.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 
-        <!-- javascript -->
+    <!-- javascript -->
 
-        <script src="{% static 'javascript/dropdown-menu.js' %}"></script>
-        <script src="{% static 'javascript/add-star.js' %}"></script>
-        <script src="{% static 'javascript/theme-switch.js' %}"></script>
-        <script src="{% static 'javascript/open-profile-edit.js' %}"></script>
+    <script src="{% static 'javascript/dropdown-menu.js' %}"></script>
+    <script src="{% static 'javascript/add-star.js' %}"></script>
+    <script src="{% static 'javascript/theme-switch.js' %}"></script>
+    <script src="{% static 'javascript/open-profile-edit.js' %}"></script>
 
-        <!-- icon -->
+    <!-- icon -->
 
-        <link rel="icon" href="{% static 'assets/favicon.ico' %}" type="image/x-icon">
-    </head>
-    <body>
+    <link rel="icon" href="{% static 'assets/favicon.ico' %}" type="image/x-icon">
+    <link rel="preload" href="{% static 'assets/theme-light.svg' %}" as="image">
+    <link rel="preload" href="{% static 'assets/theme-dark.svg' %}"  as="image">
+</head>
+<body>
 
-        <main>
-        {% include 'header.html' %}
+<main>
+    {% include 'header.html' %}
 
-            {% block content %}
-                <!-- код, который будет переопределён в других шаблонах -->
-            {% endblock %}
-        </main>
-    </body>
+    {% block content %}
+        <!-- код, который будет переопределён в других шаблонах -->
+    {% endblock %}
+</main>
+</body>
 </html>
 
 {% block script %}
@@ -45,6 +56,6 @@
 {% endblock script %}
 
 {% block style %}
-     <!-- css для переопределения в других шаблонах -->
+    <!-- css для переопределения в других шаблонах -->
 {% endblock style %}
 

@@ -1,6 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
+    const iconPath   = '/static/assets'; // или ваш путь к статике
+
+    // Функция обновления иконки
+    function updateIcon(theme) {
+        // предполагаем, что у вас лежат theme-light.svg и theme-dark.svg
+        themeToggle.src = `${iconPath}/theme-${theme}.svg`;
+    }
 
     // Функция инициализации темы
     function initTheme() {
@@ -9,15 +16,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const initialTheme = savedTheme || (systemDark ? 'dark' : 'light');
         htmlElement.setAttribute('data-theme', initialTheme);
+        updateIcon(initialTheme);
     }
 
     // Функция переключения темы
     function toggleTheme() {
         const currentTheme = htmlElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        const newTheme     = currentTheme === 'dark' ? 'light' : 'dark';
 
         htmlElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
+        updateIcon(newTheme);
 
         // Анимация иконки
         themeToggle.classList.add('theme-rotate');
@@ -31,7 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Синхронизация с системными настройками
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
         if (!localStorage.getItem('theme')) {
-            htmlElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+            const newSysTheme = e.matches ? 'dark' : 'light';
+            htmlElement.setAttribute('data-theme', newSysTheme);
+            updateIcon(newSysTheme);
         }
     });
 });
