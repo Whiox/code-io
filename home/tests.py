@@ -36,7 +36,6 @@ class HomeViewsTests(TestCase):
             user=self.user,
             about='Test about',
             email='profile@example.com',
-            phone='1234567890'
         )
         self.social = SocialNetwork.objects.create(
             user_profile=self.profile,
