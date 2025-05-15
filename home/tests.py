@@ -104,7 +104,6 @@ class HomeViewsTests(TestCase):
             'username': 'newusername',
             'about': 'New about text',
             'email': 'new@example.com',
-            'phone': '9876543210'
         }
         response = self.client.post(reverse('profile', args=[self.user.id]), data)
         self.assertEqual(response.status_code, 302)
@@ -115,7 +114,6 @@ class HomeViewsTests(TestCase):
         self.assertEqual(self.user.username, 'newusername')
         self.assertEqual(self.profile.about, 'New about text')
         self.assertEqual(self.profile.email, 'new@example.com')
-        self.assertEqual(self.profile.phone, '9876543210')
 
     def test_profile_view_post_delete_account(self):
         """Тест удаления аккаунта"""
