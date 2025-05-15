@@ -222,7 +222,7 @@ class AddStarViewTest(TestCase):
             username='testuser',
             password='testpass123'
         )
-        self.course = Courses.objects.create(title='Test Course')
+        self.course = Courses.objects.create(title='Test Course', author=self.user)
 
     def test_star_toggle(self):
         self.client.login(email='test@example.com', password='testpass123')
@@ -253,7 +253,7 @@ class ReportCourseViewTest(TestCase):
             username='testuser',
             password='testpass123'
         )
-        self.course = Courses.objects.create(title='Test Course')
+        self.course = Courses.objects.create(title='Test Course', author=self.user)
         self.client.login(email='test@example.com', password='testpass123')
 
     def test_duplicate_report(self):
@@ -317,7 +317,7 @@ class ProgressTrackingTest(TestCase):
             username='testuser',
             password='testpass123'
         )
-        self.course = Courses.objects.create(title='Test Course')
+        self.course = Courses.objects.create(title='Test Course', author=self.user)
         self.lesson = Lessons.objects.create(course=self.course, title='Lesson 1')
 
     def test_progress_toggle(self):
