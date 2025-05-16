@@ -25,7 +25,7 @@
             <span class="user-name">{{ request.user.username }}</span>
             <a href="{% url 'profile' user_id=request.user.id %}" class="profile-pic-link">
                 <div class="profile-pic">
-                    {% if user_profile %}
+                    {% if user_profile.avatar %}
                         <img src="{{ user_profile.avatar.url }}" alt="Аватар пользователя"
                              class="profile-image">
                     {% else %}
