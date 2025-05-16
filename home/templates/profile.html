@@ -4,7 +4,7 @@
 {% block title %}Профиль пользователя{% endblock %}
 
 {% block content %}
-    <div class="user-profile-page">
+    <div class="user-profile-page" data-theme>
         <div class="up-container">
             {% if is_owner %}
                 <div class="up-actions">
@@ -15,8 +15,27 @@
             {% endif %}
 
             <div class="up-header">
-                <img src="{% static 'assets/profile-default.png' %}"
-                     alt="Аватар пользователя" class="up-avatar">
+                {% if is_owner %}
+                    <form id="avatar-form" method="post" enctype="multipart/form-data" style="display:inline;">
+                        {% csrf_token %}
+                        <label for="avatar-input" style="cursor: pointer;">
+                            {% if user_profile.avatar %}
+                                <img src="{{ user_profile.avatar.url }}" alt="Аватар пользователя" class="up-avatar">
+                            {% else %}
+                                <img src="{% static 'assets/profile-default.png' %}" alt="Аватар пользователя"
+                                     class="up-avatar">
+                            {% endif %}
+                        </label>
+                        <input type="file" name="avatar" id="avatar-input" accept="image/*" style="display: none;">
+                    </form>
+                {% else %}
+                    {% if user_profile.avatar %}
+                        <img src="{{ user_profile.avatar.url }}" alt="Аватар пользователя" class="up-avatar">
+                    {% else %}
+                        <img src="{% static 'assets/profile-default.png' %}" alt="Аватар пользователя"
+                             class="up-avatar">
+                    {% endif %}
+                {% endif %}
                 <h1 class="up-username">{{ username }}</h1>
             </div>
 
@@ -34,92 +53,100 @@
                 {% endif %}
             </div>
 
-            {% if social_network %}
-
-                <div class="up-section">
-                    <div class="up-section__title">Социальные сети</div>
+            <div class="up-section">
+                <div class="up-section__title">Социальные сети</div>
+                {% if social_network.exists %}
                     <div class="up-social-links">
                         {% for sn in social_network %}
                             <a class="up-social-links__item" href="{{ sn.linc }}" target="_blank" rel="noopener">
                                 {{ sn.label }}
                             </a>
-                        {% empty %}
-                            <p class="up-section__text">Не указаны</p>
                         {% endfor %}
                     </div>
-                </div>
-
-            {% endif %}
-
-            {% if interest %}
-
-                <div class="up-section">
-                    <div class="up-section__title">Технологии</div>
-                    <ul class="up-tech-list">
-                        {% for tech in interest %}
-                            <li class="up-tech-list__item">{{ tech.label }}</li>
-                        {% empty %}
-                            <li class="up-tech-list__item">Не указаны</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-            {% endif %}
-
-        </div>
-
-        {% if is_owner %}
-            <div class="up-modal" id="up-modal">
-                <div class="up-modal__content">
-                    <span class="up-modal__close" id="up-modal-close" aria-label="Закрыть">&times;</span>
-                    <h2 class="up-modal__title">Редактирование профиля</h2>
-
-                    <form method="post" class="up-form">
-                        {% csrf_token %}
-                        <label class="up-form__label" for="username">Имя</label>
-                        <input class="up-form__input" type="text" name="username" id="username" value="{{ username }}">
-
-                        <label class="up-form__label" for="about">О себе</label>
-                        <textarea class="up-form__textarea" name="about" id="about"
-                                  rows="4">{{ user_profile.about }}</textarea>
-
-                        <label class="up-form__label" for="email">Email</label>
-                        <input class="up-form__input" type="email" name="email" id="email"
-                               value="{{ user_profile.email }}">
-
-                        <label class="up-form__label" for="tech-input">Добавить технологию</label>
-                        <input class="up-form__input" type="text" id="tech-input" placeholder="Например, Django">
-                        <button class="up-form__btn up-form__btn--add-tech" type="button" id="add-tech-btn">Добавить
-                        </button>
-
-                        <ul class="up-form__tech-chips" id="tech-chips">
-                            {% for tech in interest %}
-                                <li class="up-form__tech-chip">
-                                    <span>{{ tech.label }}</span>
-                                    <button type="button" class="up-form__tech-remove">×</button>
-                                    <input type="hidden" name="technologies" value="{{ tech.label }}">
-                                </li>
-                            {% endfor %}
-                        </ul>
-
-                        <button class="up-form__btn" type="submit">Сохранить профиль</button>
-
-                        <form method="post" class="up-form up-form--inline-delete">
-                            {% csrf_token %}
-                            <button class="up-button up-button--delete"
-                                    name="action" value="delete_account"
-                                    onclick="return confirm('Удалить аккаунт? Это действие необратимо.')"
-                                    aria-label="Удалить аккаунт">
-                                Удалить аккаунт
-                            </button>
-                        </form>
-                    </form>
-                </div>
+                {% else %}
+                    <p class="up-section__text">Не указаны</p>
+                {% endif %}
             </div>
-        {% endif %}
+
+            <div class="up-section">
+                <div class="up-section__title">Технологии</div>
+                <ul class="up-tech-list">
+                    {% for tech in interest %}
+                        <li class="up-tech-list__item">{{ tech.label }}</li>
+                    {% empty %}
+                        <li class="up-tech-list__item">Не указаны</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {% if is_owner %}
+                <div class="up-modal" id="up-modal">
+                    <div class="up-modal__content">
+                        <span class="up-modal__close" id="up-modal-close" aria-label="Закрыть">&times;</span>
+                        <h2 class="up-modal__title">Редактирование профиля</h2>
+
+                        <form method="post" class="up-form" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <label class="up-form__label" for="username">Имя</label>
+                            <input class="up-form__input" type="text" name="username" id="username"
+                                   value="{{ username }}">
+
+                            <label class="up-form__label" for="about">О себе</label>
+                            <textarea class="up-form__textarea" name="about" id="about"
+                                      rows="4">{{ user_profile.about }}</textarea>
+
+                            <label class="up-form__label" for="email">Email</label>
+                            <input class="up-form__input" type="email" name="email" id="email"
+                                   value="{{ user_profile.email }}">
+
+                            <label class="up-form__label">Социальные сети</label>
+                            <div id="sn-list" class="up-form__tech-chips">
+                                {% for sn in social_network %}
+                                    <div class="up-form__tech-chip">
+                                        <input type="text" name="sn_label" value="{{ sn.label }}"
+                                               placeholder="Тип (Telegram, VK)" class="up-form__input"
+                                               style="margin-right:5px; width:120px;">
+                                        <input type="url" name="sn_linc" value="{{ sn.linc }}" placeholder="Ссылка"
+                                               class="up-form__input" style="width:200px; margin-right:5px;">
+                                        <button type="button" class="up-form__tech-remove">×</button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" id="add-sn-btn" class="up-form__btn--add-tech up-form__btn">Добавить
+                                соц. сеть
+                            </button>
+
+                            <label class="up-form__label" for="tech-input">Добавить технологию</label>
+                            <input class="up-form__input" type="text" id="tech-input" placeholder="Например, Django">
+                            <button class="up-form__btn up-form__btn--add-tech" type="button" id="add-tech-btn">
+                                Добавить
+                            </button>
+
+                            <ul class="up-form__tech-chips" id="tech-chips">
+                                {% for tech in interest %}
+                                    <li class="up-form__tech-chip">
+                                        <span>{{ tech.label }}</span>
+                                        <button type="button" class="up-form__tech-remove">×</button>
+                                        <input type="hidden" name="technologies" value="{{ tech.label }}">
+                                    </li>
+                                {% endfor %}
+                            </ul>
+
+                            <button class="up-form__btn" type="submit">Сохранить профиль</button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
     </div>
 
     <script>
+        document.getElementById('avatar-input')?.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                document.getElementById('avatar-form').submit();
+            }
+        });
+
         document.getElementById('up-edit-btn')?.addEventListener('click', () => {
             document.getElementById('up-modal').style.display = 'flex';
         });

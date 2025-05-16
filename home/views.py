@@ -47,22 +47,11 @@ class HomeView(LoggingMixin, View):
         })
 
 
-class ProfileView(LoggingMixin, View):
-    """Страница профиля пользователя.
-
-    :cvar get: Отображает профиль пользователя по given user_id.
-    :cvar post: Обрабатывает сохранение изменений профиля или удаление аккаунта.
-    """
+class ProfileView(View):
+    """Страница профиля пользователя."""
 
     @method_decorator(login_required)
     def get(self, request, user_id):
-        """
-        Возвращает страницу профиля пользователя.
-
-        :param request: HTTP Django request
-        :param int user_id: Идентификатор пользователя
-        :return: render в 'profile.html' с данными профиля и связями
-        """
         profile_owner = get_object_or_404(User, id=user_id)
         user_profile, _ = UserProfile.objects.get_or_create(user=profile_owner)
 
@@ -77,13 +66,6 @@ class ProfileView(LoggingMixin, View):
 
     @method_decorator(login_required)
     def post(self, request, user_id):
-        """
-        Обрабатывает изменения профиля или удаляет аккаунт пользователя.
-
-        :param request: HTTP Django request
-        :param int user_id: Идентификатор профиля
-        :return: redirect на 'profile' при сохранении или 'home' после удаления
-        """
         if request.user.id != int(user_id):
             messages.error(request, "У вас нет прав на изменение этого профиля.")
             return redirect('profile', user_id=user_id)
@@ -95,25 +77,36 @@ class ProfileView(LoggingMixin, View):
             return redirect('home')
 
         user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-        new_username = request.POST.get('username', '').strip()
-        new_about = request.POST.get('about', '').strip()
-        new_email = request.POST.get('email', '').strip()
-        tech_string = request.POST.get('technologies', '').strip()
 
+        avatar_file = request.FILES.get('avatar')
+        if avatar_file:
+            if user_profile.avatar:
+                user_profile.avatar.delete(save=False)
+            user_profile.avatar = avatar_file
+
+        new_username = request.POST.get('username', '').strip()
         if new_username:
             request.user.username = new_username
             request.user.save()
-
-        user_profile.about = new_about
-        user_profile.email = new_email
+        user_profile.about = request.POST.get('about', '').strip()
+        user_profile.email = request.POST.get('email', '').strip()
         user_profile.save()
 
         Technology.objects.filter(user_profile=user_profile).delete()
-        if tech_string:
-            tech_list = request.POST.getlist('technologies')
-            tech_list = [label.strip() for label in tech_list if label.strip()]
-            for label in tech_list:
-                Technology.objects.create(user_profile=user_profile, label=label)
+        tech_list = request.POST.getlist('technologies')
+        for label in [t.strip() for t in tech_list if t.strip()]:
+            Technology.objects.create(user_profile=user_profile, label=label)
+
+        SocialNetwork.objects.filter(user_profile=user_profile).delete()
+        sn_labels = request.POST.getlist('sn_label')
+        sn_links = request.POST.getlist('sn_linc')
+        for label, link in zip(sn_labels, sn_links):
+            if label.strip() and link.strip():
+                SocialNetwork.objects.create(
+                    user_profile=user_profile,
+                    label=label.strip(),
+                    linc=link.strip()
+                )
 
         messages.success(request, "Профиль успешно обновлён.")
         return redirect('profile', user_id=user_id)

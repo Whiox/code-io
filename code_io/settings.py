@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-n1)04c4p)t)%vc49wh@1zi@o!0vso%d1zw9mo+!(=tarm+)2im'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -72,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'home.context_processors.user_avatar',
             ],
         },
     },
@@ -189,5 +190,5 @@ STATICFILES_DIRS = [
 LOGIN_URL = '/login/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-MEDIA_URL = '/courses/'  # URL для доступа к загруженным файлам
-MEDIA_ROOT = os.path.join(BASE_DIR, 'courses/')
+MEDIA_URL = '/media/'  # URL для доступа к загруженным файлам
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')

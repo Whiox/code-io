@@ -3,13 +3,14 @@
 <header class="header">
     <div class="logo"><a href="{% url 'home' %}">CODE.IO</a></div>
     <nav class="navbar">
-       <ul class="menu">
+        <ul class="menu">
             <li class="menu-item"><a href="{% url 'all' %}" class="menu-link">Все курсы</a></li>
             {% if request.user.is_authenticated %}
                 <li class="menu-item"><a href="{% url 'stared' %}" class="menu-link">Избранные</a></li>
                 <li class="menu-item"><a href="{% url 'my_courses' %}" class="menu-link">Созданные</a></li>
                 {% if request.user.is_staff or request.user.is_moderator %}
-                    <li class="menu-item"><a href="{% url 'users_courses' %}" class="menu-link">Курсы пользователей</a></li>
+                    <li class="menu-item"><a href="{% url 'users_courses' %}" class="menu-link">Курсы пользователей</a>
+                    </li>
                 {% endif %}
                 <li class="menu-item"><a href="{% url 'add_course' %}" class="menu-link">Создать</a></li>
             {% else %}
@@ -22,23 +23,31 @@
         <img src="{% static 'assets/theme-icon.svg' %}" id="theme-toggle" alt="Toggle theme" class="theme-toggle">
         {% if request.user.is_authenticated %}
             <span class="user-name">{{ request.user.username }}</span>
-            <div class="profile-pic">
-                <img src="{% static 'assets/profile-default.png' %}" alt="Фото профиля" class="profile-image">
+            <a href="{% url 'profile' user_id=request.user.id %}" class="profile-pic-link">
+                <div class="profile-pic">
+                    {% if user_profile %}
+                        <img src="{{ user_profile.avatar.url }}" alt="Аватар пользователя"
+                             class="profile-image">
+                    {% else %}
+                        <img src="{% static 'assets/profile-default.png' %}" alt="Аватар пользователя"
+                             class="profile-image">
+                    {% endif %}
+                </div>
+            </a>
+            <div class="dropdown">
+                <button class="drop-button">▼</button>
+                <div class="dropdown-menu">
+                    <a href="{% url 'profile' user_id=request.user.id %}" class="dropdown-item">Профиль</a>
+                    {% if request.user.is_staff %}
+                        <a href="{% url 'admin:index' %}" class="dropdown-item">Панель администратора</a>
+                    {% endif %}
+                    {% if request.user.is_staff or request.user.is_moderator %}
+                        <a href="{% url 'moderator' %}" class="dropdown-item">Панель модератора</a>
+                    {% endif %}
+                    <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>
+                    <a href="{% url 'change_password' %}" class="dropdown-item">Смена пароля</a>
+                </div>
             </div>
-        <div class="dropdown">
-            <button class="drop-button">▼</button>
-            <div class="dropdown-menu">
-                <a href="{% url 'profile' user_id=request.user.id %}" class="dropdown-item">Профиль</a>
-                {% if request.user.is_staff %}
-                    <a href="{% url 'admin:index' %}" class="dropdown-item">Панель администратора</a>
-                {% endif %}
-                {% if request.user.is_staff or request.user.is_moderator %}
-                    <a href="{% url 'moderator' %}" class="dropdown-item">Панель модератора</a>
-                {% endif %}
-                <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>
-                <a href="{% url 'change_password' %}" class="dropdown-item">Смена пароля</a>
-            </div>
-        </div>
         {% endif %}
     </div>
 </header>
