@@ -200,6 +200,16 @@
         [data-theme="dark"] .course-progress-text {
             color: #ccc;
         }
+
+        .course-item {
+            flex: 1 1 calc(50% - 20px);
+        }
+
+        @media (max-width: 768px) {
+            .course-item {
+                flex: 1 1 calc(100% - 20px);
+            }
+        }
     </style>
 {% endblock style %}
 
