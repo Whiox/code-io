@@ -206,7 +206,7 @@
                         <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Курс</th>
+                            <th>Тег</th>
                             <th>Автор</th>
                             <th>Причина</th>
                             <th>Дата</th>
@@ -215,9 +215,11 @@
                         </thead>
                         <tbody>
                         {% for tr in topic_reports %}
-                            <tr data-topic-report-id="{{ tr.id }}">
+                            <tr data-topic-report-id="{{ tr.id }}" data-topic-id="{{ tr.topic.id }}">
                                 <td>{{ tr.id }}</td>
-                                <td><a href="{% url 'course' tr.course.course_id %}">{{ tr.course.title }}</a></td>
+                                <td>
+                                    {{ tr.topic.name }}
+                                </td>
                                 <td><a href="{% url 'profile' tr.author.id %}">{{ tr.author.email }}</a></td>
                                 <td>{{ tr.get_reason_display }}</td>
                                 <td>{{ tr.created_at|date:"d.m.Y" }}</td>

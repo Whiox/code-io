@@ -19,6 +19,6 @@ urlpatterns = [
     path('moderator/delete/course/', DeleteCourse.as_view(), name='delete_course'),
     path('moderator/delete/course/report/', DeleteCourseReport.as_view(), name='delete_course_report'),
     path('moderator/delete/topic/', DeleteTopic.as_view(), name='delete_topic'),
-    path('moderator/delete/course/report/', DeleteTopicReport.as_view(), name='delete_topic_report'),
+    path('moderator/delete/topic/report/', DeleteTopicReport.as_view(), name='delete_topic_report'),
 
 ]

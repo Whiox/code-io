@@ -19,7 +19,7 @@ from code_io.mixins import LoggingMixin
 
 from education.methods import get_most_popular_courses
 from education.files import get_all_lessons, get_lesson_number
-from education.models import Courses, Lessons, Stars, ReportCourse, Topic, CourseProgress
+from education.models import Courses, Lessons, Stars, ReportCourse, Topic, CourseProgress, ReportTopic
 from education.forms import AddCourseForm, AddLessonForm, TopicChoiceForm
 
 
@@ -563,6 +563,81 @@ class ReportCourseView(LoggingMixin, View):
         """
         course = get_object_or_404(Courses, course_id=course_id)
         ReportCourse.objects.filter(course=course, author=request.user).delete()
+        return JsonResponse({'status': 'ok', 'ok': 'report deleted'})
+
+
+class ReportTopicView(View):
+    """Обработка жалоб на конкретный тег (тему) курса."""
+
+    @method_decorator(login_required)
+    def get(self, request, course_id):
+        course = get_object_or_404(Courses, course_id=course_id)
+        topics = course.topics.all()
+        report = ReportTopic.objects.filter(
+            topic__in=topics,
+            author=request.user
+        ).first()
+        return render(request, 'report_topic.html', {
+            'course': course,
+            'topics': topics,
+            'report': report,
+            'reason_choices': ReportTopic.REASON_CHOICES,
+        })
+
+    @method_decorator(login_required)
+    def post(self, request, course_id):
+        course = get_object_or_404(Courses, course_id=course_id)
+        topics = course.topics.all()
+        if ReportTopic.objects.filter(
+                topic__in=topics,
+                author=request.user
+        ).exists():
+            return JsonResponse({'status': 'error', 'error': 'report already exists'})
+
+        topic_id = request.POST.get('topic_id')
+        reason = request.POST.get('reason')
+        if not topic_id or not reason:
+            return JsonResponse({'status': 'error', 'error': 'не указаны все поля'})
+
+        topic = get_object_or_404(Topic, pk=topic_id, courses=course)
+        report = ReportTopic.objects.create(
+            topic=topic,
+            author=request.user,
+            reason=reason
+        )
+        return JsonResponse({'status': 'ok', 'ok': report.id})
+
+    @method_decorator(login_required)
+    def put(self, request, course_id):
+        course = get_object_or_404(Courses, course_id=course_id)
+        topics = course.topics.all()
+
+        data = QueryDict(request.body.decode())
+        topic_id = data.get('topic_id')
+        reason = data.get('reason')
+        if not topic_id or not reason:
+            return JsonResponse({'status': 'error', 'error': 'не указаны все поля'})
+
+        report = ReportTopic.objects.filter(
+            topic__in=topics,
+            author=request.user
+        ).first()
+        if not report:
+            return JsonResponse({'status': 'error', 'error': 'report does not exist'})
+
+        report.topic = get_object_or_404(Topic, pk=topic_id, courses=course)
+        report.reason = reason
+        report.save()
+        return JsonResponse({'status': 'ok', 'ok': report.id})
+
+    @method_decorator(login_required)
+    def delete(self, request, course_id):
+        course = get_object_or_404(Courses, course_id=course_id)
+        topics = course.topics.all()
+        ReportTopic.objects.filter(
+            topic__in=topics,
+            author=request.user
+        ).delete()
         return JsonResponse({'status': 'ok', 'ok': 'report deleted'})
 
 

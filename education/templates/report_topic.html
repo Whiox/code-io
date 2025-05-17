@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Жалоба на тег в «{{ course.title }}»{% endblock %}
+
+{% block content %}
+    <div class="report-container">
+        <h1 class="report-title">Жалоба на тег курса «{{ course.title }}»</h1>
+
+        <form id="report-form" class="report-form">
+            {% csrf_token %}
+            <div class="form-row">
+                <label for="topic-select" class="form-label">Выберите тег:</label>
+                <select id="topic-select" name="topic_id" class="form-input">
+                    <option value="">— выберите тег —</option>
+                    {% for tag in topics %}
+                        <option value="{{ tag.id }}"
+                                {% if report and report.topic_id == tag.id %}selected{% endif %}>
+                            {{ tag.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="reason" class="form-label">Причина жалобы:</label>
+                <select id="reason" name="reason" class="form-input">
+                    <option value="">— выберите причину —</option>
+                    {% for code, label in reason_choices %}
+                        <option value="{{ code }}"
+                                {% if report and report.reason == code %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" id="btn-submit" class="btn btn--primary">Отправить</button>
+                <button type="button" id="btn-update" class="btn btn--secondary">Обновить</button>
+                <button type="button" id="btn-delete" class="btn btn--danger">Удалить</button>
+            </div>
+        </form>
+
+        <div id="report-status" class="status-text"></div>
+    </div>
+{% endblock %}
+
+{% block style %}
+    <style>
+        :root {
+            --color-accent: #4dc621;
+            --color-success: #28a745;
+            --color-error: #dc3545;
+            --color-warning: #ffc107;
+            --border: #e0e0e0;
+            --bg-input: #fff;
+            --bg-btn: #28a745;
+            --bg-btn-hover: #218838;
+            --bg-btn-sec: #17a2b8;
+            --bg-btn-sec-h: #138496;
+            --bg-btn-del: #dc3545;
+            --bg-btn-del-h: #c82333;
+            --focus: #e67e22;
+        }
+
+        [data-theme="dark"] {
+            --color-accent: #ff8c42;
+            --color-success: #28a745;
+            --color-error: #ff6b6b;
+            --border: #555;
+            --bg-input: #333;
+            --bg-btn: #218838;
+            --bg-btn-hover: #1e7e34;
+            --bg-btn-sec: #117a8b;
+            --bg-btn-sec-h: #0f6674;
+            --bg-btn-del: #c82333;
+            --bg-btn-del-h: #bd2130;
+        }
+
+        [data-theme="dark"] .form-input {
+            color: #fff;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            max-width: 100%;
+            min-height: 100px;
+            max-height: 300px;
+        }
+
+        #btn-update,
+        #btn-delete {
+            display: none;
+        }
+
+        .report-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .report-title {
+            margin-bottom: 1rem;
+            color: var(--color-accent);
+        }
+
+        .message-container {
+            margin-bottom: 1rem;
+        }
+
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .message--success {
+            background: var(--color-success);
+        }
+
+        .message--error {
+            background: var(--color-error);
+        }
+
+        .message--warning {
+            background: var(--color-warning);
+            color: #000;
+        }
+
+        .report-form .form-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-input);
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--focus);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn--primary {
+            background: var(--bg-btn);
+            color: #fff;
+        }
+
+        .btn--primary:hover {
+            background: var(--bg-btn-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn--secondary {
+            background: var(--bg-btn-sec);
+            color: #fff;
+        }
+
+        .btn--secondary:hover {
+            background: var(--bg-btn-sec-h);
+            transform: translateY(-1px);
+        }
+
+        .btn--danger {
+            background: var(--bg-btn-del);
+            color: #fff;
+        }
+
+        .btn--danger:hover {
+            background: var(--bg-btn-del-h);
+            transform: translateY(-1px);
+        }
+
+        .status-text {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+    </style>
+{% endblock style %}
+
+
+{% block script %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('report-form');
+            const url = window.location.pathname;
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const textarea = null;
+
+            const selTopic = document.getElementById('topic-select');
+            const selReason = document.getElementById('reason');
+            const statusEl = document.getElementById('report-status');
+            const btnSubmit = document.getElementById('btn-submit');
+            const btnUpdate = document.getElementById('btn-update');
+            const btnDelete = document.getElementById('btn-delete');
+
+            function showStatus(msg, isError = false) {
+                statusEl.textContent = msg;
+                statusEl.style.color = isError ? 'var(--color-error)' : 'var(--color-success)';
+            }
+
+            function refreshButtons() {
+                const has = selTopic.value && selReason.value && {{ report|yesno:'true,false' }};
+                btnSubmit.style.display = has ? 'none' : 'inline-block';
+                btnUpdate.style.display = has ? 'inline-block' : 'none';
+                btnDelete.style.display = has ? 'inline-block' : 'none';
+            }
+
+            btnSubmit.onclick = () => {
+                if (!selTopic.value) return showStatus('Выберите тег.', true);
+                if (!selReason.value) return showStatus('Выберите причину.', true);
+                fetch(url, {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: new URLSearchParams({
+                        topic_id: selTopic.value,
+                        reason: selReason.value
+                    })
+                }).then(r => r.json()).then(data => {
+                    if (data.status === 'ok') {
+                        showStatus('Жалоба отправлена (ID ' + data.ok + ').');
+                        btnSubmit.style.display = 'none';
+                        btnUpdate.style.display = 'inline-block';
+                        btnDelete.style.display = 'inline-block';
+                    } else {
+                        showStatus('Ошибка: ' + data.error, true);
+                    }
+                }).catch(_ => showStatus('Сетевая ошибка.', true));
+            };
+
+            btnUpdate.onclick = () => {
+                if (!selTopic.value) return showStatus('Выберите тег.', true);
+                if (!selReason.value) return showStatus('Выберите причину.', true);
+                fetch(url, {
+                    method: 'PUT',
+                    headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: new URLSearchParams({
+                        topic_id: selTopic.value,
+                        reason: selReason.value
+                    })
+                }).then(r => r.json()).then(data => {
+                    if (data.status === 'ok') {
+                        showStatus('Жалоба обновлена.');
+                    } else {
+                        showStatus('Ошибка: ' + (data.error || 'неизвестно'), true);
+                    }
+                }).catch(_ => showStatus('Сетевая ошибка.', true));
+            };
+
+            btnDelete.onclick = () => {
+                if (!confirm('Удалить жалобу?')) return;
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: {'X-CSRFToken': csrftoken}
+                }).then(r => r.json()).then(data => {
+                    if (data.status === 'ok') {
+                        selTopic.value = '';
+                        selReason.value = '';
+                        btnSubmit.style.display = 'inline-block';
+                        btnUpdate.style.display = 'none';
+                        btnDelete.style.display = 'none';
+                        showStatus('Жалоба удалена.');
+                    } else {
+                        showStatus('Ошибка при удалении.', true);
+                    }
+                }).catch(_ => showStatus('Сетевая ошибка.', true));
+            };
+
+            refreshButtons();
+        });
+    </script>
+{% endblock %}

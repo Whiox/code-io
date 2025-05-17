@@ -5,7 +5,8 @@
 
 {% block content %}
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <div class="course-container" data-course-id="{{ course_id }}" data-user-authenticated="{{ user.is_authenticated|lower }}">
+    <div class="course-container" data-course-id="{{ course_id }}"
+         data-user-authenticated="{{ user.is_authenticated|lower }}">
         <div class="sidebar" id="sidebar">
             <div class="course-progress">
                 <h3>
@@ -16,7 +17,7 @@
                     <div class="progress"></div>
                 </div>
                 {% if not user.is_authenticated %}
-                <p class="login-prompt">Для сохранения прогресса в облаке войдите в аккаунт</p>
+                    <p class="login-prompt">Для сохранения прогресса в облаке войдите в аккаунт</p>
                 {% endif %}
             </div>
             <ul class="lessons-list">
@@ -45,13 +46,26 @@
             {% endfor %}
         </div>
 
-        <a href="{% url 'course_report' course_id %}" class="btn-report-floating" title="Пожаловаться на курс">&#x26A0;</a>
+        <div class="report-wrapper">
+            <button id="report-btn" class="report-btn" aria-label="Пожаловаться">
+                <img src="{% static 'assets/flag.svg' %}" alt="flag">
+            </button>
+            <div id="report-menu" class="report-menu">
+                <a href="{% url 'course_report' course_id %}" class="report-menu__item">
+                    Пожаловаться на курс
+                </a>
+                <a href="{% url 'report_topic' course_id %}" class="report-menu__item">
+                    Пожаловаться на тему
+                </a>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
 {% block script %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <link id="code-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <link id="code-theme" rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 
     <script>
         function toggleSidebar() {
@@ -64,7 +78,7 @@
         function scrollToLesson(event, lessonId) {
             if (event.target.closest('.lesson-checkbox')) return;
             const lessonElement = document.getElementById(`lesson-${lessonId}`);
-            if (lessonElement) lessonElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (lessonElement) lessonElement.scrollIntoView({behavior: 'smooth', block: 'start'});
         }
 
         function copyCode(button) {
@@ -83,7 +97,7 @@
             hljs.highlightAll();
             updateCodeTheme();
             new MutationObserver(updateCodeTheme)
-                .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+                .observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
 
             const courseContainer = document.querySelector('.course-container');
             const isAuthenticated = courseContainer.dataset.userAuthenticated === 'true';
@@ -107,7 +121,7 @@
 
                 async function loadProgressFromServer() {
                     const url = `/courses/${courseId}/progress/`;
-                    const resp = await fetch(url, { credentials: 'same-origin' });
+                    const resp = await fetch(url, {credentials: 'same-origin'});
                     const json = await resp.json();
                     if (json.status === 'ok' && Array.isArray(json.done_lessons)) {
                         document.querySelectorAll('.lessons-list li').forEach(li => {
@@ -127,7 +141,7 @@
                             const resp = await fetch(url, {
                                 method: 'POST',
                                 credentials: 'same-origin',
-                                headers: { 'X-CSRFToken': getCsrfToken() }
+                                headers: {'X-CSRFToken': getCsrfToken()}
                             });
                             const json = await resp.json();
                             if (json.status === 'ok') {
@@ -197,6 +211,20 @@
                 }
             });
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('report-btn');
+            const menu = document.getElementById('report-menu');
+
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                menu.classList.toggle('open');
+            });
+
+            document.addEventListener('click', () => {
+                menu.classList.remove('open');
+            });
+        });
     </script>
 {% endblock %}
 
@@ -211,6 +239,7 @@
             --sidebar-text: #333;
             --input-bg: #fff;
         }
+
         [data-theme="dark"] {
             --sidebar-bg: #333333;
             --sidebar-text: #ffffff;
@@ -231,14 +260,24 @@
             background: var(--sidebar-bg);
             transition: transform 0.3s ease;
             z-index: 1000;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
             padding: 1rem;
             overflow-y: auto;
         }
-        .sidebar.active { transform: translateX(280px); }
 
-        .content { transition: margin-left 0.3s ease; padding: 2rem; margin-left: 0; }
-        .content.shifted { margin-left: 280px; }
+        .sidebar.active {
+            transform: translateX(280px);
+        }
+
+        .content {
+            transition: margin-left 0.3s ease;
+            padding: 2rem;
+            margin-left: 0;
+        }
+
+        .content.shifted {
+            margin-left: 280px;
+        }
 
         .toggle-button {
             position: fixed;
@@ -251,10 +290,13 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s;
         }
-        .toggle-button:hover { transform: translateY(-2px); }
+
+        .toggle-button:hover {
+            transform: translateY(-2px);
+        }
 
         .btn-report-floating {
             position: fixed;
@@ -270,31 +312,184 @@
             border-radius: 50%;
             font-size: 24px;
             line-height: 1;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s;
             text-decoration: none;
         }
-        .btn-report-floating:hover { transform: scale(1.1); }
 
-        .course-progress { padding: 1rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; }
-        .progress-bar { height: 8px; background: var(--input-bg); border-radius: 4px; overflow: hidden; }
-        .progress { height: 100%; background: var(--accent-color); transition: width 0.3s ease; }
+        .btn-report-floating:hover {
+            transform: scale(1.1);
+        }
 
-        .login-prompt { font-size: 12px; color: var(--secondary-text); margin-top: 4px; }
+        .course-progress {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
 
-        .lessons-list { list-style: none; padding: 0 0.5rem; margin: 0; }
-        .lessons-list li { margin: 4px 0; display: flex; align-items: center; }
-        .lesson-checkbox { position: relative; display: flex; align-items: center; padding: 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s; margin-right: 8px; }
-        .lesson-checkbox:hover { background: rgba(0,0,0,0.05); }
-        .lesson-checkbox input { opacity: 0; position: absolute; }
-        .checkmark { width: 20px; height: 20px; border: 2px solid var(--accent-color); border-radius: 4px; margin-right: 12px; position: relative; }
-        .checkmark::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 12px; height: 12px; background: var(--accent-color); border-radius: 2px; opacity: 0; transition: opacity 0.2s; }
-        .completed-checkbox:checked ~ .checkmark::after { opacity: 1; }
+        .progress-bar {
+            height: 8px;
+            background: var(--input-bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
 
-        .codehilite { position: relative; }
-        .copy-button { position: absolute; top: 8px; right: 8px; z-index: 10; padding: 5px 10px; font-size: 12px; background-color: var(--accent-color); color: white; border: none; border-radius: 5px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s, transform 0.2s; }
-        .copy-button:hover { opacity: 1; transform: scale(1.05); }
+        .progress {
+            height: 100%;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
 
-        @media (max-width: 768px) { .content.shifted { margin-left: 0; } }
+        .login-prompt {
+            font-size: 12px;
+            color: var(--secondary-text);
+            margin-top: 4px;
+        }
+
+        .lessons-list {
+            list-style: none;
+            padding: 0 0.5rem;
+            margin: 0;
+        }
+
+        .lessons-list li {
+            margin: 4px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .lesson-checkbox {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-right: 8px;
+        }
+
+        .lesson-checkbox:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .lesson-checkbox input {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .checkmark {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--accent-color);
+            border-radius: 4px;
+            margin-right: 12px;
+            position: relative;
+        }
+
+        .checkmark::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: var(--accent-color);
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .completed-checkbox:checked ~ .checkmark::after {
+            opacity: 1;
+        }
+
+        .codehilite {
+            position: relative;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+            padding: 5px 10px;
+            font-size: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .copy-button:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .report-wrapper {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .report-btn {
+            background: var(--accent-color);
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: background 0.2s;
+        }
+
+        .report-btn:hover {
+            background: var(--button-hover);
+        }
+
+        .report-btn img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .report-menu {
+            display: none;
+            position: absolute;
+            bottom: 60px;
+            right: 0;
+            background: var(--modal-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .report-menu.open {
+            display: block;
+        }
+
+        .report-menu__item {
+            display: block;
+            padding: 8px 16px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: background 0.15s;
+        }
+
+        .report-menu__item:hover {
+            background: var(--input-bg);
+        }
+
+        @media (max-width: 768px) {
+            .content.shifted {
+                margin-left: 0;
+            }
+        }
     </style>
 {% endblock %}

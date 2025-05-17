@@ -127,7 +127,7 @@ class ReportTopic(models.Model):
         ('Unacceptable', 'Недопустимо')
     ]
 
-    course = models.ForeignKey(Courses, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='reports', verbose_name='Тег')
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     reason = models.CharField(
         max_length=50,

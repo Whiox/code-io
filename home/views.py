@@ -137,7 +137,7 @@ class ModeratorPanelView(LoggingMixin, View):
             'courses': Courses.objects.all().select_related('author'),
             'topics': Topic.objects.filter(author__isnull=False).select_related('author'),
             'course_reports': ReportCourse.objects.all().select_related('author', 'course'),
-            'topic_reports': ReportTopic.objects.all().select_related('author', 'course')
+            'topic_reports': ReportTopic.objects.all().select_related('author', 'topic')
         }
 
         return render(request, 'moderator_page.html', context)
