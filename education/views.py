@@ -71,27 +71,44 @@ class AllCoursesView(LoggingMixin, View):
         :param request: HTTP-запрос Django
         :return: render в 'all_courses.html' с контекстом курсов
         """
-        courses_qs = Courses.objects.annotate(
+        q = request.GET.get('q', '').strip()
+        filter_by = request.GET.get('filter_by', 'title')
+
+        qs = Courses.objects.annotate(
             lessons_count=Count('lessons')
         ).select_related('author').prefetch_related('topics')
 
-        content = {'courses': []}
-        for course in courses_qs:
-            topics = [t.name for t in course.topics.all()] or ['Свободная тема']
-            is_stared = (
-                request.user.is_authenticated and
-                Stars.objects.filter(user=request.user, course=course).exists()
-            )
-            content['courses'].append({
+        if q:
+            if filter_by == 'title':
+                qs = qs.filter(title__icontains=q)
+            elif filter_by == 'author':
+                qs = qs.filter(author__username__icontains=q)
+            elif filter_by == 'tags':
+                qs = qs.filter(topics__name__icontains=q)
+        qs = qs.distinct()
+
+        courses = []
+        for course in qs:
+            courses.append({
                 'id': course.course_id,
                 'title': course.title,
-                'author': course.author.username if course.author else 'Неизвестный автор',
-                'topics': topics,
-                'is_stared': is_stared,
+                'author': course.author.username if course.author else '—',
+                'topics': [t.name for t in course.topics.all()] or ['—'],
+                'is_stared': (
+                        request.user.is_authenticated
+                        and Stars.objects.filter(user=request.user, course=course).exists()
+                ),
                 'lessons_count': course.lessons_count,
             })
 
-        return render(request, 'all_courses.html', content)
+        context = {
+            'courses': courses,
+            'search': {
+                'q': q,
+                'filter_by': filter_by,
+            }
+        }
+        return render(request, 'all_courses.html', context)
 
 
 class StaredCoursesView(LoggingMixin, View):
