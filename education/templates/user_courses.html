@@ -8,10 +8,11 @@
     <section class="main-content">
         {% for course in courses %}
             <li class="course-item-my"
-                style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ccc; padding: 10px;">
+                style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ccc;  padding: 10px;">
                 <div>
                     <h2 style="display: inline;">{{ course.title }}</h2>
-                    <p>ID курса: {{ course.id }}, Автор курса: <a href="{% url 'profile' course.author.id %}">{{ course.author }}</a></p>
+                    <p>ID курса: {{ course.id }}, Автор курса: <a
+                            href="{% url 'profile' course.author.id %}">{{ course.author }}</a></p>
                 </div>
                 <div>
                     <a href="{% url 'course' course.id %}" class="btn">Перейти на курс</a>
@@ -32,10 +33,36 @@
 
 {% block style %}
     <style>
+        [data-theme="dark"] {
+            --main-gradient-start: #FF6B35;
+            --main-gradient-end: #FF914D;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --primary-color: #FF6B35;
+            --secondary-text: #a0aec0;
+        }
+
+        [data-theme="light"] {
+            --main-gradient-start: #28a745;
+            --main-gradient-end: #1b752e;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --primary-color: #28a745;
+            --secondary-text: #718096;
+        }
+
+        a {
+            color: #0077ff;
+        }
+
         h1 {
             text-align: center;
             margin: 2rem 0;
-            color: var(--heading-color);
+            color: var(--main-gradient-start);
+        }
+
+        h2 {
+            color: var(--main-gradient-start);
         }
 
         .centered {
@@ -49,45 +76,47 @@
         }
 
         .btn {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.6rem 1.2rem;
-        font-size: 1rem;
-        font-weight: 600;
-        border: 2px solid transparent;
-        border-radius: 0.5rem;
-        text-decoration: none;
-        transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
-        cursor: pointer;
-    }
+            display: inline-flex;
+            align-items: center;
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid transparent;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+            cursor: pointer;
+        }
 
-    .btn-icon {
-        margin-right: 0.5rem;
-        font-size: 1.2em;
-        line-height: 1;
-    }
+        .btn-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2em;
+            line-height: 1;
+        }
 
-    .btn-primary {
-        background-color: var(--heading-color);
-        color: #fff;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        border-color: var(--heading-color);
-    }
-    .btn-primary:hover {
-        background-color: var(--heading-color);
-        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-        transform: translateY(-1px);
-    }
-    .btn-primary:active {
-        background-color: var(--heading-color);
-        box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-        transform: translateY(0);
-    }
+        .btn-primary {
+            background-color: var(--heading-color);
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-color: var(--heading-color);
+        }
 
-    .centered {
-        display: flex;
-        justify-content: center;
-        margin-top: 2rem;
-    }
+        .btn-primary:hover {
+            background-color: var(--heading-color);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            background-color: var(--heading-color);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+            transform: translateY(0);
+        }
+
+        .centered {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
     </style>
 {% endblock style %}
