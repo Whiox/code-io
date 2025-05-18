@@ -53,20 +53,20 @@
                 {% endif %}
             </div>
 
-            <div class="up-section">
-                <div class="up-section__title">Социальные сети</div>
-                {% if social_network.exists %}
-                    <div class="up-social-links">
-                        {% for sn in social_network %}
-                            <a class="up-social-links__item" href="{{ sn.linc }}" target="_blank" rel="noopener">
-                                {{ sn.label }}
-                            </a>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <p class="up-section__text">Не указаны</p>
-                {% endif %}
-            </div>
+{#            <div class="up-section">#}
+{#                <div class="up-section__title">Социальные сети</div>#}
+{#                {% if social_network.exists %}#}
+{#                    <div class="up-social-links">#}
+{#                        {% for sn in social_network %}#}
+{#                            <a class="up-social-links__item" href="{{ sn.linc }}" target="_blank" rel="noopener">#}
+{#                                {{ sn.label }}#}
+{#                            </a>#}
+{#                        {% endfor %}#}
+{#                    </div>#}
+{#                {% else %}#}
+{#                    <p class="up-section__text">Не указаны</p>#}
+{#                {% endif %}#}
+{#            </div>#}
 
             <div class="up-section">
                 <div class="up-section__title">Технологии</div>
@@ -99,22 +99,22 @@
                             <input class="up-form__input" type="email" name="email" id="email"
                                    value="{{ user_profile.email }}">
 
-                            <label class="up-form__label">Социальные сети</label>
-                            <div id="sn-list" class="up-form__tech-chips">
-                                {% for sn in social_network %}
-                                    <div class="up-form__tech-chip">
-                                        <input type="text" name="sn_label" value="{{ sn.label }}"
-                                               placeholder="Тип (Telegram, VK)" class="up-form__input"
-                                               style="margin-right:5px; width:120px;">
-                                        <input type="url" name="sn_linc" value="{{ sn.linc }}" placeholder="Ссылка"
-                                               class="up-form__input" style="width:200px; margin-right:5px;">
-                                        <button type="button" class="up-form__tech-remove">×</button>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            <button type="button" id="add-sn-btn" class="up-form__btn--add-tech up-form__btn">Добавить
-                                соц. сеть
-                            </button>
+{#                            <label class="up-form__label">Социальные сети</label>#}
+{#                            <div id="sn-list" class="up-form__tech-chips">#}
+{#                                {% for sn in social_network %}#}
+{#                                    <div class="up-form__tech-chip">#}
+{#                                        <input type="text" name="sn_label" value="{{ sn.label }}"#}
+{#                                               placeholder="Тип (Telegram, VK)" class="up-form__input"#}
+{#                                               style="margin-right:5px; width:120px;">#}
+{#                                        <input type="url" name="sn_linc" value="{{ sn.linc }}" placeholder="Ссылка"#}
+{#                                               class="up-form__input" style="width:200px; margin-right:5px;">#}
+{#                                        <button type="button" class="up-form__tech-remove">×</button>#}
+{#                                    </div>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                            <button type="button" id="add-sn-btn" class="up-form__btn--add-tech up-form__btn">Добавить#}
+{#                                соц. сеть#}
+{#                            </button>#}
 
                             <label class="up-form__label" for="tech-input">Добавить технологию</label>
                             <input class="up-form__input" type="text" id="tech-input" placeholder="Например, Django">
