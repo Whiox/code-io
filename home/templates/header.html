@@ -20,7 +20,7 @@
         </ul>
     </nav>
     <div class="user-area">
-        <img src="{% static 'assets/theme-icon.svg' %}" id="theme-toggle" alt="Toggle theme" class="theme-toggle">
+        <img src="{% static 'assets/theme-light.svg' %}" id="theme-toggle" alt="Toggle theme" class="theme-toggle">
         {% if request.user.is_authenticated %}
             <span class="user-name">{{ request.user.username }}</span>
             <a href="{% url 'profile' user_id=request.user.id %}" class="profile-pic-link">
