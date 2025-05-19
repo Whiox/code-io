@@ -324,3 +324,8 @@ class DeleteTopicReport(LoggingMixin, View):
 
 def error404(request, exc):
     return render(request, '404.html')
+
+
+def error500(request, exc):
+    return render(request, '500.html')
+
