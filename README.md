@@ -1,5 +1,7 @@
 # code_io
 
+![Pylint](https://github.com/Whiox/code-io/actions/workflows/pylint.yml/badge.svg)
+
 ## Наш сайт https://code-io.ru/
 
 ### Поставлена задача разработать сайт с созданием онлайн курсов
@@ -39,14 +41,14 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Для запуска через Docker (PortgreSQL, nginx, gunicorn):
+Для запуска через Docker (PostgresSQL, nginx, gunicorn):
 ```bash
 docker-compose up --build
 ```
 
 ### pylint
 
-~~Запускается в CI~~
+Запускается в CI
 
 Для ручного запуска:
 
@@ -56,17 +58,17 @@ pylint --load-plugins pylint_django --django-settings-module=code_io.settings --
 
 ### Тестирование
 
-~~Выгружается в gitlab artifact после каждого коммита~~
+Запускается в CI
 
 Для тестирования вручную:
 ```bash
-coverage run --source='.' manage.py test
+coverage run --rcfile=.coveragerc --source='.' manage.py test
 coverage html
 ```
 
 ### Документация
 
-~~Выгружается в gitlab artifact после каждого коммита~~
+Выгружается в github artifact после каждого коммита
 
 Для сборки документации вручную:
 ```bash
