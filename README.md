@@ -1,5 +1,3 @@
-# Проект первой команды
-
 # code_io
 
 ## Наш сайт https://code-io.ru/
@@ -48,7 +46,7 @@ docker-compose up --build
 
 ### pylint
 
-Запускается в CI
+~~Запускается в CI~~
 
 Для ручного запуска:
 
@@ -58,7 +56,7 @@ pylint --load-plugins pylint_django --django-settings-module=code_io.settings --
 
 ### Тестирование
 
-Выгружается в gitlab artifact после каждого коммита
+~~Выгружается в gitlab artifact после каждого коммита~~
 
 Для тестирования вручную:
 ```bash
@@ -68,7 +66,7 @@ coverage html
 
 ### Документация
 
-Выгружается в gitlab artifact после каждого коммита
+~~Выгружается в gitlab artifact после каждого коммита~~
 
 Для сборки документации вручную:
 ```bash
