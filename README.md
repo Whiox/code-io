@@ -62,7 +62,7 @@ pylint --load-plugins pylint_django --django-settings-module=code_io.settings --
 
 Для тестирования вручную:
 ```bash
-coverage run --source='.' manage.py test
+coverage run --rcfile=.coveragerc --source='.' manage.py test
 coverage html
 ```
 
