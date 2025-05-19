@@ -73,5 +73,3 @@ coverage html
 cd docs
 ./make.bat html
 ```
-
-![Pylint](https://github.com/Whiox/code-io/actions/workflows/pylint.yml/badge.svg)
