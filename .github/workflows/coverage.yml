@@ -24,9 +24,6 @@ jobs:
 
       - name: Run Coverage
         run: |
-          coverage run \
-            --rcfile=.coveragerc \
-            --source='.' \ 
-            manage.py test
+          coverage run --rcfile=.coveragerc --source='.' manage.py test
           
           coverage report
