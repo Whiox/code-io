@@ -3,7 +3,7 @@ name: Stats
 on: [ push, pull_request ]
 
 jobs:
-  pylint:
+  stats:
     runs-on: ubuntu-latest
     strategy:
       matrix:
