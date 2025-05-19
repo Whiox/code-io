@@ -1,7 +1,6 @@
 # code_io
 
 ![Pylint](https://github.com/Whiox/code-io/actions/workflows/pylint.yml/badge.svg)
-[![Coverage](https://codecov.io/gh/Whiox/code-io/branch/main/graph/badge.svg?token=${{ secrets.CODECOV_TOKEN }} "Codecov report")](https://codecov.io/gh/Whiox/code-io)
 
 ## Наш сайт https://code-io.ru/
 
