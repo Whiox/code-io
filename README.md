@@ -1,5 +1,7 @@
 # code_io
 
+![Pylint](https://github.com/Whiox/code-io/actions/workflows/pylint.yml/badge.svg)
+
 ## Наш сайт https://code-io.ru/
 
 ### Поставлена задача разработать сайт с созданием онлайн курсов
