@@ -1,3 +1,121 @@
+:root {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --main-bg-color: #ffffff;
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #888;
+  --body-bg: #ffffff;
+  --course-item-bg: #f9f9f9;
+  --course-item-border: #ddd;
+  --btn-bg: #28a745;
+  --btn-hover: #1f9838;
+  --heading-color: #28a745;
+  --header-bg: #1b752e;
+  --menu-link-hover: #1c682d;
+  --dropdown-bg: #65e759;
+  --dropdown-item-color: rgb(32, 30, 30);
+  --dropdown-item-hover: #479c3f;
+  --logo-gradient: linear-gradient(135deg, #32CD32, #FFA500);
+  --logo-color: transparent;
+  --profile-container-bg: #ffffff;
+  --profile-border: #4caf50;
+  --avatar-border: #4caf50;
+  --link-color: #4caf50;
+  --modal-bg: #ffffff;
+  --modal-text: #333333;
+  --input-bg: #fff;
+  --input-border: #ddd;
+  --input-focus-border: #e67e22;
+  --button-bg: #ff4d00;
+  --button-hover: #e64400;
+  --close-color: #333333;
+  --main-gradient-start: #28a745;
+  --main-gradient-end: #1b752e;
+  --card-bg: #ffffff;
+  --border-color: #e0e0e0;
+  --primary-color: #28a745;
+  --primary-hover: #218838;
+  --secondary-text: #718096;
+  --danger: #dc3545;
+  --danger-hover: #bb2d3b;
+  --surface: #f3f3f3;
+  --text-muted: #6c757d;
+  --accent-color: #28a745;
+  --hover-bg: #4dc621;
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #333;
+  --lesson-bg: #f0f0f0;
+  --form-section-bg: #ffffff;
+  --color-accent: #4dc621;
+  --color-success: #28a745;
+  --color-error: #dc3545;
+  --color-warning: #ffc107;
+  --bg-input: #fff;
+  --bg-btn: #28a745;
+  --bg-btn-hover: #218838;
+  --bg-btn-sec: #17a2b8;
+  --bg-btn-sec-h: #138496;
+  --bg-btn-del: #dc3545;
+  --bg-btn-del-h: #c82333;
+  --focus: #e67e22;
+}
+
+[data-theme="dark"] {
+  --bg-color: #434343;
+  --text-color: #ffffff;
+  --main-bg-color: #434343;
+  --scrollbar-track: #2a2a2a;
+  --scrollbar-thumb: #555;
+  --body-bg: #434343;
+  --course-item-bg: #333333;
+  --course-item-border: #444444;
+  --btn-bg: #FF6B35;
+  --btn-hover: #ff5d23;
+  --heading-color: #FF6B35;
+  --header-bg: #333333;
+  --menu-link-hover: #555555;
+  --dropdown-bg: #444444;
+  --dropdown-item-color: white;
+  --dropdown-item-hover: #555555;
+  --logo-gradient: none;
+  --logo-color: white;
+  --profile-container-bg: #333333;
+  --profile-border: #555555;
+  --avatar-border: #ff8c42;
+  --link-color: #ff8c42;
+  --modal-bg: #333333;
+  --modal-text: #ffffff;
+  --input-bg: #333;
+  --input-border: #555555;
+  --focus-border: #e67e22;
+  --button-bg: #ff6a00;
+  --button-hover: #d15701;
+  --close-color: #ffffff;
+  --main-gradient-start: #FF6B35;
+  --main-gradient-end: #FF914D;
+  --card-bg: #2d2d2d;
+  --border-color: #404040;
+  --primary-color: #FF6B35;
+  --primary-hover: #339af0;
+  --secondary-text: #a0aec0;
+  --surface: #272727;
+  --text-muted: #adb5bd;
+  --accent-color: #ff8c42;
+  --hover-bg: #ff6f00;
+  --sidebar-bg: #2e2e2e;
+  --sidebar-text: #ffffff;
+  --lesson-bg: #444444;
+  --danger: #eb5757;
+  --danger-hover: #bd2130;
+  --bg-input: #333;
+  --bg-btn: #218838;
+  --bg-btn-hover: #1e7e34;
+  --bg-btn-sec: #117a8b;
+  --bg-btn-sec-h: #0f6674;
+  --bg-btn-del: #c82333;
+  --bg-btn-del-h: #bd2130;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -6,18 +124,6 @@ html, body {
 
 * {
     box-sizing: border-box;
-}
-
-:root {
-    --bg-color: #ffffff;
-    --text-color: #000000;
-    --main-bg-color: #ffffff;
-}
-
-[data-theme="dark"] {
-    --bg-color: #434343;
-    --text-color: #ffffff;
-    --main-bg-color: #434343;
 }
 
 body {
@@ -55,8 +161,12 @@ main {
 }
 
 @keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .courses-row::-webkit-scrollbar {
@@ -71,14 +181,4 @@ main {
 .courses-row::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
     border-radius: 4px;
-}
-
-:root {
-    --scrollbar-track: #f1f1f1;
-    --scrollbar-thumb: #888;
-}
-
-[data-theme="dark"] {
-    --scrollbar-track: #2a2a2a;
-    --scrollbar-thumb: #555;
 }

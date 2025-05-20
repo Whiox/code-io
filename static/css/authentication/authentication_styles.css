@@ -1,29 +1,3 @@
-:root {
-    --body-bg: #f8f9fa;
-    --text-color: #333;
-    --course-item-bg: #f9f9f9;
-    --course-item-border: #ddd;
-    --btn-bg: #007bff;
-    --btn-hover: #0056b3;
-    --heading-color: #e67e22;
-    --input-bg: #ffffff;
-    --input-border: #ced4da;
-    --input-focus-border: #80bdff;
-    --transition-speed: 0.3s;
-}
-
-[data-theme="dark"] {
-    --body-bg: #434343;
-    --text-color: #ffffff;
-    --course-item-bg: #333333;
-    --course-item-border: #444444;
-    --btn-bg: #ff8c42;
-    --btn-hover: #e67e3b;
-    --heading-color: #ff8c42;
-    --input-bg: #555555;
-    --input-border: #666666;
-    --input-focus-border: #ffa94d;
-}
 
 .auth-form {
     max-width: 440px;
