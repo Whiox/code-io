@@ -66,48 +66,6 @@ body {
     background-color: var(--btn-hover);
 }
 
-.star {
-    width: 24px;
-    height: 24px;
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.star:hover {
-    transform: scale(1.1);
-}
-
-.course-progress-wrapper {
-    margin-top: 12px;
-    display: flex;
-    align-items: center;
-}
-
-.course-progress-bar {
-    flex: 1;
-    height: 6px;
-    background-color: var(--course-item-border);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-right: 8px;
-}
-
-.course-progress-fill {
-    height: 100%;
-    background-color: var(--heading-color);
-    width: 0%;
-    transition: width 0.3s ease;
-}
-
-.course-progress-text {
-    font-size: 0.85em;
-    min-width: 30px;
-    text-align: right;
-}
-
 h1, h2, h3 {
     color: var(--heading-color);
     margin: 20px 0 15px;
